@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FastAPI Explained: Build and Run Your First Python API</title>
+<style>
+:root{color-scheme:light;--bg:#f6f5f0;--panel:#ffffff;--ink:#0b1220;--ink2:#273246;--line:#c3ccd8;--brand:#0a4a8c;--brand2:#073763;--soft:#e4eefa;--sim:#7a3f00;--simbg:#fff1d6;--ok:#0f5c27;--okbg:#e2f5e7;--bad:#9b1c1c;--badbg:#fde8e8;--code:#eef2f7;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.65 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+a{color:var(--brand)}
+header.top{position:sticky;padding-bottom:18px!important;top:0;z-index:20;background:var(--brand2);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 20px}
+header.top h1{font-size:18px;margin:0;font-weight:700;flex:1;line-height:1.3}
+header.top .pos{font-size:15px;white-space:nowrap}
+#menuBtn{display:none;background:#fff;color:var(--brand2);border:0;border-radius:6px;padding:8px 12px;font:600 15px inherit;cursor:pointer}
+#bar{position:absolute;left:0;right:0;bottom:0;height:8px;background:#d5dce6}
+#bar i{display:block;height:100%;width:0;background:#1f8a4c;transition:width .25s}
+.shell{display:grid;grid-template-columns:290px minmax(0,1fr);max-width:1400px;margin:0 auto}
+nav.toc{position:sticky;top:70px;align-self:start;max-height:calc(100vh - 70px);overflow:auto;padding:18px 14px;border-right:1px solid var(--line);background:#fff}
+nav.toc h2{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);margin:0 0 10px}
+nav.toc button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:8px;padding:9px 10px;font:16px/1.3 inherit;color:var(--ink);cursor:pointer}
+nav.toc button:hover{background:var(--soft)}
+nav.toc button.on{background:var(--brand);color:#fff;font-weight:600}
+nav.toc .k{flex:0 0 28px;height:28px;border-radius:50%;background:var(--soft);color:var(--brand2);display:grid;place-items:center;font-weight:700;font-size:14px}
+nav.toc button.on .k{background:#fff}
+nav.toc button.seen .k::after{content:"";}
+nav.toc button.seen:not(.on) .k{background:var(--okbg);color:var(--ok)}
+main{padding:28px clamp(16px,4vw,48px) 60px;min-width:0}
+.sec{display:none;max-width:960px}
+.sec.on{display:block}
+h2.st{font-size:34px;line-height:1.2;margin:0 0 6px;color:var(--brand2)}
+.lead{font-size:20px;color:var(--ink2);margin:0 0 22px}
+h3{font-size:25px;margin:34px 0 10px;color:var(--brand2);line-height:1.3}
+h4{font-size:19px;margin:18px 0 6px}
+p{margin:0 0 14px}
+ul,ol{padding-left:26px;margin:0 0 16px}
+li{margin:5px 0}
+code{overflow-wrap:anywhere;font-family:var(--mono);font-size:.92em;background:var(--code);border:1px solid #d3dbe6;border-radius:4px;padding:1px 5px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:16px 0}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin:16px 0}
+.grid .card{margin:0}
+.grid h4{margin-top:0;color:var(--brand2)}
+.callout{border-left:6px solid var(--brand);background:var(--soft);padding:14px 18px;border-radius:8px;margin:16px 0}
+.callout.sim{border-color:#b45309;background:var(--simbg)}
+.callout.warn{border-color:var(--bad);background:var(--badbg)}
+.callout.ok{border-color:var(--ok);background:var(--okbg)}
+.callout p:last-child{margin:0}
+.badge{display:inline-block;font:700 13px/1 inherit;letter-spacing:.04em;text-transform:uppercase;padding:5px 9px;border-radius:5px;vertical-align:middle}
+.badge.sim{background:var(--simbg);color:var(--sim);border:2px solid #b45309}
+.badge.term{background:var(--brand2);color:#fff;border:2px solid var(--brand2)}
+.badge.file{background:#e9e4f7;color:#3b1f7a;border:2px solid #3b1f7a}
+table{width:100%;border-collapse:collapse;background:#fff;margin:14px 0 20px;font-size:16.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand2);color:#fff}
+.tblwrap{overflow-x:auto}
+.five{border:1px solid var(--line);border-radius:12px;background:#fff;margin:18px 0;overflow:hidden}
+.five>div{display:grid;grid-template-columns:150px 1fr;border-top:1px solid var(--line)}
+.five>div:first-child{border-top:0}
+.five b{background:var(--soft);color:var(--brand2);padding:12px 14px;font-size:15.5px}
+.five>div:last-child b{background:var(--badbg);color:var(--bad)}
+.five span{padding:12px 16px}
+.cb{margin:14px 0;border:1px solid #9fb0c5;border-radius:10px;overflow:hidden;background:var(--code)}
+.cb-h{display:flex;align-items:center;gap:10px;padding:7px 10px;background:#dbe4ef;border-bottom:1px solid #9fb0c5;font-size:14.5px}
+.cb-l{font-weight:700;flex:1;font-family:var(--mono);color:var(--ink)}
+.cb pre{margin:0;padding:14px 16px;overflow-x:auto;font:15.5px/1.55 var(--mono);color:var(--ink);white-space:pre}
+.cb.out{border-style:dashed}
+.cb button,.btn{background:var(--brand);color:#fff;border:0;border-radius:6px;padding:7px 13px;font:600 15px inherit;cursor:pointer}
+.cb button:hover,.btn:hover{background:var(--brand2)}
+.btn.alt{background:#fff;color:var(--brand2);border:2px solid var(--brand2)}
+.btn:disabled{opacity:.5;cursor:default}
+.tk-k{color:#7a1fa2;font-weight:600}.tk-s{color:#0b6b2b}.tk-c{color:#4b5563;font-style:italic}.tk-d{color:#a33b00;font-weight:600}.tk-n{color:#0a4a8c}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 0;border-bottom:3px solid var(--brand2)}
+.tabs button{background:#fff;border:2px solid var(--line);border-bottom:0;border-radius:8px 8px 0 0;padding:10px 18px;font:600 16.5px inherit;color:var(--ink);cursor:pointer}
+.tabs button.on{background:var(--brand2);color:#fff;border-color:var(--brand2)}
+.tabpane{display:none;background:#fff;border:1px solid var(--line);border-top:0;padding:8px 22px 18px;border-radius:0 0 12px 12px}
+.tabpane.on{display:block}
+details{background:#fff;border:1px solid var(--line);border-radius:10px;margin:10px 0;padding:0}
+details>summary{cursor:pointer;padding:13px 18px;font-weight:700;color:var(--brand2);list-style:none}
+details>summary::before{content:"\25B6";display:inline-block;margin-right:10px;font-size:13px;transition:transform .15s}
+details[open]>summary::before{transform:rotate(90deg)}
+details>.in{padding:2px 20px 16px}
+svg.dg{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--line);border-radius:12px}
+svg text{fill:#0b1220;font-family:"Segoe UI",system-ui,Arial,sans-serif;font-size:15px}
+svg .ts{font-size:13.5px;fill:#273246}
+svg .tb{font-weight:700}
+svg .tw{fill:#fff}
+svg .nd rect,svg .nd polygon,svg .nd circle{fill:#fff;stroke:#0a4a8c;stroke-width:2.5}
+svg .nd.fa rect{fill:#e4eefa}svg .nd.gr rect{fill:#e2f5e7;stroke:#0f5c27}svg .nd.am rect{fill:#fff1d6;stroke:#b45309}svg .nd.rd rect{fill:#fde8e8;stroke:#9b1c1c}
+svg .nd.num circle{fill:#0a4a8c;stroke:#073763}svg .nd.num text{fill:#fff;font-weight:700}
+svg [data-k],svg [data-err]{cursor:pointer}
+svg [data-k]:hover rect,svg [data-err]:hover rect,svg [data-k]:hover circle{stroke-width:4}
+svg [data-k]:focus,svg [data-err]:focus{outline:none}
+svg [data-k]:focus-visible rect,svg [data-err]:focus-visible rect{stroke:#000;stroke-width:4}
+svg .active rect,svg .active circle{stroke:#000!important;stroke-width:4.5!important}
+svg .active:not(.num) rect{fill:#cfe3fb}
+svg .ar{stroke:#0b1220;stroke-width:2.5;fill:none}
+svg .ar.dash{stroke-dasharray:7 5}
+.info{background:#fff;border:2px solid var(--brand);border-radius:10px;padding:14px 18px;margin:12px 0 18px;min-height:90px}
+.info p{margin:4px 0 0}
+.hint{font-size:15px;color:var(--ink2);margin:8px 0 0}
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:40px;padding-top:20px;border-top:2px solid var(--line)}
+.nav .btn{font-size:17px;padding:12px 22px}
+.url span{padding:2px 4px;border-radius:4px;font-family:var(--mono);font-size:17px}
+.u1{background:#e9e4f7}.u2{background:#dbeefe}.u3{background:#ffe9c7}.u4{background:#d9f3e0}.u5{background:#fde0e0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chip{background:#fff;border:2px solid var(--brand2);color:var(--brand2);border-radius:999px;padding:8px 14px;font:600 15px/1.3 inherit;cursor:pointer}
+.chip.on{background:var(--brand2);color:#fff}
+.diag dl{margin:0}.diag dt{font-weight:700;color:var(--brand2);margin-top:12px}.diag dd{margin:2px 0 0}
+.explorer{display:grid;gap:16px;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
+.explorer label{display:block;font-weight:700;margin:12px 0 4px}
+.explorer select,.explorer input{width:100%;font:17px inherit;padding:10px;border:2px solid #7a8aa0;border-radius:8px;background:#fff;color:var(--ink)}
+.stat{display:inline-block;font:700 20px var(--mono);padding:4px 12px;border-radius:6px}
+.s2{background:var(--okbg);color:var(--ok)}.s4{background:var(--badbg);color:var(--bad)}.s0{background:#e5e9ef;color:var(--ink2)}
+.lab{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start}
+.lab input{width:26px;height:26px;margin-top:4px}
+.lab.done{background:var(--okbg);border-color:var(--ok)}
+.q{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0}
+.q .opt{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:8px;padding:11px 14px;margin:8px 0;font:17px/1.45 inherit;color:var(--ink);cursor:pointer}
+.q .opt:hover:not(:disabled){border-color:var(--brand)}
+.q .opt.right{background:var(--okbg);border-color:var(--ok)}
+.q .opt.wrong{background:var(--badbg);border-color:var(--bad)}
+.q .why{display:none;margin-top:10px}
+.q.answered .why{display:block}
+.score{font-size:42px;font-weight:800;color:var(--brand2)}
+.vis{position:absolute;width:0;height:0;overflow:hidden}
+footer{max-width:960px;color:var(--ink2);font-size:15px;margin-top:30px}
+@media(max-width:1000px){
+ .shell{grid-template-columns:1fr}
+ #menuBtn{display:inline-block}
+ nav.toc{position:fixed;left:0;top:0;bottom:0;width:300px;max-width:88vw;z-index:30;transform:translateX(-105%);transition:transform .2s;max-height:none;box-shadow:4px 0 20px rgba(0,0,0,.3)}
+ nav.toc.open{transform:none}
+ .explorer{grid-template-columns:1fr}
+ .five>div{grid-template-columns:1fr}
+ h2.st{font-size:28px}
+}
+@media print{header.top,#bar,nav.toc,.nav{display:none}.sec{display:block!important;page-break-before:always}.shell{display:block}}
+</style>
+</head>
+<body>
+<svg class="vis" aria-hidden="true"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0b1220"/></marker></defs></svg>
+<header class="top">
+  <button id="menuBtn" aria-label="Open contents">&#9776; Contents</button>
+  <h1>FastAPI Explained: Build and Run Your First Python API</h1>
+  <div class="pos" id="pos">Section 1 of 13</div>
+  <div id="bar" role="progressbar" aria-label="Module progress" aria-valuemin="0" aria-valuemax="100"><i></i></div>
+</header>
+<div class="shell">
+<nav class="toc" id="toc" aria-label="Table of contents"><h2>Contents</h2></nav>
+<main id="main">
+<!-- ============ START ============ -->
+<section class="sec" id="s0" data-key="&#9733;" data-title="Welcome and how to use this module">
+<h2 class="st">FastAPI Explained: Build and Run Your First Python API</h2>
+<p class="lead">Day 1 of <em>Modern Guide to Containers, Orchestration and Monitoring</em>. You will run a small, prepared web API on your own computer before meeting Docker.</p>
+
+<div class="callout sim"><p><strong>Everything in this module is fictional.</strong> The "Power Operations Health Monitor" and its substations (SUB-101, SUB-102, SUB-103) are <strong>simulated sample data</strong>. The example never connects to real power infrastructure, real SCADA systems or real equipment.</p></div>
+
+<h3>What you will be able to do</h3>
+<ol>
+<li>Explain what an API is and why applications use APIs.</li>
+<li>Understand what FastAPI does and how it relates to Python.</li>
+<li>Explain HTTP requests, responses, methods, status codes and JSON.</li>
+<li>Understand routes, endpoints, path parameters and query parameters.</li>
+<li>Read and explain a small FastAPI application.</li>
+<li>Run a prepared FastAPI application on your own computer.</li>
+<li>Call its endpoints from a browser, the interactive docs and <code>curl</code>.</li>
+<li>Describe how the application will later be packaged in Docker and run on Kubernetes.</li>
+</ol>
+
+<h3>Two kinds of activity: simulated and real</h3>
+<p>This page is a single HTML file. It <strong>cannot</strong> start a Python server or run commands. To keep this clear, every example is labelled:</p>
+<div class="grid">
+<div class="card"><p><span class="badge sim">Simulated in this page</span></p><p>Interactive diagrams, the API Explorer and the quiz run only inside this page using JavaScript and built-in sample data. No request leaves the page.</p></div>
+<div class="card"><p><span class="badge term">Real terminal</span></p><p>Commands in dark-labelled boxes must be typed or pasted into a real terminal (PowerShell, Terminal or a Linux shell) on your computer. Use the <strong>Copy</strong> button.</p></div>
+<div class="card"><p><span class="badge file">File content</span></p><p>Python and text files you save on your computer, for example <code>app.py</code>.</p></div>
+</div>
+
+<h3>How to use this module</h3>
+<ul>
+<li>Use <strong>Previous / Next</strong> at the bottom, the arrow keys, or the Contents list on the left.</li>
+<li>Click the parts of any diagram. They explain themselves.</li>
+<li>Each key idea follows the same pattern: <em>what it is, why it matters, how it works, an example, a common mistake</em>.</li>
+<li>Plan about 60 to 75 minutes for the concepts and 30 to 45 minutes for the hands-on lab (Section K).</li>
+</ul>
+<div class="callout"><p><strong>Goal:</strong> you are not becoming a backend developer today. You are learning enough to <em>run, inspect and troubleshoot</em> a prepared API so that containerising it tomorrow makes sense.</p></div>
+</section>
+
+<!-- ============ A ============ -->
+<section class="sec" id="sA" data-key="A" data-title="What is an API?">
+<h2 class="st">A. What is an API?</h2>
+<p class="lead">How two programs talk to each other, using a simulated power-operations example.</p>
+
+<h3>The scenario</h3>
+<p>Imagine a <strong>Power Operations Health Monitor</strong>. It keeps simulated voltage readings for a few substations. Several people and programs want those readings: an operator's dashboard, a mobile app, a daily report script. Instead of each one reading the data files directly, they all ask the Monitor through one controlled doorway. That doorway is an <strong>API</strong>.</p>
+<div class="callout sim"><p><strong>Simulated data only.</strong> The equipment readings here are invented for training. This example does not connect to any real power equipment or network.</p></div>
+
+<h3>Four words to learn first</h3>
+<div class="grid">
+<div class="card"><h4>Client</h4><p>The program that <em>asks</em>. A web browser, a mobile app, a script, or the <code>curl</code> command.</p></div>
+<div class="card"><h4>Server</h4><p>The program that <em>answers</em>. It runs continuously and waits for requests. In this module the server is our FastAPI application.</p></div>
+<div class="card"><h4>API</h4><p><strong>Application Programming Interface.</strong> A published set of rules for how to ask a program for something and what shape the answer will take.</p></div>
+<div class="card"><h4>HTTP</h4><p>The common language of the web that clients and servers use to send requests and responses.</p></div>
+</div>
+
+<div class="five">
+<div><b>What it is</b><span>A defined way for one program to request data or actions from another program, without needing to know how that program works inside.</span></div>
+<div><b>Why it matters</b><span>One system (the Monitor) can serve many different users and tools consistently. Teams can change internals without breaking everyone who depends on the answers.</span></div>
+<div><b>How it works</b><span>The client sends a request to a specific address. The server reads it, finds or calculates the data, and sends back a response.</span></div>
+<div><b>Example</b><span>A client asks for <code>/readings/SUB-103</code> and receives the simulated voltage and status of that substation as JSON.</span></div>
+<div><b>Common mistake</b><span>Thinking an API is a website or a database. It is neither. It is the controlled doorway <em>in front of</em> data or logic.</span></div>
+</div>
+
+<h3>Architecture: click any part</h3>
+<svg class="dg" id="dgA" viewBox="0 0 920 330" role="img" aria-label="Client sends HTTP request to FastAPI application, which may use a data source, then returns an HTTP response">
+ <g class="nd fa" data-k="client"><rect x="20" y="90" width="170" height="100" rx="12"/><text class="tb" x="105" y="130" text-anchor="middle">Client</text><text class="ts" x="105" y="152" text-anchor="middle">Browser, curl</text><text class="ts" x="105" y="170" text-anchor="middle">or another app</text></g>
+ <g class="nd gr" data-k="api"><rect x="365" y="90" width="190" height="100" rx="12"/><text class="tb" x="460" y="130" text-anchor="middle">FastAPI</text><text class="tb" x="460" y="150" text-anchor="middle">application</text><text class="ts" x="460" y="172" text-anchor="middle">your Python code</text></g>
+ <g class="nd am" data-k="data"><rect x="725" y="90" width="175" height="100" rx="12"/><text class="tb" x="812" y="125" text-anchor="middle">Data source</text><text class="ts" x="812" y="147" text-anchor="middle">(optional)</text><text class="ts" x="812" y="167" text-anchor="middle">database, file or list</text></g>
+ <path class="ar" d="M190 125 H365" marker-end="url(#ah)"/><text class="tb" x="278" y="112" text-anchor="middle">HTTP request</text>
+ <path class="ar" d="M555 125 H725" marker-end="url(#ah)"/><text class="ts" x="640" y="112" text-anchor="middle">read data</text>
+ <path class="ar dash" d="M725 160 H555" marker-end="url(#ah)"/><text class="ts" x="640" y="182" text-anchor="middle">data returned</text>
+ <path class="ar" d="M365 175 H190" marker-end="url(#ah)"/><text class="tb" x="278" y="200" text-anchor="middle">HTTP response</text>
+ <g class="nd num" data-k="s1"><circle cx="278" cy="70" r="17"/><text x="278" y="76" text-anchor="middle">1</text></g>
+ <g class="nd num" data-k="s2"><circle cx="460" cy="62" r="17"/><text x="460" y="68" text-anchor="middle">2</text></g>
+ <g class="nd num" data-k="s3"><circle cx="640" cy="70" r="17"/><text x="640" y="76" text-anchor="middle">3</text></g>
+ <g class="nd num" data-k="s4"><circle cx="640" cy="215" r="17"/><text x="640" y="221" text-anchor="middle">4</text></g>
+ <g class="nd num" data-k="s5"><circle cx="460" cy="228" r="17"/><text x="460" y="234" text-anchor="middle">5</text></g>
+ <g class="nd num" data-k="s6"><circle cx="278" cy="235" r="17"/><text x="278" y="241" text-anchor="middle">6</text></g>
+ <text class="ts" x="460" y="300" text-anchor="middle">Dashed arrows are optional: a very simple API may need no data source at all.</text>
+</svg>
+<div class="info" id="infoA" aria-live="polite"></div>
+<p class="hint">Click a box or a numbered circle.</p>
+
+<h3>The request-response lifecycle, step by step</h3>
+<ol>
+<li><strong>The client sends a request.</strong> It names a method (<code>GET</code>) and an address (<code>/readings/SUB-103</code>).</li>
+<li><strong>The FastAPI application receives it.</strong> It matches the address to one of its functions.</li>
+<li><strong>The function looks for data.</strong> In our example it searches a simple Python list. A real system might query a database.</li>
+<li><strong>The data comes back</strong> to the function.</li>
+<li><strong>FastAPI builds the response:</strong> a status code (such as 200) plus a JSON body.</li>
+<li><strong>The client receives the response</strong> and shows it, stores it or acts on it.</li>
+</ol>
+
+<h3>User interface, API and database: three different things</h3>
+<div class="tblwrap"><table>
+<tr><th></th><th>User interface (UI)</th><th>API</th><th>Database</th></tr>
+<tr><th>Built for</th><td>Humans</td><td>Other programs</td><td>Storing data safely</td></tr>
+<tr><th>Looks like</th><td>Buttons, charts, forms</td><td>Addresses that return structured data (JSON)</td><td>Tables or records on disk</td></tr>
+<tr><th>Power example</th><td>An operator's dashboard screen</td><td><code>GET /readings</code></td><td>Stored history of readings</td></tr>
+<tr><th>Who talks to it</th><td>The person using the screen</td><td>The dashboard, mobile app and scripts</td><td>Only the API (not everyone directly)</td></tr>
+</table></div>
+<p>Analogy: the screen is the counter, the API is the clerk who takes your request form, and the database is the records room. The clerk has rules about what can be asked and how the answer is written. The analogy helps, but remember the technical point: <strong>the API is software that receives structured requests and returns structured responses.</strong></p>
+
+<h3>Why applications communicate through APIs</h3>
+<ul>
+<li><strong>One source of truth:</strong> every consumer gets the same answer.</li>
+<li><strong>Safety:</strong> the API decides what may be asked. Clients do not touch the database directly.</li>
+<li><strong>Independence:</strong> the dashboard team and the data team can change their own parts separately.</li>
+<li><strong>Reuse:</strong> a browser, a phone app and a script all use the same API.</li>
+</ul>
+<details><summary>Check your understanding</summary><div class="in"><p>A report script wants today's SUB-103 voltage. Which is the client and which is the server?</p><p><strong>Answer:</strong> the script is the client (it asks). The Monitor's FastAPI application is the server (it answers).</p></div></details>
+</section>
+
+<!-- ============ B ============ -->
+<section class="sec" id="sB" data-key="B" data-title="What is FastAPI?">
+<h2 class="st">B. What is FastAPI?</h2>
+<p class="lead">A Python framework that turns ordinary Python functions into web API endpoints.</p>
+
+<h3>Why Python alone is not enough</h3>
+<p>A plain Python script starts, does its work and <strong>ends</strong>. It does not listen on a network port, understand HTTP or keep waiting for visitors. To act as an API, a program must stay running, accept connections, read HTTP text, pick the right code, and write a correctly formatted answer. Doing all that by hand is long and error-prone.</p>
+
+<h3>What a web framework does</h3>
+<p>A <strong>web framework</strong> is a library that handles the repetitive web work so you only write the useful part. With FastAPI you write a normal function, add one line above it, and FastAPI connects it to an address.</p>
+
+<div class="five">
+<div><b>What it is</b><span>FastAPI is a free, open-source Python framework for building APIs.</span></div>
+<div><b>Why it matters</b><span>It is small to learn, checks incoming data automatically, and writes interactive documentation for you. It suits lightweight backend services and microservices, which is why it appears often in container training.</span></div>
+<div><b>How it works</b><span>You decorate functions (<code>@app.get("/health")</code>). When a request arrives for that address, FastAPI calls your function and converts what it returns into a JSON response.</span></div>
+<div><b>Example</b><span>A 4-line function returning <code>{"status": "running"}</code> becomes a working <code>/health</code> endpoint.</span></div>
+<div><b>Common mistake</b><span>Believing FastAPI itself is the server that listens on the port. It is not. That job belongs to Uvicorn (below).</span></div>
+</div>
+
+<h3>Uvicorn: the server that runs FastAPI</h3>
+<div class="five">
+<div><b>What it is</b><span>Uvicorn is a lightweight <strong>ASGI server</strong>. ASGI is a standard "plug shape" that lets a web server talk to a Python web application.</span></div>
+<div><b>Why it matters</b><span>FastAPI is a framework, not a running server. Without Uvicorn nothing listens on port 8000.</span></div>
+<div><b>How it works</b><span>Uvicorn opens the port, accepts connections, hands each request to FastAPI, and sends FastAPI's answer back to the client.</span></div>
+<div><b>Example</b><span><code>python -m uvicorn app:app</code> means "run the object named <code>app</code> found in the file <code>app.py</code>".</span></div>
+<div><b>Common mistake</b><span>Running <code>python app.py</code> and expecting a server. Nothing starts because the file only defines the application.</span></div>
+</div>
+
+<h3>How the pieces fit: click any layer</h3>
+<svg class="dg" id="dgB" viewBox="0 0 920 360" role="img" aria-label="Layers: client, HTTP, Uvicorn, FastAPI, your code, all running inside Python">
+ <rect x="250" y="20" width="650" height="320" rx="16" fill="#f3f7fc" stroke="#073763" stroke-width="2.5" stroke-dasharray="9 6"/>
+ <text class="tb" x="270" y="48">Python (the language and its libraries run all of this)</text>
+ <g class="nd fa" data-k="client"><rect x="15" y="110" width="150" height="120" rx="12"/><text class="tb" x="90" y="160" text-anchor="middle">Client</text><text class="ts" x="90" y="182" text-anchor="middle">browser, curl,</text><text class="ts" x="90" y="200" text-anchor="middle">another app</text></g>
+ <g class="nd" data-k="http"><rect x="175" y="150" width="60" height="40" rx="8"/><text class="tb" x="205" y="176" text-anchor="middle">HTTP</text></g>
+ <g class="nd am" data-k="uvicorn"><rect x="265" y="80" width="170" height="240" rx="12"/><text class="tb" x="350" y="130" text-anchor="middle">Uvicorn</text><text class="ts" x="350" y="156" text-anchor="middle">ASGI server</text><text class="ts" x="350" y="190" text-anchor="middle">opens the port</text><text class="ts" x="350" y="210" text-anchor="middle">accepts requests</text><text class="ts" x="350" y="230" text-anchor="middle">sends responses</text></g>
+ <g class="nd gr" data-k="fastapi"><rect x="475" y="80" width="190" height="240" rx="12"/><text class="tb" x="570" y="130" text-anchor="middle">FastAPI</text><text class="ts" x="570" y="156" text-anchor="middle">web framework</text><text class="ts" x="570" y="190" text-anchor="middle">routing</text><text class="ts" x="570" y="210" text-anchor="middle">validation (Pydantic)</text><text class="ts" x="570" y="230" text-anchor="middle">JSON conversion</text><text class="ts" x="570" y="250" text-anchor="middle">automatic /docs</text></g>
+ <g class="nd" data-k="code"><rect x="705" y="80" width="175" height="240" rx="12"/><text class="tb" x="792" y="130" text-anchor="middle">Your code</text><text class="ts" x="792" y="156" text-anchor="middle">app.py</text><text class="ts" x="792" y="190" text-anchor="middle">functions that</text><text class="ts" x="792" y="210" text-anchor="middle">return readings</text><text class="ts" x="792" y="230" text-anchor="middle">and alerts</text></g>
+ <path class="ar" d="M165 170 H175" marker-end="url(#ah)"/>
+ <path class="ar" d="M235 170 H265" marker-end="url(#ah)"/>
+ <path class="ar" d="M435 170 H475" marker-end="url(#ah)"/><path class="ar" d="M665 170 H705" marker-end="url(#ah)"/>
+ <text class="ts" x="460" y="345" text-anchor="middle">Requests travel left to right. Responses travel back right to left.</text>
+</svg>
+<div class="info" id="infoB" aria-live="polite"></div>
+
+<h3>The application lifecycle: click a stage</h3>
+<svg class="dg" id="dgB2" viewBox="0 0 920 270" role="img" aria-label="FastAPI application lifecycle">
+ <g class="nd gr" data-k="start"><rect x="15" y="20" width="160" height="70" rx="10"/><text class="tb" x="95" y="50" text-anchor="middle">1. Start</text><text class="ts" x="95" y="70" text-anchor="middle">Uvicorn loads app</text></g>
+ <g class="nd" data-k="wait"><rect x="215" y="20" width="160" height="70" rx="10"/><text class="tb" x="295" y="50" text-anchor="middle">2. Wait</text><text class="ts" x="295" y="70" text-anchor="middle">listening on port</text></g>
+ <g class="nd fa" data-k="route"><rect x="415" y="20" width="160" height="70" rx="10"/><text class="tb" x="495" y="50" text-anchor="middle">3. Route</text><text class="ts" x="495" y="70" text-anchor="middle">match the address</text></g>
+ <g class="nd fa" data-k="validate"><rect x="615" y="20" width="160" height="70" rx="10"/><text class="tb" x="695" y="50" text-anchor="middle">4. Validate</text><text class="ts" x="695" y="70" text-anchor="middle">check inputs</text></g>
+ <g class="nd" data-k="run"><rect x="615" y="150" width="160" height="70" rx="10"/><text class="tb" x="695" y="180" text-anchor="middle">5. Run function</text><text class="ts" x="695" y="200" text-anchor="middle">your Python code</text></g>
+ <g class="nd fa" data-k="respond"><rect x="415" y="150" width="160" height="70" rx="10"/><text class="tb" x="495" y="180" text-anchor="middle">6. Respond</text><text class="ts" x="495" y="200" text-anchor="middle">JSON + status</text></g>
+ <g class="nd rd" data-k="stop"><rect x="15" y="150" width="160" height="70" rx="10"/><text class="tb" x="95" y="180" text-anchor="middle">Stop</text><text class="ts" x="95" y="200" text-anchor="middle">press Ctrl+C</text></g>
+ <path class="ar" d="M175 55 H215" marker-end="url(#ah)"/><path class="ar" d="M375 55 H415" marker-end="url(#ah)"/><path class="ar" d="M575 55 H615" marker-end="url(#ah)"/>
+ <path class="ar" d="M695 90 V150" marker-end="url(#ah)"/><path class="ar" d="M615 185 H575" marker-end="url(#ah)"/>
+ <path class="ar dash" d="M495 220 V250 H295 V90" marker-end="url(#ah)"/><text class="ts" x="395" y="244" text-anchor="middle">back to waiting for the next request</text>
+ <path class="ar dash" d="M295 90 V120 H95 V150" marker-end="url(#ah)"/>
+</svg>
+<div class="info" id="infoB2" aria-live="polite"></div>
+
+<h3>Two features you get automatically</h3>
+<div class="grid">
+<div class="card"><h4>Validation</h4><p>You declare what a value must look like using <strong>type annotations</strong> (for example "text" or "number"), and <strong>Pydantic</strong> (a data-checking library used by FastAPI) enforces it. Our <code>/alerts</code> endpoint accepts only <code>active</code> or <code>resolved</code>. Anything else gets an automatic <strong>422</strong> response before your code runs.</p></div>
+<div class="card"><h4>Interactive documentation</h4><p>FastAPI writes a web page listing every endpoint and lets you try it. Open <code>/docs</code> on the running server. No extra work is needed.</p></div>
+</div>
+
+<h3>FastAPI, Flask and Django at a high level</h3>
+<div class="tblwrap"><table>
+<tr><th></th><th>FastAPI</th><th>Flask</th><th>Django</th></tr>
+<tr><th>Style</th><td>Modern, API-focused</td><td>Minimal, flexible</td><td>Full-featured, "batteries included"</td></tr>
+<tr><th>Often chosen for</th><td>APIs and microservices</td><td>Small web apps and APIs, prototypes</td><td>Large websites with databases, admin screens and user accounts</td></tr>
+<tr><th>Notable strengths</th><td>Type-based validation, automatic docs</td><td>Simple to start, large ecosystem</td><td>Built-in admin, ORM, authentication</td></tr>
+<tr><th>Things to weigh</th><td>Newer; async concepts appear in advanced use</td><td>You choose and assemble extra parts yourself</td><td>More to learn; heavier for a tiny API</td></tr>
+</table></div>
+<p>No framework is best for every job. Teams choose based on the problem, skills and existing systems. We use FastAPI here because a small API with automatic docs is easy to read and to containerise.</p>
+<p><strong>Common mistake:</strong> assuming "microservice" means "small code is enough". A microservice is a small, focused service that does one job and talks to others over APIs, which is exactly the pattern Docker and Kubernetes manage.</p>
+</section>
+<!-- ============ C ============ -->
+<section class="sec" id="sC" data-key="C" data-title="HTTP fundamentals">
+<h2 class="st">C. HTTP fundamentals</h2>
+<p class="lead">The vocabulary every API conversation uses.</p>
+
+<div class="five">
+<div><b>What it is</b><span>HTTP (HyperText Transfer Protocol) is the set of rules for sending a <strong>request</strong> from a client and getting a <strong>response</strong> from a server.</span></div>
+<div><b>Why it matters</b><span>Every API call, browser page, <code>curl</code> command and Kubernetes health check uses it. Reading an HTTP response is the key troubleshooting skill.</span></div>
+<div><b>How it works</b><span>A request states <em>what to do</em> (method), <em>where</em> (URL), and optional extra details (headers, body). The response states <em>how it went</em> (status code) plus headers and a body.</span></div>
+<div><b>Example</b><span><code>GET http://127.0.0.1:8000/health</code> returns status <code>200</code> and body <code>{"status":"running"}</code>.</span></div>
+<div><b>Common mistake</b><span>Looking only at the body. Always check the <strong>status code</strong> first. A body can look reasonable even when the call failed.</span></div>
+</div>
+
+<h3>Anatomy of a request and response: click any part</h3>
+<svg class="dg" id="dgC" viewBox="0 0 920 420" role="img" aria-label="Anatomy of an HTTP request and response">
+ <text class="tb" x="20" y="28">HTTP REQUEST (client sends)</text>
+ <text class="tb" x="490" y="28">HTTP RESPONSE (server sends back)</text>
+ <rect x="15" y="40" width="425" height="360" rx="12" fill="#f8fafc" stroke="#7a8aa0" stroke-width="2"/>
+ <rect x="480" y="40" width="425" height="360" rx="12" fill="#f8fafc" stroke="#7a8aa0" stroke-width="2"/>
+ <g class="nd fa" data-k="method"><rect x="30" y="58" width="120" height="60" rx="8"/><text class="tb" x="90" y="84" text-anchor="middle">Method</text><text class="ts" x="90" y="104" text-anchor="middle">GET</text></g>
+ <g class="nd fa" data-k="url"><rect x="160" y="58" width="265" height="60" rx="8"/><text class="tb" x="292" y="84" text-anchor="middle">URL</text><text class="ts" x="292" y="104" text-anchor="middle">/readings/SUB-103</text></g>
+ <g class="nd" data-k="reqh"><rect x="30" y="140" width="395" height="100" rx="8"/><text class="tb" x="227" y="168" text-anchor="middle">Request headers</text><text class="ts" x="227" y="192" text-anchor="middle">Host: 127.0.0.1:8000</text><text class="ts" x="227" y="212" text-anchor="middle">Accept: application/json</text></g>
+ <g class="nd am" data-k="reqb"><rect x="30" y="262" width="395" height="120" rx="8"/><text class="tb" x="227" y="294" text-anchor="middle">Request body (optional)</text><text class="ts" x="227" y="318" text-anchor="middle">Empty for GET.</text><text class="ts" x="227" y="338" text-anchor="middle">Used by POST, PUT, PATCH to send data.</text></g>
+ <g class="nd gr" data-k="status"><rect x="495" y="58" width="395" height="60" rx="8"/><text class="tb" x="692" y="84" text-anchor="middle">Status code</text><text class="ts" x="692" y="104" text-anchor="middle">200 OK</text></g>
+ <g class="nd" data-k="resh"><rect x="495" y="140" width="395" height="100" rx="8"/><text class="tb" x="692" y="168" text-anchor="middle">Response headers</text><text class="ts" x="692" y="192" text-anchor="middle">content-type: application/json</text><text class="ts" x="692" y="212" text-anchor="middle">content-length: 93</text></g>
+ <g class="nd fa" data-k="resb"><rect x="495" y="262" width="395" height="120" rx="8"/><text class="tb" x="692" y="290" text-anchor="middle">Response body (JSON)</text><text class="ts" x="692" y="314" text-anchor="middle">{"equipment_id":"SUB-103",</text><text class="ts" x="692" y="334" text-anchor="middle">"voltage_kv":205.2,</text><text class="ts" x="692" y="354" text-anchor="middle">"status":"investigate", ...}</text></g>
+ <path class="ar" d="M440 200 H480" marker-end="url(#ah)"/>
+</svg>
+<div class="info" id="infoC" aria-live="polite"></div>
+
+<h3>The same exchange as raw text</h3>
+<pre class="code" data-kind="out" data-label="Raw HTTP, simplified" data-nocopy="1">GET /readings/SUB-103 HTTP/1.1
+Host: 127.0.0.1:8000
+Accept: application/json
+
+HTTP/1.1 200 OK
+content-type: application/json
+
+{"equipment_id":"SUB-103","name":"West Substation","voltage_kv":205.2,"status":"investigate"}</pre>
+
+<h3>Anatomy of a URL</h3>
+<p class="url"><span class="u1">http://</span><span class="u2">127.0.0.1</span><span class="u3">:8000</span><span class="u4">/alerts</span><span class="u5">?status=active</span></p>
+<ul>
+<li><span class="url"><span class="u1">http://</span></span> the <strong>scheme</strong>: which protocol to speak.</li>
+<li><span class="url"><span class="u2">127.0.0.1</span></span> the <strong>host</strong>: which computer. <code>127.0.0.1</code> (also <code>localhost</code>) always means "this very computer".</li>
+<li><span class="url"><span class="u3">:8000</span></span> the <strong>port</strong>: which program on that computer. Think of the host as a building and the port as a room number.</li>
+<li><span class="url"><span class="u4">/alerts</span></span> the <strong>path</strong>, which selects the route.</li>
+<li><span class="url"><span class="u5">?status=active</span></span> the <strong>query string</strong>: optional filters after a <code>?</code>.</li>
+</ul>
+
+<h3>Key terms with examples</h3>
+<div class="grid">
+<div class="card"><h4>HTTP request</h4><p>The message the client sends. Example: <code>GET /health</code>.</p></div>
+<div class="card"><h4>HTTP response</h4><p>The message the server returns: status code, headers and usually a body.</p></div>
+<div class="card"><h4>Route and endpoint</h4><p>A <strong>route</strong> is a path pattern the app recognises, such as <code>/readings/{equipment_id}</code>. An <strong>endpoint</strong> is the route plus its method, for example <code>GET /readings</code>. People often use the words interchangeably.</p></div>
+<div class="card"><h4>Request body</h4><p>Data the client sends <em>to</em> the server, usually with POST, PUT or PATCH. Our app only reads data, so it needs none.</p></div>
+<div class="card"><h4>Response body</h4><p>The data the server sends <em>back</em>. In our API it is always JSON.</p></div>
+<div class="card"><h4>Headers</h4><p>Labelled details about the message, such as the type of content (<code>content-type: application/json</code>).</p></div>
+</div>
+
+<h3>HTTP methods</h3>
+<div class="tblwrap"><table>
+<tr><th>Method</th><th>Meaning</th><th>Power-monitor example</th><th>Typical success code</th></tr>
+<tr><td><code>GET</code></td><td>Read data. Changes nothing.</td><td>Get all readings</td><td>200</td></tr>
+<tr><td><code>POST</code></td><td>Create something new.</td><td>Add a new alert</td><td>201</td></tr>
+<tr><td><code>PUT</code></td><td>Replace an item completely.</td><td>Replace all settings of SUB-101</td><td>200</td></tr>
+<tr><td><code>PATCH</code></td><td>Change part of an item.</td><td>Update only the status of an alert</td><td>200</td></tr>
+<tr><td><code>DELETE</code></td><td>Remove an item.</td><td>Delete a resolved alert</td><td>200 or 204</td></tr>
+</table></div>
+<p><strong>In this module our app uses only <code>GET</code>.</strong> The other methods are listed so you can recognise them. <strong>Common mistake:</strong> typing a URL into the browser always sends GET, so you cannot test POST that way. Use <code>/docs</code> or <code>curl</code> for that.</p>
+
+<h3>JSON</h3>
+<div class="five">
+<div><b>What it is</b><span>JSON (JavaScript Object Notation) is a plain-text format for structured data that both people and programs can read.</span></div>
+<div><b>Why it matters</b><span>It is the shared format of nearly all modern APIs, so any language can understand the answer.</span></div>
+<div><b>How it works</b><span><code>{ }</code> holds an <em>object</em> (named values). <code>[ ]</code> holds a <em>list</em>. Names and text are in <strong>double quotes</strong>. Numbers and <code>true</code>/<code>false</code> are written without quotes. Items are separated by commas.</span></div>
+<div><b>Example</b><span><code>{"equipment_id": "SUB-101", "voltage_kv": 220.1}</code></span></div>
+<div><b>Common mistake</b><span>Using single quotes or leaving a trailing comma. Both make the JSON invalid.</span></div>
+</div>
+
+<h3>Status codes</h3>
+<div class="tblwrap"><table>
+<tr><th>Code</th><th>Name</th><th>Meaning</th><th>In our app</th></tr>
+<tr><td><code>200</code></td><td>OK</td><td>The request worked.</td><td>Every successful <code>GET</code></td></tr>
+<tr><td><code>201</code></td><td>Created</td><td>A new item was created.</td><td>Not used yet (would follow a POST)</td></tr>
+<tr><td><code>400</code></td><td>Bad Request</td><td>The request was malformed or unacceptable.</td><td>Not used by our code</td></tr>
+<tr><td><code>404</code></td><td>Not Found</td><td>The address or item does not exist.</td><td><code>/readings/SUB-999</code></td></tr>
+<tr><td><code>422</code></td><td>Unprocessable Content</td><td>The request was well-formed but the values are invalid.</td><td><code>/alerts?status=banana</code></td></tr>
+<tr><td><code>500</code></td><td>Internal Server Error</td><td>The server code crashed unexpectedly.</td><td>Appears only if a bug exists</td></tr>
+</table></div>
+<ul>
+<li><strong>2xx</strong> = success. <strong>4xx</strong> = the <em>caller</em> did something wrong. <strong>5xx</strong> = the <em>server</em> has a problem.</li>
+<li>Analogy: 200 is "here is your file", 404 is "no such file in the records room", 422 is "your form has an invalid entry", 500 is "the clerk fell over". Technically, each code is simply a number the server reports.</li>
+<li>Some versions of the libraries print 422 as "Unprocessable Entity". Same code, older name.</li>
+</ul>
+</section>
+
+<!-- ============ D ============ -->
+<section class="sec" id="sD" data-key="D" data-title="Build the sample application">
+<h2 class="st">D. Build the sample application</h2>
+<p class="lead">One small project, used for the rest of the module.</p>
+<div class="callout sim"><p>All readings and alerts below are <strong>simulated</strong>. The app holds them in Python lists and never reads real equipment.</p></div>
+
+<h3>Project structure</h3>
+<pre class="code" data-kind="out" data-label="Project folder" data-nocopy="1">fastapi-power-monitor/
+|-- app.py
+`-- requirements.txt</pre>
+<p>Create a folder named <code>fastapi-power-monitor</code>. Inside it save the two files below exactly as shown, using a text editor such as VS Code, Notepad++ or Notepad. <strong>Windows tip:</strong> make sure the file is named <code>app.py</code>, not <code>app.py.txt</code>.</p>
+
+<h3>The five endpoints: click one</h3>
+<svg class="dg" id="dgD" viewBox="0 0 920 360" role="img" aria-label="Map of the five API endpoints">
+ <g class="nd gr"><rect x="345" y="140" width="230" height="80" rx="14"/><text class="tb" x="460" y="175" text-anchor="middle">FastAPI app (app.py)</text><text class="ts" x="460" y="198" text-anchor="middle">http://127.0.0.1:8000</text></g>
+ <g class="nd fa" data-k="root"><rect x="20" y="20" width="250" height="70" rx="10"/><text class="tb" x="145" y="50" text-anchor="middle">GET /</text><text class="ts" x="145" y="72" text-anchor="middle">app name + environment</text></g>
+ <g class="nd fa" data-k="health"><rect x="335" y="20" width="250" height="70" rx="10"/><text class="tb" x="460" y="50" text-anchor="middle">GET /health</text><text class="ts" x="460" y="72" text-anchor="middle">is the app running?</text></g>
+ <g class="nd fa" data-k="readings"><rect x="650" y="20" width="250" height="70" rx="10"/><text class="tb" x="775" y="50" text-anchor="middle">GET /readings</text><text class="ts" x="775" y="72" text-anchor="middle">all simulated readings</text></g>
+ <g class="nd am" data-k="one"><rect x="120" y="270" width="320" height="70" rx="10"/><text class="tb" x="280" y="300" text-anchor="middle">GET /readings/{equipment_id}</text><text class="ts" x="280" y="322" text-anchor="middle">one reading, or 404</text></g>
+ <g class="nd am" data-k="alerts"><rect x="480" y="270" width="320" height="70" rx="10"/><text class="tb" x="640" y="300" text-anchor="middle">GET /alerts?status=active</text><text class="ts" x="640" y="322" text-anchor="middle">alerts, filtered by query</text></g>
+ <path class="ar" d="M145 90 L360 140" marker-end="url(#ah)"/><path class="ar" d="M460 90 V140" marker-end="url(#ah)"/><path class="ar" d="M775 90 L560 140" marker-end="url(#ah)"/>
+ <path class="ar" d="M360 220 L280 270" marker-end="url(#ah)"/><path class="ar" d="M560 220 L640 270" marker-end="url(#ah)"/>
+</svg>
+<div class="info" id="infoD" aria-live="polite"></div>
+
+<h3>Simulated data</h3>
+<div class="tblwrap"><table>
+<tr><th>equipment_id</th><th>name</th><th>voltage_kv</th><th>status</th></tr>
+<tr><td>SUB-101</td><td>North Substation</td><td>220.1</td><td>normal</td></tr>
+<tr><td>SUB-102</td><td>East Substation</td><td>218.7</td><td>normal</td></tr>
+<tr><td>SUB-103</td><td>West Substation</td><td>205.2</td><td>investigate</td></tr>
+</table></div>
+<p>There are also four simulated alerts. Two are <code>active</code> and two are <code>resolved</code>.</p>
+
+<h3>File 1: <code>app.py</code></h3>
+<pre class="code" data-kind="file" data-label="app.py">import os
+from typing import List, Literal, Optional
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI(title="Power Operations Health Monitor (Simulated)")
+
+
+class Reading(BaseModel):
+    equipment_id: str
+    name: str
+    voltage_kv: float
+    status: str
+
+
+class Alert(BaseModel):
+    alert_id: str
+    equipment_id: str
+    message: str
+    status: str
+
+
+# Simulated data only. Nothing here connects to real power equipment.
+READINGS = [
+    Reading(equipment_id="SUB-101", name="North Substation", voltage_kv=220.1, status="normal"),
+    Reading(equipment_id="SUB-102", name="East Substation", voltage_kv=218.7, status="normal"),
+    Reading(equipment_id="SUB-103", name="West Substation", voltage_kv=205.2, status="investigate"),
+]
+
+ALERTS = [
+    Alert(alert_id="ALT-001", equipment_id="SUB-103", message="Voltage below normal range", status="active"),
+    Alert(alert_id="ALT-002", equipment_id="SUB-103", message="Voltage trend under review", status="active"),
+    Alert(alert_id="ALT-003", equipment_id="SUB-101", message="Routine inspection completed", status="resolved"),
+    Alert(alert_id="ALT-004", equipment_id="SUB-102", message="Cooling fan warning cleared", status="resolved"),
+]
+
+
+@app.get("/")
+def home():
+    return {
+        "application": "Power Operations Health Monitor (Simulated)",
+        "environment": os.getenv("APP_ENV", "training"),
+    }
+
+
+@app.get("/health")
+def health():
+    return {"status": "running"}
+
+
+@app.get("/readings", response_model=List[Reading])
+def list_readings():
+    return READINGS
+
+
+@app.get("/readings/{equipment_id}", response_model=Reading)
+def get_reading(equipment_id: str):
+    for reading in READINGS:
+        if reading.equipment_id == equipment_id:
+            return reading
+    raise HTTPException(status_code=404, detail=f"Equipment {equipment_id} not found")
+
+
+@app.get("/alerts", response_model=List[Alert])
+def list_alerts(status: Optional[Literal["active", "resolved"]] = None):
+    if status is None:
+        return ALERTS
+    return [alert for alert in ALERTS if alert.status == status]</pre>
+
+<h3>File 2: <code>requirements.txt</code></h3>
+<pre class="code" data-kind="file" data-label="requirements.txt">fastapi==0.115.0
+uvicorn==0.30.6
+pydantic==2.9.2</pre>
+<ul>
+<li><code>fastapi</code> is the framework. <code>uvicorn</code> is the server. <code>pydantic</code> checks data and is used by FastAPI.</li>
+<li><code>==</code> pins an exact version so every learner installs the same thing. These versions were tested together with Python 3.13 and work with Python 3.9 or newer.</li>
+</ul>
+<p><strong>Common mistake:</strong> saving the code with smart quotes or odd indentation from a word processor. Use a code or plain-text editor and paste exactly.</p>
+</section>
+
+<!-- ============ E ============ -->
+<section class="sec" id="sE" data-key="E" data-title="Explain the code">
+<h2 class="st">E. Explain the code, piece by piece</h2>
+<p class="lead">Eight small pieces. Each shows the code, what it means, what happens when a client calls it, and the expected response.</p>
+<p>The JSON below is formatted over several lines for easy reading. A real API response is usually printed on one line.</p>
+
+<details open><summary>1. Imports: bringing in tools</summary><div class="in">
+<pre class="code" data-kind="python" data-label="app.py (top)">import os
+from typing import List, Literal, Optional
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel</pre>
+<p><strong>Plain English:</strong> before using a tool you must say where it comes from. <code>os</code> lets us read an environment setting. <code>typing</code> helps describe data shapes. <code>FastAPI</code> is the framework, <code>HTTPException</code> lets us return errors, and <code>BaseModel</code> from Pydantic describes the shape of our data.</p>
+<p><strong>When a client calls it:</strong> nothing. Imports run once when the server starts.</p>
+<p><strong>Expected response:</strong> none. If a library is missing you will see <code>ModuleNotFoundError</code> at startup (see Section I).</p>
+</div></details>
+
+<details><summary>2. Creating the application</summary><div class="in">
+<pre class="code" data-kind="python" data-label="app.py">app = FastAPI(title="Power Operations Health Monitor (Simulated)")</pre>
+<p><strong>Plain English:</strong> this creates one FastAPI application and gives it the name <code>app</code>. The title appears at the top of the <code>/docs</code> page.</p>
+<p><strong>When a client calls it:</strong> nothing directly. But the command <code>uvicorn app:app</code> looks for this exact name: <em>file</em> <code>app</code>, <em>variable</em> <code>app</code>.</p>
+<p><strong>Expected response:</strong> none. Open <code>/docs</code> to see the title.</p>
+</div></details>
+
+<details><summary>3. Type annotations and Pydantic models: describing data</summary><div class="in">
+<pre class="code" data-kind="python" data-label="app.py">class Reading(BaseModel):
+    equipment_id: str
+    name: str
+    voltage_kv: float
+    status: str</pre>
+<p><strong>Plain English:</strong> this is a template for one reading. <code>str</code> means text and <code>float</code> means a number with decimals. The part after the colon is a <strong>type annotation</strong>: a label saying what kind of value belongs there. FastAPI and Pydantic use the template to check data and to document the response.</p>
+<p><strong>When a client calls it:</strong> any endpoint that returns a <code>Reading</code> is checked against this template. A reading with a text voltage would be rejected before reaching the client.</p>
+<p><strong>Expected response shape:</strong></p>
+<pre class="code" data-kind="json" data-label="Shape of one reading" data-nocopy="1">{
+  "equipment_id": "SUB-101",
+  "name": "North Substation",
+  "voltage_kv": 220.1,
+  "status": "normal"
+}</pre>
+</div></details>
+
+<details><summary>4. Lists, dictionaries and JSON</summary><div class="in">
+<pre class="code" data-kind="python" data-label="app.py">READINGS = [
+    Reading(equipment_id="SUB-101", name="North Substation", voltage_kv=220.1, status="normal"),
+    Reading(equipment_id="SUB-102", name="East Substation", voltage_kv=218.7, status="normal"),
+    Reading(equipment_id="SUB-103", name="West Substation", voltage_kv=205.2, status="investigate"),
+]</pre>
+<p><strong>Plain English:</strong> square brackets make a <strong>list</strong>: an ordered collection. Each item is one <code>Reading</code>. This is our simulated "data source". A <strong>dictionary</strong> (curly braces with name: value pairs) is similar to a JSON object, and you will see one in the <code>/</code> endpoint below.</p>
+<p><strong>When a client calls it:</strong> FastAPI automatically converts Python lists, dictionaries and models into JSON. This is called <strong>serialization</strong>.</p>
+<p><strong>Common mistake:</strong> restarting the server and expecting changes made earlier to remain. This list lives in memory only, so it resets every start.</p>
+</div></details>
+
+<details><summary>5. A route: <code>@app.get</code> and a function</summary><div class="in">
+<pre class="code" data-kind="python" data-label="app.py">@app.get("/health")
+def health():
+    return {"status": "running"}</pre>
+<p><strong>Plain English:</strong> the line starting with <code>@</code> is a <strong>decorator</strong>: a label attached to the function below it. It says "when a <code>GET</code> request arrives for <code>/health</code>, run this function". <code>def</code> defines the function, and <code>return</code> hands back the answer. The indented lines belong to the function.</p>
+<p><strong>When a client calls it:</strong> <code>curl http://127.0.0.1:8000/health</code></p>
+<p><strong>Expected response:</strong> status <code>200</code>, body:</p>
+<pre class="code" data-kind="json" data-label="Response" data-nocopy="1">{"status": "running"}</pre>
+<p>The home route <code>GET /</code> works the same way and returns a dictionary with <code>application</code> and <code>environment</code>. The environment comes from <code>os.getenv("APP_ENV", "training")</code>, which means "use the setting named APP_ENV, or <code>training</code> if it is not set".</p>
+</div></details>
+
+<details><summary>6. Returning a list with a response model</summary><div class="in">
+<pre class="code" data-kind="python" data-label="app.py">@app.get("/readings", response_model=List[Reading])
+def list_readings():
+    return READINGS</pre>
+<p><strong>Plain English:</strong> <code>response_model=List[Reading]</code> promises "the answer is a list of readings". The function simply returns the whole list.</p>
+<p><strong>When a client calls it:</strong> <code>curl http://127.0.0.1:8000/readings</code></p>
+<p><strong>Expected response:</strong> status <code>200</code>, body is a JSON list:</p>
+<pre class="code" data-kind="json" data-label="Response" data-nocopy="1">[
+  {"equipment_id": "SUB-101", "name": "North Substation", "voltage_kv": 220.1, "status": "normal"},
+  {"equipment_id": "SUB-102", "name": "East Substation", "voltage_kv": 218.7, "status": "normal"},
+  {"equipment_id": "SUB-103", "name": "West Substation", "voltage_kv": 205.2, "status": "investigate"}
+]</pre>
+</div></details>
+
+<details><summary>7. Path parameter and HTTPException (404)</summary><div class="in">
+<pre class="code" data-kind="python" data-label="app.py">@app.get("/readings/{equipment_id}", response_model=Reading)
+def get_reading(equipment_id: str):
+    for reading in READINGS:
+        if reading.equipment_id == equipment_id:
+            return reading
+    raise HTTPException(status_code=404, detail=f"Equipment {equipment_id} not found")</pre>
+<p><strong>Plain English:</strong> the part in curly braces, <code>{equipment_id}</code>, is a <strong>path parameter</strong>: a changing piece of the address. Whatever the client puts there is passed to the function. The function looks through the list. If it finds a match it returns it. If it reaches the end without finding one, <code>raise HTTPException</code> stops and sends a <strong>404</strong> with a message.</p>
+<p><strong>When a client calls it:</strong> <code>curl http://127.0.0.1:8000/readings/SUB-103</code> finds a match.</p>
+<pre class="code" data-kind="json" data-label="Response: 200 OK" data-nocopy="1">{"equipment_id": "SUB-103", "name": "West Substation", "voltage_kv": 205.2, "status": "investigate"}</pre>
+<p>And <code>curl -i http://127.0.0.1:8000/readings/SUB-999</code> does not:</p>
+<pre class="code" data-kind="json" data-label="Response: 404 Not Found" data-nocopy="1">{"detail": "Equipment SUB-999 not found"}</pre>
+<p><strong>Common mistake:</strong> IDs are case-sensitive. <code>sub-103</code> will return 404.</p>
+</div></details>
+
+<details><summary>8. Query parameter and filtering</summary><div class="in">
+<pre class="code" data-kind="python" data-label="app.py">@app.get("/alerts", response_model=List[Alert])
+def list_alerts(status: Optional[Literal["active", "resolved"]] = None):
+    if status is None:
+        return ALERTS
+    return [alert for alert in ALERTS if alert.status == status]</pre>
+<p><strong>Plain English:</strong> a function input that is <em>not</em> in the path becomes a <strong>query parameter</strong>, written after <code>?</code> in the URL. <code>= None</code> makes it optional. <code>Literal["active", "resolved"]</code> allows only those two words. The last line builds a new list keeping only alerts whose status matches.</p>
+<p><strong>Path vs query:</strong> a path parameter <em>identifies one thing</em> (<code>/readings/SUB-103</code>). A query parameter <em>narrows or filters</em> a collection (<code>/alerts?status=active</code>).</p>
+<p><strong>When a client calls it:</strong> <code>curl "http://127.0.0.1:8000/alerts?status=active"</code></p>
+<pre class="code" data-kind="json" data-label="Response: 200 OK" data-nocopy="1">[
+  {"alert_id": "ALT-001", "equipment_id": "SUB-103", "message": "Voltage below normal range", "status": "active"},
+  {"alert_id": "ALT-002", "equipment_id": "SUB-103", "message": "Voltage trend under review", "status": "active"}
+]</pre>
+<p>With <code>?status=banana</code> FastAPI answers <strong>422</strong> automatically, without running your function:</p>
+<pre class="code" data-kind="json" data-label="Response: 422" data-nocopy="1">{"detail":[{"type":"literal_error","loc":["query","status"],"msg":"Input should be 'active' or 'resolved'","input":"banana","ctx":{"expected":"'active' or 'resolved'"}}]}</pre>
+</div></details>
+</section>
+<!-- ============ F ============ -->
+<section class="sec" id="sF" data-key="F" data-title="Run the application locally">
+<h2 class="st">F. Run the application on your computer</h2>
+<p class="lead">Seven steps, on Windows, macOS or Linux.</p>
+<div class="callout"><p><span class="badge term">Real terminal</span> Everything in this section is typed into a real terminal on your computer. This web page cannot start a Python server for you.</p></div>
+
+<h3>The setup flow: click a step</h3>
+<svg class="dg" id="dgF" viewBox="0 0 920 250" role="img" aria-label="Seven setup steps">
+ <g class="nd fa" data-k="py"><rect x="10" y="30" width="115" height="85" rx="10"/><text class="tb" x="67" y="65" text-anchor="middle">1</text><text class="ts" x="67" y="87" text-anchor="middle">Install</text><text class="ts" x="67" y="105" text-anchor="middle">Python</text></g>
+ <g class="nd fa" data-k="dir"><rect x="140" y="30" width="115" height="85" rx="10"/><text class="tb" x="197" y="65" text-anchor="middle">2</text><text class="ts" x="197" y="87" text-anchor="middle">Project</text><text class="ts" x="197" y="105" text-anchor="middle">folder</text></g>
+ <g class="nd fa" data-k="venv"><rect x="270" y="30" width="115" height="85" rx="10"/><text class="tb" x="327" y="65" text-anchor="middle">3</text><text class="ts" x="327" y="87" text-anchor="middle">Create</text><text class="ts" x="327" y="105" text-anchor="middle">virtual env</text></g>
+ <g class="nd fa" data-k="act"><rect x="400" y="30" width="115" height="85" rx="10"/><text class="tb" x="457" y="65" text-anchor="middle">4</text><text class="ts" x="457" y="87" text-anchor="middle">Activate</text><text class="ts" x="457" y="105" text-anchor="middle">it</text></g>
+ <g class="nd fa" data-k="pip"><rect x="530" y="30" width="115" height="85" rx="10"/><text class="tb" x="587" y="65" text-anchor="middle">5</text><text class="ts" x="587" y="87" text-anchor="middle">Install</text><text class="ts" x="587" y="105" text-anchor="middle">packages</text></g>
+ <g class="nd gr" data-k="run"><rect x="660" y="30" width="115" height="85" rx="10"/><text class="tb" x="717" y="65" text-anchor="middle">6</text><text class="ts" x="717" y="87" text-anchor="middle">Start</text><text class="ts" x="717" y="105" text-anchor="middle">Uvicorn</text></g>
+ <g class="nd rd" data-k="stop"><rect x="790" y="30" width="115" height="85" rx="10"/><text class="tb" x="847" y="65" text-anchor="middle">7</text><text class="ts" x="847" y="87" text-anchor="middle">Stop with</text><text class="ts" x="847" y="105" text-anchor="middle">Ctrl+C</text></g>
+ <path class="ar" d="M125 72 H140" marker-end="url(#ah)"/><path class="ar" d="M255 72 H270" marker-end="url(#ah)"/><path class="ar" d="M385 72 H400" marker-end="url(#ah)"/><path class="ar" d="M515 72 H530" marker-end="url(#ah)"/><path class="ar" d="M645 72 H660" marker-end="url(#ah)"/><path class="ar" d="M775 72 H790" marker-end="url(#ah)"/>
+ <text class="ts" x="460" y="165" text-anchor="middle">Steps 1 to 3 are done once. Steps 4 and 6 are repeated every time you come back to the project.</text>
+ <text class="ts" x="460" y="190" text-anchor="middle">Save app.py and requirements.txt (Section D) into the project folder before step 5.</text>
+</svg>
+<div class="info" id="infoF" aria-live="polite"></div>
+
+<h3>Choose your operating system</h3>
+<div class="tabs" data-group="os" role="tablist"><button class="on" data-t="win">Windows (PowerShell)</button><button data-t="mac">macOS</button><button data-t="lin">Linux</button></div>
+
+<div class="tabpane on" data-group="os" data-t="win">
+<h4>1. Install Python (version 3.9 or newer; 3.11 or 3.12 recommended)</h4>
+<p>Download from <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org/downloads</a>. In the installer tick <strong>"Add python.exe to PATH"</strong>. Then open <strong>PowerShell</strong> and check:</p>
+<pre class="code" data-kind="terminal" data-label="PowerShell">python --version</pre>
+<p><strong>Expect:</strong> a line such as <code>Python 3.12.x</code>. If Windows opens the Microsoft Store instead, install Python from python.org and reopen PowerShell.</p>
+<h4>2. Create and enter the project folder</h4>
+<pre class="code" data-kind="terminal" data-label="PowerShell">mkdir fastapi-power-monitor
+cd fastapi-power-monitor</pre>
+<p>Now save <code>app.py</code> and <code>requirements.txt</code> into this folder.</p>
+<h4>3. Create a virtual environment</h4>
+<pre class="code" data-kind="terminal" data-label="PowerShell">python -m venv .venv</pre>
+<p><strong>Expect:</strong> no message, and a new hidden folder named <code>.venv</code>. It is a private box of Python packages for this project only.</p>
+<h4>4. Activate it</h4>
+<pre class="code" data-kind="terminal" data-label="PowerShell">.venv\Scripts\Activate.ps1</pre>
+<p><strong>Expect:</strong> <code>(.venv)</code> appears at the start of your prompt. If PowerShell says scripts are disabled, run this once in the same window (it only affects this window) and activate again:</p>
+<pre class="code" data-kind="terminal" data-label="PowerShell">Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</pre>
+<p>Alternative: use the Command Prompt (<code>cmd</code>) and run <code>.venv\Scripts\activate.bat</code>.</p>
+<h4>5. Install the packages</h4>
+<pre class="code" data-kind="terminal" data-label="PowerShell">python -m pip install -r requirements.txt</pre>
+<h4>6. Start the API</h4>
+<pre class="code" data-kind="terminal" data-label="PowerShell">python -m uvicorn app:app --reload --host 127.0.0.1 --port 8000</pre>
+<h4>7. Stop it safely</h4>
+<p>Click the terminal window and press <strong>Ctrl+C</strong>. To leave the virtual environment type <code>deactivate</code>.</p>
+</div>
+
+<div class="tabpane" data-group="os" data-t="mac">
+<h4>1. Install Python (3.9 or newer; 3.11 or 3.12 recommended)</h4>
+<p>Download from <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org/downloads</a>, or if you use Homebrew run <code>brew install python</code>. Open <strong>Terminal</strong> and check:</p>
+<pre class="code" data-kind="terminal" data-label="Terminal">python3 --version</pre>
+<h4>2. Create and enter the project folder</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">mkdir fastapi-power-monitor
+cd fastapi-power-monitor</pre>
+<p>Now save <code>app.py</code> and <code>requirements.txt</code> into this folder.</p>
+<h4>3. Create a virtual environment</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">python3 -m venv .venv</pre>
+<h4>4. Activate it</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">source .venv/bin/activate</pre>
+<p><strong>Expect:</strong> <code>(.venv)</code> at the start of your prompt. Inside the environment, <code>python</code> works as well as <code>python3</code>.</p>
+<h4>5. Install the packages</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">python -m pip install -r requirements.txt</pre>
+<h4>6. Start the API</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">python -m uvicorn app:app --reload --host 127.0.0.1 --port 8000</pre>
+<h4>7. Stop it safely</h4>
+<p>Click the Terminal window and press <strong>Ctrl+C</strong> (the Control key, not Command). To leave the environment type <code>deactivate</code>.</p>
+</div>
+
+<div class="tabpane" data-group="os" data-t="lin">
+<h4>1. Install Python (3.9 or newer)</h4>
+<p>On Ubuntu or Debian:</p>
+<pre class="code" data-kind="terminal" data-label="Terminal">sudo apt update
+sudo apt install -y python3 python3-venv python3-pip
+python3 --version</pre>
+<p>On other distributions use your package manager (for example <code>dnf install python3</code>).</p>
+<h4>2. Create and enter the project folder</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">mkdir fastapi-power-monitor
+cd fastapi-power-monitor</pre>
+<p>Now save <code>app.py</code> and <code>requirements.txt</code> into this folder.</p>
+<h4>3. Create a virtual environment</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">python3 -m venv .venv</pre>
+<h4>4. Activate it</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">source .venv/bin/activate</pre>
+<h4>5. Install the packages</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">python -m pip install -r requirements.txt</pre>
+<h4>6. Start the API</h4>
+<pre class="code" data-kind="terminal" data-label="Terminal">python -m uvicorn app:app --reload --host 127.0.0.1 --port 8000</pre>
+<h4>7. Stop it safely</h4>
+<p>Press <strong>Ctrl+C</strong> in the terminal running the server. To leave the environment type <code>deactivate</code>.</p>
+</div>
+
+<h3>What you should see when the server starts</h3>
+<pre class="code" data-kind="out" data-label="Expected terminal output (details will differ)" data-nocopy="1">INFO:     Will watch for changes in these directories: ['/path/to/fastapi-power-monitor']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [12345] using StatReload
+INFO:     Started server process [12347]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.</pre>
+<p>The line <strong>"Application startup complete."</strong> means success. The terminal now looks "stuck". That is normal: the server is running and waiting. <strong>Leave this window open</strong> and open a second terminal or a browser for the next section.</p>
+<p><strong>Quick check:</strong> open <a href="http://127.0.0.1:8000/health" target="_blank" rel="noopener">http://127.0.0.1:8000/health</a>. It works only while your server is running.</p>
+
+<h3>What each part of the start command means</h3>
+<div class="tblwrap"><table>
+<tr><th>Part</th><th>Meaning</th></tr>
+<tr><td><code>python -m uvicorn</code></td><td>Run the Uvicorn tool using the Python from your active environment. This avoids "command not found" problems.</td></tr>
+<tr><td><code>app:app</code></td><td><code>file name : variable name</code>. The file <code>app.py</code> and the object <code>app</code> inside it.</td></tr>
+<tr><td><code>--reload</code></td><td>Restart automatically when you save a code change. <strong>For development only. Do not use it in production</strong>: it watches files continuously and is not designed for a stable live service.</td></tr>
+<tr><td><code>--host 127.0.0.1</code></td><td>Accept connections only from this computer.</td></tr>
+<tr><td><code>--port 8000</code></td><td>Listen on port 8000.</td></tr>
+</table></div>
+
+<h3>Stopping safely</h3>
+<p>Press <strong>Ctrl+C</strong> once. Expect:</p>
+<pre class="code" data-kind="out" data-label="Expected output when stopping" data-nocopy="1">INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [12347]</pre>
+<p><strong>Common mistake:</strong> closing the terminal window or leaving a second copy running. The next start may then fail with "port already in use" (Section I).</p>
+</section>
+
+<!-- ============ G ============ -->
+<section class="sec" id="sG" data-key="G" data-title="Call the API">
+<h2 class="st">G. Call the API</h2>
+<p class="lead">Three ways to talk to your running server.</p>
+<div class="callout warn"><p><strong>Before you start:</strong> these examples need your local server from Section F to be running. This web page does not run the API. If the server is stopped you will see "connection refused".</p></div>
+
+<div class="tabs" data-group="call" role="tablist"><button class="on" data-t="br">1. Web browser</button><button data-t="doc">2. Interactive docs (/docs)</button><button data-t="cu">3. curl</button></div>
+<div class="tabpane on" data-group="call" data-t="br">
+<p>Type an address into the browser's address bar and press Enter. The browser sends a <code>GET</code> request.</p>
+<ul>
+<li><code>http://127.0.0.1:8000/</code></li>
+<li><code>http://127.0.0.1:8000/health</code></li>
+<li><code>http://127.0.0.1:8000/readings</code></li>
+<li><code>http://127.0.0.1:8000/readings/SUB-103</code></li>
+<li><code>http://127.0.0.1:8000/alerts?status=active</code></li>
+</ul>
+<p>Firefox shows JSON in a tidy viewer. Chrome and Edge show plain text, which is still valid JSON. <strong>Limit:</strong> a browser address bar can only send GET, and it does not show the status code clearly. For that, use <code>/docs</code> or <code>curl -i</code>.</p>
+</div>
+<div class="tabpane" data-group="call" data-t="doc">
+<p>Open <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener">http://127.0.0.1:8000/docs</a>. FastAPI generated this page from your code.</p>
+<ol>
+<li>Click an endpoint such as <strong>GET /readings/{equipment_id}</strong> to expand it.</li>
+<li>Click <strong>Try it out</strong>.</li>
+<li>Type a value, for example <code>SUB-103</code>, in the <code>equipment_id</code> box.</li>
+<li>Click <strong>Execute</strong>.</li>
+<li>Read the results: the <strong>Curl</strong> command it used, the <strong>Request URL</strong>, the <strong>Server response</strong> with its <strong>Code</strong> and <strong>Response body</strong>.</li>
+</ol>
+<p>For <code>/alerts</code>, the <code>status</code> box offers the allowed values. Because FastAPI knows the rules, the docs page is always in step with the code. Also available: <code>/redoc</code> (a read-only style) and <code>/openapi.json</code> (the machine-readable description).</p>
+</div>
+<div class="tabpane" data-group="call" data-t="cu">
+<p><code>curl</code> is a command-line tool that sends HTTP requests. Open a <strong>second</strong> terminal (the first is busy running the server).</p>
+<div class="callout"><p><strong>Windows PowerShell note:</strong> in older Windows PowerShell, <code>curl</code> is an alias for a different command. Type <code>curl.exe</code> instead of <code>curl</code> if you get odd output. Also use <strong>double quotes</strong> around any URL containing <code>?</code>.</p></div>
+<pre class="code" data-kind="terminal" data-label="Second terminal (curl)">curl http://127.0.0.1:8000/health</pre>
+<p>Add <code>-i</code> to see the status line and headers, which is how you spot a 404:</p>
+<pre class="code" data-kind="terminal" data-label="Second terminal (curl)">curl -i http://127.0.0.1:8000/readings/SUB-999</pre>
+<pre class="code" data-kind="out" data-label="Expected output" data-nocopy="1">HTTP/1.1 404 Not Found
+content-type: application/json
+
+{"detail":"Equipment SUB-999 not found"}</pre>
+<p>To pretty-print JSON on any system that has Python:</p>
+<pre class="code" data-kind="terminal" data-label="Second terminal (curl)">curl -s http://127.0.0.1:8000/readings | python -m json.tool</pre>
+</div>
+
+<h3>Reference: every endpoint</h3>
+<p>Responses are formatted over several lines here for readability; the real output is on one line.</p>
+
+<div class="card"><h4>1. Home</h4><p><strong>Method:</strong> GET &nbsp; <strong>URL:</strong> <code>http://127.0.0.1:8000/</code> &nbsp; <strong>Status:</strong> <span class="stat s2">200</span></p>
+<pre class="code" data-kind="terminal" data-label="curl">curl http://127.0.0.1:8000/</pre>
+<pre class="code" data-kind="json" data-label="Response body" data-nocopy="1">{"application": "Power Operations Health Monitor (Simulated)", "environment": "training"}</pre></div>
+
+<div class="card"><h4>2. Health</h4><p><strong>Method:</strong> GET &nbsp; <strong>URL:</strong> <code>http://127.0.0.1:8000/health</code> &nbsp; <strong>Status:</strong> <span class="stat s2">200</span></p>
+<pre class="code" data-kind="terminal" data-label="curl">curl http://127.0.0.1:8000/health</pre>
+<pre class="code" data-kind="json" data-label="Response body" data-nocopy="1">{"status": "running"}</pre></div>
+
+<div class="card"><h4>3. All readings</h4><p><strong>Method:</strong> GET &nbsp; <strong>URL:</strong> <code>http://127.0.0.1:8000/readings</code> &nbsp; <strong>Status:</strong> <span class="stat s2">200</span></p>
+<pre class="code" data-kind="terminal" data-label="curl">curl http://127.0.0.1:8000/readings</pre>
+<pre class="code" data-kind="json" data-label="Response body" data-nocopy="1">[
+  {"equipment_id": "SUB-101", "name": "North Substation", "voltage_kv": 220.1, "status": "normal"},
+  {"equipment_id": "SUB-102", "name": "East Substation", "voltage_kv": 218.7, "status": "normal"},
+  {"equipment_id": "SUB-103", "name": "West Substation", "voltage_kv": 205.2, "status": "investigate"}
+]</pre><p>A list <code>[ ... ]</code> of three objects.</p></div>
+
+<div class="card"><h4>4. One reading (found)</h4><p><strong>Method:</strong> GET &nbsp; <strong>URL:</strong> <code>http://127.0.0.1:8000/readings/SUB-103</code> &nbsp; <strong>Status:</strong> <span class="stat s2">200</span></p>
+<pre class="code" data-kind="terminal" data-label="curl">curl http://127.0.0.1:8000/readings/SUB-103</pre>
+<pre class="code" data-kind="json" data-label="Response body" data-nocopy="1">{"equipment_id": "SUB-103", "name": "West Substation", "voltage_kv": 205.2, "status": "investigate"}</pre></div>
+
+<div class="card"><h4>5. One reading (not found)</h4><p><strong>Method:</strong> GET &nbsp; <strong>URL:</strong> <code>http://127.0.0.1:8000/readings/SUB-999</code> &nbsp; <strong>Status:</strong> <span class="stat s4">404</span></p>
+<pre class="code" data-kind="terminal" data-label="curl">curl -i http://127.0.0.1:8000/readings/SUB-999</pre>
+<pre class="code" data-kind="json" data-label="Response body" data-nocopy="1">{"detail": "Equipment SUB-999 not found"}</pre>
+<p><strong>How to recognise a 404:</strong> the status line says <code>404 Not Found</code>, and the body has a <code>"detail"</code> message instead of a reading.</p></div>
+
+<div class="card"><h4>6. Alerts filtered by query parameter</h4><p><strong>Method:</strong> GET &nbsp; <strong>URL:</strong> <code>http://127.0.0.1:8000/alerts?status=active</code> &nbsp; <strong>Status:</strong> <span class="stat s2">200</span></p>
+<pre class="code" data-kind="terminal" data-label="curl">curl "http://127.0.0.1:8000/alerts?status=active"</pre>
+<pre class="code" data-kind="json" data-label="Response body" data-nocopy="1">[
+  {"alert_id": "ALT-001", "equipment_id": "SUB-103", "message": "Voltage below normal range", "status": "active"},
+  {"alert_id": "ALT-002", "equipment_id": "SUB-103", "message": "Voltage trend under review", "status": "active"}
+]</pre><p>Try <code>status=resolved</code> for the other two. Leave the filter off (<code>/alerts</code>) to get all four.</p></div>
+
+<div class="card"><h4>7. Alerts with an invalid value</h4><p><strong>Method:</strong> GET &nbsp; <strong>URL:</strong> <code>http://127.0.0.1:8000/alerts?status=banana</code> &nbsp; <strong>Status:</strong> <span class="stat s4">422</span></p>
+<pre class="code" data-kind="terminal" data-label="curl">curl -i "http://127.0.0.1:8000/alerts?status=banana"</pre>
+<pre class="code" data-kind="json" data-label="Response body" data-nocopy="1">{"detail":[{"type":"literal_error","loc":["query","status"],"msg":"Input should be 'active' or 'resolved'","input":"banana","ctx":{"expected":"'active' or 'resolved'"}}]}</pre>
+<p><strong>Reading it:</strong> <code>loc</code> says the problem is in the query parameter <code>status</code>. <code>msg</code> says what is allowed. 404 means "that thing does not exist"; 422 means "I understood the request but a value is not acceptable".</p></div>
+</section>
+
+<!-- ============ H ============ -->
+<section class="sec" id="sH" data-key="H" data-title="Interactive API explorer (simulation)">
+<h2 class="st">H. Interactive API explorer</h2>
+<div class="callout sim"><p><span class="badge sim">Simulation</span> <strong>This explorer does not contact your FastAPI server.</strong> It runs entirely inside this page with JavaScript and built-in sample data that mirrors <code>app.py</code>. Nothing is sent over the network.</p></div>
+
+<div class="explorer">
+<div class="card">
+<h4 style="margin-top:0">Build a request</h4>
+<label for="exEp">Endpoint</label>
+<select id="exEp">
+<option value="root">GET /</option>
+<option value="health">GET /health</option>
+<option value="readings">GET /readings</option>
+<option value="one" selected>GET /readings/{equipment_id}</option>
+<option value="alerts">GET /alerts</option>
+</select>
+<div id="exIdBox"><label for="exId">equipment_id (path parameter)</label><input id="exId" value="SUB-103" autocomplete="off" spellcheck="false"><p class="hint">Try SUB-101, SUB-102, SUB-103, then SUB-999 or sub-103 (lowercase).</p></div>
+<div id="exStBox" style="display:none"><label for="exSt">status (query parameter)</label>
+<select id="exSt"><option value="">(no filter)</option><option value="active">active</option><option value="resolved">resolved</option><option value="banana">banana (invalid value)</option></select></div>
+<p style="margin-top:18px"><button class="btn" id="exGo">Send simulated request</button></p>
+<hr>
+<p><strong>Real docs link:</strong> <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener">Open real API docs</a></p>
+<p class="hint">This link works <strong>only after</strong> you start the local server (Section F) on your own computer. Otherwise your browser will say it cannot connect.</p>
+</div>
+<div class="card" id="exOut" aria-live="polite">
+<h4 style="margin-top:0">Result <span class="badge sim">simulated</span></h4>
+<p>Choose an endpoint and press <strong>Send simulated request</strong>.</p>
+</div>
+</div>
+<h3>Things to try</h3>
+<ol><li>Request <code>/readings/SUB-999</code>. Which status code do you get and why?</li><li>Request <code>/alerts</code> with no filter, then with <code>active</code>. How many items come back each time?</li><li>Request <code>/alerts</code> with <code>banana</code>. Find <code>loc</code> and <code>msg</code> in the 422 body.</li></ol>
+</section>
+
+<!-- ============ I ============ -->
+<section class="sec" id="sI" data-key="I" data-title="Debugging and common errors">
+<h2 class="st">I. Debugging and common errors</h2>
+<p class="lead">Every learner meets at least one of these. Knowing how to read them is the skill.</p>
+
+<h3>Diagnosis flowchart: click a result</h3>
+<svg class="dg" id="dgI" viewBox="0 0 920 470" role="img" aria-label="Error diagnosis flowchart">
+ <g class="nd am"><rect x="330" y="8" width="260" height="38" rx="19"/><text class="tb" x="460" y="33" text-anchor="middle">Something is not working</text></g>
+ <g class="nd fa"><rect x="250" y="66" width="420" height="58" rx="10"/><text class="tb" x="460" y="90" text-anchor="middle">Did the server start?</text><text class="ts" x="460" y="110" text-anchor="middle">Look for "Application startup complete." in its terminal</text></g>
+ <path class="ar" d="M300 124 L170 170" marker-end="url(#ah)"/><text class="tb" x="215" y="140">NO</text>
+ <path class="ar" d="M620 124 L750 170" marker-end="url(#ah)"/><text class="tb" x="705" y="140">YES</text>
+ <g class="nd"><rect x="20" y="172" width="300" height="48" rx="10"/><text class="tb" x="170" y="193" text-anchor="middle">Server did not start.</text><text class="ts" x="170" y="211" text-anchor="middle">What does the terminal print?</text></g>
+ <g class="nd"><rect x="520" y="172" width="380" height="48" rx="10"/><text class="tb" x="710" y="193" text-anchor="middle">Server started, but the client shows...</text><text class="ts" x="710" y="211" text-anchor="middle">What does the client report?</text></g>
+ <path class="ar" d="M12 196 V433 M12 270 H20 M12 312 H20 M12 354 H20 M12 396 H20 M12 433 H20"/>
+ <g class="nd rd" data-err="0"><rect x="20" y="248" width="320" height="38" rx="8"/><text x="180" y="272" text-anchor="middle">No module named 'fastapi'</text></g>
+ <g class="nd rd" data-err="1"><rect x="20" y="290" width="320" height="38" rx="8"/><text x="180" y="314" text-anchor="middle">uvicorn: command not found</text></g>
+ <g class="nd rd" data-err="2"><rect x="20" y="332" width="320" height="38" rx="8"/><text x="180" y="356" text-anchor="middle">Address already in use</text></g>
+ <g class="nd rd" data-err="3"><rect x="20" y="374" width="320" height="38" rx="8"/><text x="180" y="398" text-anchor="middle">Could not import module "..."</text></g>
+ <g class="nd rd" data-err="7"><rect x="20" y="416" width="320" height="38" rx="8"/><text x="180" y="440" text-anchor="middle">SyntaxError / IndentationError</text></g>
+ <path class="ar" d="M505 196 V433 M505 268 H520 M505 310 H520 M505 352 H520"/>
+ <g class="nd rd" data-err="6"><rect x="520" y="248" width="380" height="38" rx="8"/><text x="710" y="272" text-anchor="middle">"Connection refused" / "can't be reached"</text></g>
+ <g class="nd rd" data-err="4"><rect x="520" y="290" width="380" height="38" rx="8"/><text x="710" y="314" text-anchor="middle">404 Not Found</text></g>
+ <g class="nd rd" data-err="5"><rect x="520" y="332" width="380" height="38" rx="8"/><text x="710" y="356" text-anchor="middle">422 Unprocessable Content</text></g>
+</svg>
+<p class="hint">Clicking a red box opens the matching guide below.</p>
+
+<h3>Troubleshooting guide</h3>
+<div class="chips" id="errChips"></div>
+<div id="errCard" class="card" aria-live="polite"></div>
+<div class="callout"><p><strong>Universal first steps:</strong> (1) read the <em>last</em> line of the error, (2) check that <code>(.venv)</code> shows in your prompt, (3) check you are in the <code>fastapi-power-monitor</code> folder, (4) check that the server terminal says "startup complete".</p></div>
+</section>
+<!-- ============ J ============ -->
+<section class="sec" id="sJ" data-key="J" data-title="From FastAPI to Docker and Kubernetes">
+<h2 class="st">J. How FastAPI connects to Docker and Kubernetes</h2>
+<p class="lead">A conceptual bridge to the next sessions. You will not write Dockerfiles or Kubernetes YAML here.</p>
+
+<h3>The journey: click a stage</h3>
+<svg class="dg" id="dgJ" viewBox="0 0 920 230" role="img" aria-label="Python code to FastAPI to Uvicorn to Docker image to container to Kubernetes Deployment to Service">
+ <g class="nd fa" data-k="py"><rect x="8" y="40" width="112" height="90" rx="10"/><text class="tb" x="64" y="78" text-anchor="middle">Python</text><text class="ts" x="64" y="98" text-anchor="middle">source code</text><text class="ts" x="64" y="116" text-anchor="middle">app.py</text></g>
+ <g class="nd fa" data-k="fa"><rect x="140" y="40" width="112" height="90" rx="10"/><text class="tb" x="196" y="78" text-anchor="middle">FastAPI</text><text class="ts" x="196" y="98" text-anchor="middle">application</text></g>
+ <g class="nd fa" data-k="uv"><rect x="272" y="40" width="112" height="90" rx="10"/><text class="tb" x="328" y="78" text-anchor="middle">Uvicorn</text><text class="ts" x="328" y="98" text-anchor="middle">server on</text><text class="ts" x="328" y="116" text-anchor="middle">a port</text></g>
+ <g class="nd am" data-k="img"><rect x="404" y="40" width="112" height="90" rx="10"/><text class="tb" x="460" y="78" text-anchor="middle">Docker</text><text class="ts" x="460" y="98" text-anchor="middle">image</text><text class="ts" x="460" y="116" text-anchor="middle">(the package)</text></g>
+ <g class="nd am" data-k="ctr"><rect x="536" y="40" width="112" height="90" rx="10"/><text class="tb" x="592" y="78" text-anchor="middle">Docker</text><text class="ts" x="592" y="98" text-anchor="middle">container</text><text class="ts" x="592" y="116" text-anchor="middle">(running)</text></g>
+ <g class="nd gr" data-k="dep"><rect x="668" y="40" width="112" height="90" rx="10"/><text class="tb" x="724" y="72" text-anchor="middle">Kubernetes</text><text class="ts" x="724" y="96" text-anchor="middle">Deployment</text><text class="ts" x="724" y="114" text-anchor="middle">(keeps it up)</text></g>
+ <g class="nd gr" data-k="svc"><rect x="800" y="40" width="112" height="90" rx="10"/><text class="tb" x="856" y="72" text-anchor="middle">Kubernetes</text><text class="ts" x="856" y="96" text-anchor="middle">Service</text><text class="ts" x="856" y="114" text-anchor="middle">(stable address)</text></g>
+ <path class="ar" d="M120 85 H140" marker-end="url(#ah)"/><path class="ar" d="M252 85 H272" marker-end="url(#ah)"/><path class="ar" d="M384 85 H404" marker-end="url(#ah)"/><path class="ar" d="M516 85 H536" marker-end="url(#ah)"/><path class="ar" d="M648 85 H668" marker-end="url(#ah)"/><path class="ar" d="M780 85 H800" marker-end="url(#ah)"/>
+ <text class="ts" x="196" y="170" text-anchor="middle">Today (this module)</text><path d="M20 150 H372" stroke="#0f5c27" stroke-width="4"/>
+ <text class="ts" x="560" y="170" text-anchor="middle">Next sessions: Docker</text><path d="M404 150 H648" stroke="#b45309" stroke-width="4"/>
+ <text class="ts" x="790" y="170" text-anchor="middle">Later: Kubernetes</text><path d="M668 150 H912" stroke="#0a4a8c" stroke-width="4"/>
+</svg>
+<div class="info" id="infoJ" aria-live="polite"></div>
+
+<h3>Why each idea matters</h3>
+<div class="grid">
+<div class="card"><h4>Why the app runs on a port</h4><p>A computer can run many network programs. The port number tells incoming traffic which one to talk to. Our API listens on <code>8000</code>. Containers and Kubernetes use that same number to route traffic to it.</p></div>
+<div class="card"><h4>Why <code>0.0.0.0</code> inside a container</h4><p><code>127.0.0.1</code> means "only this same machine". Inside a container, that means only the container itself, so traffic arriving from outside is refused. <code>0.0.0.0</code> means "accept connections on every network interface", which allows the container's published port to reach the app.</p></div>
+<div class="card"><h4>Why port 8000 must match</h4><p>Docker and Kubernetes forward traffic to a <em>container port</em>. If the app listens on 8000 but the setup forwards to 8080, requests reach nothing and you get "connection refused".</p></div>
+<div class="card"><h4>Why Docker packages dependencies</h4><p>Your laptop has Python and the right packages. A server may not. A Docker image bundles the app, Python and the libraries from <code>requirements.txt</code>, so it behaves the same everywhere.</p></div>
+<div class="card"><h4>Why Kubernetes</h4><p>One container is easy. Dozens across many machines need something to start them, restart failures, scale and give them a stable address. Kubernetes does that.</p></div>
+</div>
+
+<h3>Local versus container: one setting changes</h3>
+<div class="tblwrap"><table>
+<tr><th></th><th>On your laptop (today)</th><th>Inside a container (later)</th></tr>
+<tr><th>Host setting</th><td><code>--host 127.0.0.1</code></td><td><code>--host 0.0.0.0</code></td></tr>
+<tr><th>Port</th><td><code>--port 8000</code></td><td><code>--port 8000</code> (matches the container port)</td></tr>
+<tr><th><code>--reload</code></th><td>Used for convenience</td><td>Not used</td></tr>
+</table></div>
+<div class="callout"><p><span class="badge file">Preview only</span> In the container sessions you will see the start command in this form. <strong>Do not run it today</strong>, and no Dockerfile syntax is needed yet:</p>
+<pre class="code" data-kind="out" data-label="Preview of a later session" data-nocopy="1">python -m uvicorn app:app --host 0.0.0.0 --port 8000</pre></div>
+<p><strong>Common mistake:</strong> keeping <code>127.0.0.1</code> in a container, then wondering why the published port gives "connection refused" even though the container is running.</p>
+</section>
+
+<!-- ============ K ============ -->
+<section class="sec" id="sK" data-key="K" data-title="Hands-on lab">
+<h2 class="st">K. Hands-on lab</h2>
+<p class="lead">About 30 to 45 minutes. Tick each task as you complete it. Your progress is counted below.</p>
+<div class="callout"><p><span class="badge term">Real terminal</span> This lab uses your own terminal and browser. Keep the server terminal open and use a <strong>second</strong> terminal for <code>curl</code>.</p></div>
+<div class="card" style="position:sticky;top:76px;z-index:5"><strong id="labCount">0 of 10 tasks complete</strong> <button class="btn alt" id="labReset" style="float:right;padding:4px 12px">Reset</button></div>
+
+<div class="card lab" data-lab="0"><input type="checkbox" aria-label="Task 1 done"><div><h4 style="margin-top:0">Task 1. Inspect <code>app.py</code></h4><p>Open the file in your editor. Find the five lines beginning with <code>@app.get</code>.</p><p><strong>Expected:</strong> you can point to the five routes: <code>/</code>, <code>/health</code>, <code>/readings</code>, <code>/readings/{equipment_id}</code>, <code>/alerts</code>.</p></div></div>
+
+<div class="card lab" data-lab="1"><input type="checkbox" aria-label="Task 2 done"><div><h4 style="margin-top:0">Task 2. Install dependencies</h4><p>Create and activate the virtual environment, then install (Section F, steps 3 to 5):</p><pre class="code" data-kind="terminal" data-label="Terminal">python -m pip install -r requirements.txt</pre><p><strong>Expected:</strong> the output ends with "Successfully installed ...". <code>(.venv)</code> is visible in your prompt.</p></div></div>
+
+<div class="card lab" data-lab="2"><input type="checkbox" aria-label="Task 3 done"><div><h4 style="margin-top:0">Task 3. Start the application</h4><pre class="code" data-kind="terminal" data-label="Terminal 1 (leave running)">python -m uvicorn app:app --reload --host 127.0.0.1 --port 8000</pre><p><strong>Expected:</strong> "Uvicorn running on http://127.0.0.1:8000" and "Application startup complete."</p></div></div>
+
+<div class="card lab" data-lab="3"><input type="checkbox" aria-label="Task 4 done"><div><h4 style="margin-top:0">Task 4. Open <code>/docs</code></h4><p>In a browser go to <code>http://127.0.0.1:8000/docs</code>.</p><p><strong>Expected:</strong> a page titled "Power Operations Health Monitor (Simulated)" listing five GET endpoints.</p></div></div>
+
+<div class="card lab" data-lab="4"><input type="checkbox" aria-label="Task 5 done"><div><h4 style="margin-top:0">Task 5. Call <code>/health</code></h4><pre class="code" data-kind="terminal" data-label="Terminal 2">curl http://127.0.0.1:8000/health</pre><p><strong>Expected:</strong> <code>{"status":"running"}</code></p></div></div>
+
+<div class="card lab" data-lab="5"><input type="checkbox" aria-label="Task 6 done"><div><h4 style="margin-top:0">Task 6. Retrieve all readings</h4><pre class="code" data-kind="terminal" data-label="Terminal 2">curl http://127.0.0.1:8000/readings</pre><p><strong>Expected:</strong> a JSON list with three items: SUB-101, SUB-102, SUB-103.</p></div></div>
+
+<div class="card lab" data-lab="6"><input type="checkbox" aria-label="Task 7 done"><div><h4 style="margin-top:0">Task 7. Retrieve one reading by ID</h4><pre class="code" data-kind="terminal" data-label="Terminal 2">curl http://127.0.0.1:8000/readings/SUB-103</pre><p><strong>Expected:</strong> one object with <code>"voltage_kv":205.2</code> and <code>"status":"investigate"</code>.</p></div></div>
+
+<div class="card lab" data-lab="7"><input type="checkbox" aria-label="Task 8 done"><div><h4 style="margin-top:0">Task 8. Trigger a 404</h4><pre class="code" data-kind="terminal" data-label="Terminal 2">curl -i http://127.0.0.1:8000/readings/SUB-999</pre><p><strong>Expected:</strong> first line <code>HTTP/1.1 404 Not Found</code> and body <code>{"detail":"Equipment SUB-999 not found"}</code>.</p></div></div>
+
+<div class="card lab" data-lab="8"><input type="checkbox" aria-label="Task 9 done"><div><h4 style="margin-top:0">Task 9. Filter alerts with a query parameter</h4><pre class="code" data-kind="terminal" data-label="Terminal 2">curl "http://127.0.0.1:8000/alerts?status=active"</pre><p><strong>Expected:</strong> two alerts (ALT-001 and ALT-002). Now try <code>status=resolved</code> (two different alerts) and <code>status=banana</code> (a 422 error).</p></div></div>
+
+<div class="card lab" data-lab="9"><input type="checkbox" aria-label="Task 10 done"><div><h4 style="margin-top:0">Task 10. Explain request versus response</h4><p>Using Task 7, write down, in your own words: what did the client <em>send</em>, and what did the server <em>send back</em>?</p>
+<details><summary>Show a model answer</summary><div class="in"><p><strong>Request (sent by curl):</strong> method <code>GET</code>, address <code>/readings/SUB-103</code> on host 127.0.0.1 port 8000, headers, no body.</p><p><strong>Response (sent by FastAPI):</strong> status <code>200 OK</code>, header <code>content-type: application/json</code>, and a JSON body with the reading for SUB-103.</p></div></details></div></div>
+
+<div class="callout ok" id="labDone" style="display:none"><p><strong>Lab complete.</strong> Stop the server with Ctrl+C. You have run, called and diagnosed a real API. Next session packages this exact app in Docker.</p></div>
+<p class="hint">Stuck? Go to Section I and use the flowchart.</p>
+</section>
+
+<!-- ============ L ============ -->
+<section class="sec" id="sL" data-key="L" data-title="Knowledge assessment">
+<h2 class="st">L. Knowledge assessment</h2>
+<p class="lead">Twelve questions. Pick an answer to see feedback immediately.</p>
+<div class="callout sim"><p><span class="badge sim">Simulated in this page</span> The quiz is scored locally in your browser. Nothing is stored or sent.</p></div>
+<div id="quiz"></div>
+<div class="card" id="quizEnd" style="display:none;text-align:center"><div class="score" id="quizScore"></div><p id="quizMsg"></p><button class="btn" id="quizRetry">Retry the quiz</button></div>
+</section>
+
+<footer>Fictional training content. The Power Operations Health Monitor and all readings are simulated and are not connected to any real equipment or system.</footer>
+</main>
+</div>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+/* ---------- syntax highlighting (light theme) ---------- */
+function hl(src,re,cls){var out="",last=0,m;re.lastIndex=0;
+ while((m=re.exec(src))){out+=esc(src.slice(last,m.index));var i=0;for(var j=1;j<m.length;j++){if(m[j]!==undefined){i=j-1;break}}
+  out+='<span class="'+cls[i]+'">'+esc(m[0])+'</span>';last=m.index+m[0].length;if(m[0].length===0)re.lastIndex++}
+ return out+esc(src.slice(last))}
+var PY=/(#.*$)|("(?:\\.|[^"\\\n])*")|(@\w+(?:\.\w+)*)|\b(import|from|def|class|return|if|for|in|None|raise|else|elif|True|False|and|or|not|is)\b|\b(\d+(?:\.\d+)?)\b/gm;
+var PYC=["tk-c","tk-s","tk-d","tk-k","tk-n"];
+var JS=/("(?:\\.|[^"\\\n])*")|(-?\b\d+(?:\.\d+)?\b)/g;
+var JSC=["tk-s","tk-n"];
+
+/* ---------- code blocks with copy buttons ---------- */
+var KINDS={terminal:["Real terminal","term"],python:["File content","file"],file:["File content","file"],json:["Example output","sim"],out:["Example output","sim"]};
+function copyText(t,btn){
+ function done(){btn.textContent="Copied";setTimeout(function(){btn.textContent="Copy"},1500)}
+ function fb(){var ta=document.createElement("textarea");ta.value=t;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy");done()}catch(e){btn.textContent="Copy failed"}document.body.removeChild(ta)}
+ if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(done,fb)}else{fb()}}
+function enhance(root){
+ (root||document).querySelectorAll("pre.code:not([data-done])").forEach(function(pre){
+  pre.setAttribute("data-done","1");
+  var kind=pre.getAttribute("data-kind")||"out",raw=pre.textContent.replace(/\n$/,""),k=KINDS[kind]||KINDS.out;
+  var w=document.createElement("div");w.className="cb"+(kind==="out"||kind==="json"?" out":"");
+  var h=document.createElement("div");h.className="cb-h";
+  h.innerHTML='<span class="cb-l">'+esc(pre.getAttribute("data-label")||"")+'</span><span class="badge '+k[1]+'">'+k[0]+'</span>';
+  if(!pre.hasAttribute("data-nocopy")){var b=document.createElement("button");b.type="button";b.textContent="Copy";b.setAttribute("aria-label","Copy to clipboard");b.onclick=function(){copyText(raw,b)};h.appendChild(b)}
+  var p=document.createElement("pre");
+  if(kind==="python"||kind==="file"){p.innerHTML=/requirements/.test(pre.getAttribute("data-label")||"")?esc(raw):hl(raw,PY,PYC)}
+  else if(kind==="json"){p.innerHTML=hl(raw,JS,JSC)}else{p.textContent=raw}
+  w.appendChild(h);w.appendChild(p);pre.parentNode.replaceChild(w,pre)})}
+
+/* ---------- navigation ---------- */
+var secs=[].slice.call(document.querySelectorAll(".sec")),toc=$("toc"),cur=0,seen={};
+try{seen=JSON.parse(store("fastapi-seen")||"{}")}catch(e){seen={}}
+secs.forEach(function(s,i){
+ var b=document.createElement("button");b.type="button";b.innerHTML='<span class="k">'+s.getAttribute("data-key")+'</span><span>'+s.getAttribute("data-title")+"</span>";
+ b.onclick=function(){show(i);toc.classList.remove("open")};toc.appendChild(b);
+ var n=document.createElement("div");n.className="nav";
+ n.innerHTML=(i>0?'<button class="btn alt" type="button" data-go="-1">&larr; Previous</button>':"<span></span>")+(i<secs.length-1?'<button class="btn" type="button" data-go="1">Next &rarr;</button>':"<span></span>");
+ s.appendChild(n)});
+document.addEventListener("click",function(e){var g=e.target.closest("[data-go]");if(g)show(cur+parseInt(g.getAttribute("data-go"),10))});
+function show(i){
+ if(i<0||i>=secs.length)return;cur=i;
+ secs.forEach(function(s,j){s.classList.toggle("on",j===i)});
+ var bs=toc.querySelectorAll("button");bs.forEach(function(b,j){b.classList.toggle("on",j===i);if(seen[j]||j===i)b.classList.add("seen")});
+ seen[i]=1;store("fastapi-seen",JSON.stringify(seen));
+ var pct=Math.round((i+1)/secs.length*100);document.querySelector("#bar i").style.width=pct+"%";$("bar").setAttribute("aria-valuenow",pct);
+ $("pos").textContent="Section "+(i+1)+" of "+secs.length;
+ try{history.replaceState(null,"","#"+secs[i].id)}catch(e){}
+ window.scrollTo(0,0)}
+$("menuBtn").onclick=function(){toc.classList.toggle("open")};
+document.addEventListener("keydown",function(e){
+ if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.altKey||e.ctrlKey||e.metaKey)return;
+ if(e.key==="ArrowRight")show(cur+1);else if(e.key==="ArrowLeft")show(cur-1)});
+
+/* ---------- tabs ---------- */
+document.querySelectorAll(".tabs").forEach(function(t){
+ var g=t.getAttribute("data-group");
+ t.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
+  t.querySelectorAll("button").forEach(function(x){x.classList.toggle("on",x===b)});
+  document.querySelectorAll('.tabpane[data-group="'+g+'"]').forEach(function(p){p.classList.toggle("on",p.getAttribute("data-t")===b.getAttribute("data-t"))})})});
+
+/* ---------- clickable diagrams ---------- */
+function wire(svgId,boxId,info,attr){
+ var svg=$(svgId),box=$(boxId);attr=attr||"data-k";if(!svg)return;
+ box.innerHTML='<p><em>Click a part of the diagram above to see what it does.</em></p>';
+ svg.querySelectorAll("["+attr+"]").forEach(function(el){
+  el.setAttribute("tabindex","0");el.setAttribute("role","button");
+  function act(){svg.querySelectorAll(".active").forEach(function(a){a.classList.remove("active")});
+   svg.querySelectorAll("["+attr+'="'+el.getAttribute(attr)+'"]').forEach(function(a){a.classList.add("active")});
+   var d=info[el.getAttribute(attr)];box.innerHTML="<strong>"+d[0]+"</strong><p>"+d[1]+"</p>"}
+  el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act()}})})}
+
+wire("dgA","infoA",{
+ client:["Client","The program that asks. It could be a browser, a script or the curl command. It only needs to know the address and the rules of the API."],
+ api:["FastAPI application","Receives the request, finds the function for that address, checks the inputs, runs your code and builds the response."],
+ data:["Data source (optional)","Where the facts live: a database, a file or, in our training app, a simple Python list of simulated readings. Some APIs need no data source."],
+ s1:["Step 1: the client sends an HTTP request","For example GET /readings/SUB-103. The request names a method and an address."],
+ s2:["Step 2: FastAPI receives the request","Uvicorn passes it to FastAPI, which matches the address to the right function."],
+ s3:["Step 3: the function asks the data source","Our function loops over the list of readings. A larger system might query a database."],
+ s4:["Step 4: the data comes back","The matching reading (or nothing, if the ID does not exist) returns to the function."],
+ s5:["Step 5: FastAPI builds the response","It picks the status code (200, or 404 if nothing was found) and converts the data to JSON."],
+ s6:["Step 6: the client receives the response","The browser shows it, curl prints it, or another program uses it. The conversation is complete."]});
+wire("dgB","infoB",{
+ client:["Client","Browser, curl or another application. It speaks HTTP."],
+ http:["HTTP","The shared language. The client sends HTTP requests and receives HTTP responses."],
+ uvicorn:["Uvicorn (ASGI server)","Opens the network port, accepts connections and passes requests to FastAPI. It is the part that stays running and waiting. You start it with python -m uvicorn."],
+ fastapi:["FastAPI (web framework)","Matches addresses to your functions, validates inputs with Pydantic, turns Python data into JSON and builds the /docs page."],
+ code:["Your code: app.py","The part you write: models, data and functions such as get_reading(). Everything else is provided."]});
+wire("dgB2","infoB2",{
+ start:["1. Start","You run python -m uvicorn app:app. Uvicorn imports app.py, creates the app object and the routes are registered. 'Application startup complete.' appears."],
+ wait:["2. Wait","The server sits idle, listening on the port. This is why your terminal looks stuck. It is working as designed."],
+ route:["3. Route","A request arrives, for example GET /alerts?status=active. FastAPI finds the function registered for that path and method. If none matches, it returns 404."],
+ validate:["4. Validate","FastAPI checks the inputs against your type annotations. status=banana fails here, and FastAPI answers 422 without running your function."],
+ run:["5. Run your function","Your Python code runs: it looks up data and returns a list, dictionary or model."],
+ respond:["6. Respond","FastAPI converts the result to JSON, adds the status code and headers, and Uvicorn sends it back. Then the app returns to waiting."],
+ stop:["Stop","Pressing Ctrl+C asks Uvicorn to shut down cleanly: it finishes the work and frees port 8000."]});
+wire("dgC","infoC",{
+ method:["Method","What the client wants to do: GET reads, POST creates, PUT replaces, PATCH changes part, DELETE removes. Ours are all GET."],
+ url:["URL and path","The address of what you want. The path /readings/SUB-103 selects the route; a query string such as ?status=active would filter."],
+ reqh:["Request headers","Labelled details such as the host and which formats the client accepts. Curl and browsers add these for you."],
+ reqb:["Request body (optional)","Data sent to the server. GET requests normally have none. POST, PUT and PATCH carry JSON here."],
+ status:["Status code","A number summarising the outcome: 200 success, 404 not found, 422 invalid input, 500 server error. Check this first."],
+ resh:["Response headers","Details about the answer. content-type: application/json tells the client the body is JSON."],
+ resb:["Response body","The data itself, here JSON. For errors, FastAPI uses a JSON body with a detail field."]});
+wire("dgD","infoD",{
+ root:["GET /","Returns the application name and the environment, read from the APP_ENV setting (default training).<pre style='margin:6px 0 0'>curl http://127.0.0.1:8000/</pre>"],
+ health:["GET /health","A simple check that the app is alive. Later, Kubernetes will call an endpoint like this to decide if the container is healthy.<pre style='margin:6px 0 0'>curl http://127.0.0.1:8000/health</pre>"],
+ readings:["GET /readings","Returns the full list of three simulated readings.<pre style='margin:6px 0 0'>curl http://127.0.0.1:8000/readings</pre>"],
+ one:["GET /readings/{equipment_id}","A path parameter selects one reading. A missing ID returns 404.<pre style='margin:6px 0 0'>curl http://127.0.0.1:8000/readings/SUB-103</pre>"],
+ alerts:["GET /alerts?status=active","A query parameter filters the alerts. Allowed values: active, resolved. Anything else returns 422.<pre style='margin:6px 0 0'>curl \"http://127.0.0.1:8000/alerts?status=active\"</pre>"]});
+wire("dgF","infoF",{
+ py:["1. Install Python","You need Python 3.9 or newer. Check with python --version (python3 --version on macOS and Linux)."],
+ dir:["2. Create the project folder","A folder named fastapi-power-monitor holding app.py and requirements.txt."],
+ venv:["3. Create a virtual environment","python -m venv .venv makes a private box of packages for this project, so it cannot clash with other Python work on your computer."],
+ act:["4. Activate it","After activation your prompt starts with (.venv). If it does not, you are not inside the environment, which is the cause of most 'No module named' errors."],
+ pip:["5. Install the packages","python -m pip install -r requirements.txt reads the file and installs FastAPI, Uvicorn and Pydantic at the listed versions."],
+ run:["6. Start Uvicorn","python -m uvicorn app:app --reload --host 127.0.0.1 --port 8000. Wait for 'Application startup complete.' and leave the window open."],
+ stop:["7. Stop with Ctrl+C","Press Ctrl+C in the server window to shut down cleanly and free the port."]});
+wire("dgJ","infoJ",{
+ py:["Python source code","The file app.py you wrote. It cannot serve anything by itself."],
+ fa:["FastAPI application","The app object that knows your routes, validation and docs."],
+ uv:["Uvicorn server","Runs the app and listens on a port such as 8000. Inside a container it must listen on 0.0.0.0."],
+ img:["Docker image","A sealed package containing your code, Python and all the libraries from requirements.txt. Built once, runs anywhere Docker runs. (Next session.)"],
+ ctr:["Docker container","A running instance of an image. The API runs inside it, and its port 8000 is mapped to a port on the host. (Next session.)"],
+ dep:["Kubernetes Deployment","Declares 'keep N copies of this container running'. Replaces failed ones and handles updates. (Later session.)"],
+ svc:["Kubernetes Service","A stable address in front of the changing set of containers, so clients always reach the API. (Later session.)"]});
+
+/* ---------- API explorer (simulation) ---------- */
+var READ=[{equipment_id:"SUB-101",name:"North Substation",voltage_kv:220.1,status:"normal"},{equipment_id:"SUB-102",name:"East Substation",voltage_kv:218.7,status:"normal"},{equipment_id:"SUB-103",name:"West Substation",voltage_kv:205.2,status:"investigate"}];
+var ALR=[{alert_id:"ALT-001",equipment_id:"SUB-103",message:"Voltage below normal range",status:"active"},{alert_id:"ALT-002",equipment_id:"SUB-103",message:"Voltage trend under review",status:"active"},{alert_id:"ALT-003",equipment_id:"SUB-101",message:"Routine inspection completed",status:"resolved"},{alert_id:"ALT-004",equipment_id:"SUB-102",message:"Cooling fan warning cleared",status:"resolved"}];
+var ep=$("exEp"),idb=$("exIdBox"),stb=$("exStBox");
+function syncEx(){idb.style.display=ep.value==="one"?"block":"none";stb.style.display=ep.value==="alerts"?"block":"none"}
+ep.onchange=syncEx;syncEx();
+function sim(){
+ var e=ep.value,id=$("exId").value,st=$("exSt").value,r={path:"",code:200,text:"OK",body:null,why:""};
+ if(e==="root"){r.path="/";r.body={application:"Power Operations Health Monitor (Simulated)",environment:"training"};r.why="The home route returns a dictionary, which FastAPI turns into JSON."}
+ else if(e==="health"){r.path="/health";r.body={status:"running"};r.why="A simple liveness check."}
+ else if(e==="readings"){r.path="/readings";r.body=READ;r.why="A JSON list [ ] with three readings."}
+ else if(e==="one"){
+  r.path="/readings/"+encodeURIComponent(id);
+  if(id===""){r.path="/readings/";r.code=307;r.text="Temporary Redirect";r.body=null;r.why="With an empty ID the address becomes /readings/ . FastAPI redirects to /readings. Browsers follow the redirect automatically; curl does not unless asked."}
+  else{var f=READ.filter(function(x){return x.equipment_id===id})[0];
+   if(f){r.body=f;r.why="The path parameter matched a reading, so the function returned it."}
+   else{r.code=404;r.text="Not Found";r.body={detail:"Equipment "+id+" not found"};r.why="No reading has exactly this ID. IDs are case-sensitive, so sub-103 is not SUB-103. The function raised HTTPException(404)."}}}
+ else{
+  r.path="/alerts"+(st?"?status="+st:"");
+  if(st==="banana"){r.code=422;r.text="Unprocessable Content";r.body={detail:[{type:"literal_error",loc:["query","status"],msg:"Input should be 'active' or 'resolved'",input:"banana",ctx:{expected:"'active' or 'resolved'"}}]};r.why="FastAPI validated the query parameter and rejected the value before running the function. Read loc and msg."}
+  else{r.body=st?ALR.filter(function(a){return a.status===st}):ALR;r.why=st?"The query parameter filtered the list to "+r.body.length+" alert(s).":"No filter, so all 4 alerts are returned."}}
+ return r}
+$("exGo").onclick=function(){
+ var r=sim(),cls=r.code<300?"s2":(r.code<400?"s0":"s4"),body=r.body===null?"(empty body)":JSON.stringify(r.body,null,2);
+ $("exOut").innerHTML='<h4 style="margin-top:0">Result <span class="badge sim">simulated</span></h4>'+
+  '<table><tr><th style="width:34%">Method</th><td><code>GET</code></td></tr><tr><th>URL (simulated)</th><td><code>http://127.0.0.1:8000'+esc(r.path)+'</code></td></tr>'+
+  '<tr><th>Status code</th><td><span class="stat '+cls+'">'+r.code+"</span> "+r.text+'</td></tr><tr><th>content-type</th><td><code>'+(r.body===null?"(none)":"application/json")+'</code></td></tr></table>'+
+  '<p><strong>Response body</strong></p><div class="cb out"><pre style="margin:0;padding:12px 14px;overflow-x:auto;font:15px/1.5 var(--mono);white-space:pre">'+hl(body,JS,JSC)+'</pre></div>'+
+  '<div class="callout" style="margin-top:12px"><p><strong>Why:</strong> '+esc(r.why)+'</p></div>'};
+
+/* ---------- troubleshooting ---------- */
+var ERR=[
+ {n:"No module named 'fastapi'",
+  see:'<pre class="code" data-kind="out" data-label="What you see" data-nocopy="1">ModuleNotFoundError: No module named \'fastapi\'</pre>',
+  cause:"Python cannot find the FastAPI package. Usually the virtual environment is not active, or the packages were never installed into it.",
+  diag:'<ul><li>Does your prompt start with <code>(.venv)</code>? If not, the environment is not active.</li></ul><pre class="code" data-kind="terminal" data-label="Terminal">python -m pip list</pre><p>FastAPI, uvicorn and pydantic should appear in the list.</p>',
+  fix:'<pre class="code" data-kind="terminal" data-label="macOS / Linux">source .venv/bin/activate\npython -m pip install -r requirements.txt</pre><pre class="code" data-kind="terminal" data-label="Windows PowerShell">.venv\\Scripts\\Activate.ps1\npython -m pip install -r requirements.txt</pre>'},
+ {n:"Uvicorn command not found",
+  see:'<pre class="code" data-kind="out" data-label="What you see" data-nocopy="1">uvicorn: command not found            (macOS / Linux)\n\'uvicorn\' is not recognized as an internal or external command   (Windows)</pre>',
+  cause:"Uvicorn is not installed, or the virtual environment that contains it is not active, so the shell cannot find the uvicorn program.",
+  diag:'<p>Check that <code>(.venv)</code> is in your prompt, and that packages are installed:</p><pre class="code" data-kind="terminal" data-label="Terminal">python -m pip show uvicorn</pre>',
+  fix:'<p>Activate the environment, install the requirements, and always start the server with <code>python -m uvicorn</code>, as this module does. That form works even when the plain command is not on the PATH.</p><pre class="code" data-kind="terminal" data-label="Terminal">python -m pip install -r requirements.txt\npython -m uvicorn app:app --reload --host 127.0.0.1 --port 8000</pre>'},
+ {n:"Port 8000 already in use",
+  see:'<pre class="code" data-kind="out" data-label="What you see (wording varies by system)" data-nocopy="1">ERROR:    [Errno 98] Address already in use       (Linux)\nERROR:    [Errno 48] Address already in use       (macOS)\nERROR:    [winerror 10048] ... only one usage of each socket address ... is normally permitted   (Windows)</pre>',
+  cause:"Another program, often an earlier copy of your own server that you did not stop, is already listening on port 8000.",
+  diag:'<pre class="code" data-kind="terminal" data-label="macOS / Linux">lsof -i :8000</pre><pre class="code" data-kind="terminal" data-label="Windows PowerShell">netstat -ano | findstr :8000</pre><p>Note the program name or the PID (process number) shown.</p>',
+  fix:'<ol><li>Best: find the other terminal running Uvicorn and press <strong>Ctrl+C</strong>.</li><li>Or stop the process by its PID (replace the number):<pre class="code" data-kind="terminal" data-label="macOS / Linux">kill 12345</pre><pre class="code" data-kind="terminal" data-label="Windows PowerShell">taskkill /PID 12345 /F</pre></li><li>Or use another port and use it in every URL:<pre class="code" data-kind="terminal" data-label="Terminal">python -m uvicorn app:app --reload --host 127.0.0.1 --port 8001</pre></li></ol><p>Only stop a process you recognise.</p>'},
+ {n:"Incorrect module or app name",
+  see:'<pre class="code" data-kind="out" data-label="What you see" data-nocopy="1">ERROR:    Error loading ASGI app. Could not import module "main".\nERROR:    Error loading ASGI app. Attribute "app" not found in module "app".</pre>',
+  cause:"The text after <code>uvicorn</code> must be <code>file_name:variable_name</code>. Either the file is not in your current folder, or the name you typed does not match the file or the variable.",
+  diag:'<pre class="code" data-kind="terminal" data-label="macOS / Linux">pwd\nls</pre><pre class="code" data-kind="terminal" data-label="Windows PowerShell">pwd\ndir</pre><p>You should be inside <code>fastapi-power-monitor</code> and see <code>app.py</code>. Open the file and confirm it contains <code>app = FastAPI(</code>.</p>',
+  fix:'<p>Change into the project folder and use the matching name:</p><pre class="code" data-kind="terminal" data-label="Terminal">cd fastapi-power-monitor\npython -m uvicorn app:app --reload --host 127.0.0.1 --port 8000</pre>'},
+ {n:"HTTP 404 Not Found",
+  see:'<pre class="code" data-kind="out" data-label="Two different 404 messages" data-nocopy="1">{"detail":"Not Found"}\n{"detail":"Equipment SUB-999 not found"}</pre>',
+  cause:"<strong>Not Found</strong> alone means the <em>route</em> does not exist (a typo such as <code>/reading</code>). <strong>Equipment ... not found</strong> means the route is right but that <em>ID</em> does not exist, or its capital letters differ.",
+  diag:'<p>Compare your URL with the list at <code>/docs</code>. Check spelling, a missing <code>s</code> in <code>readings</code>, and capitals: <code>SUB-103</code> not <code>sub-103</code>. Use <code>curl -i</code> to see the status line.</p>',
+  fix:'<pre class="code" data-kind="terminal" data-label="Terminal">curl http://127.0.0.1:8000/readings/SUB-103</pre><p>Use an ID listed in <code>/readings</code>.</p>'},
+ {n:"HTTP 422 Unprocessable Content",
+  see:'<pre class="code" data-kind="out" data-label="What you see" data-nocopy="1">{"detail":[{"type":"literal_error","loc":["query","status"],"msg":"Input should be \'active\' or \'resolved\'","input":"banana", ...}]}</pre>',
+  cause:"The request reached the right route, but a value broke the rules declared in the code. Here, <code>status</code> must be <code>active</code> or <code>resolved</code>.",
+  diag:'<p>Read <code>loc</code> (which input: <code>["query","status"]</code>) and <code>msg</code> (what is allowed). Compare with the endpoint at <code>/docs</code>.</p>',
+  fix:'<pre class="code" data-kind="terminal" data-label="Terminal">curl "http://127.0.0.1:8000/alerts?status=active"</pre>'},
+ {n:"Connection refused",
+  see:'<pre class="code" data-kind="out" data-label="What you see" data-nocopy="1">curl: (7) Failed to connect to 127.0.0.1 port 8000: Connection refused\nBrowser: "This site can\'t be reached" / "refused to connect"</pre>',
+  cause:"Nothing is listening at that address. The server was never started, has stopped or crashed, or you used a different port or closed its terminal.",
+  diag:'<ul><li>Look at the server terminal. Does it say "Application startup complete."? Is it still open?</li><li>Does the port in your URL match the <code>--port</code> you started with?</li><li>Remember: this page cannot start the server for you.</li></ul>',
+  fix:'<p>Start (or restart) the server, keep that window open, and run <code>curl</code> from a second terminal:</p><pre class="code" data-kind="terminal" data-label="Terminal 1">python -m uvicorn app:app --reload --host 127.0.0.1 --port 8000</pre>'},
+ {n:"Python syntax error at startup",
+  see:'<pre class="code" data-kind="out" data-label="What you see" data-nocopy="1">  File "app.py", line 45\n    def health()\n                ^\nSyntaxError: expected \':\'</pre>',
+  cause:"A typo in <code>app.py</code>: a missing colon, quote or bracket, or wrong indentation (<code>IndentationError</code>). Python refuses to load the file, so the server cannot start.",
+  diag:'<p>Read the file name and <strong>line number</strong> in the message, and look at that line and the one above it. You can also check the file directly:</p><pre class="code" data-kind="terminal" data-label="Terminal">python -m py_compile app.py</pre><p>No output means the syntax is fine.</p>',
+  fix:'<p>Fix the typo exactly as shown in Section D and save. If the server was already running with <code>--reload</code> it restarts by itself. If it never started, run the start command again.</p>'}];
+var chips=$("errChips"),card=$("errCard");
+ERR.forEach(function(e,i){var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=e.n;b.onclick=function(){selErr(i,false)};chips.appendChild(b)});
+function selErr(i,scroll){
+ chips.querySelectorAll(".chip").forEach(function(c,j){c.classList.toggle("on",i===j)});
+ var e=ERR[i];
+ card.innerHTML='<h3 style="margin-top:0">'+esc(e.n)+'</h3><h4>1. What you see</h4>'+e.see+'<h4>2. Likely cause</h4><p>'+e.cause+'</p><h4>3. How to diagnose</h4>'+e.diag+'<h4>4. Corrective action</h4>'+e.fix;
+ enhance(card);
+ if(scroll)card.scrollIntoView({behavior:"smooth",block:"start"})}
+(function(){var svg=$("dgI");svg.querySelectorAll("[data-err]").forEach(function(el){el.setAttribute("tabindex","0");el.setAttribute("role","button");
+ function go(){svg.querySelectorAll(".active").forEach(function(a){a.classList.remove("active")});el.classList.add("active");selErr(parseInt(el.getAttribute("data-err"),10),true)}
+ el.addEventListener("click",go);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}})})})();
+selErr(0,false);
+
+/* ---------- lab checklist ---------- */
+var labs=[].slice.call(document.querySelectorAll("[data-lab]")),ls={};
+try{ls=JSON.parse(store("fastapi-lab")||"{}")}catch(e){ls={}}
+function labUpdate(){var n=0;labs.forEach(function(l,i){var c=l.querySelector("input").checked;l.classList.toggle("done",c);if(c)n++;ls[i]=c?1:0});
+ $("labCount").textContent=n+" of "+labs.length+" tasks complete";$("labDone").style.display=n===labs.length?"block":"none";store("fastapi-lab",JSON.stringify(ls))}
+labs.forEach(function(l,i){var c=l.querySelector("input");c.checked=!!ls[i];c.onchange=labUpdate});
+$("labReset").onclick=function(){labs.forEach(function(l){l.querySelector("input").checked=false});labUpdate()};labUpdate();
+
+/* ---------- quiz ---------- */
+var Q=[
+ {q:"Which statement best describes an API?",o:["A website that people browse with a mouse","A set of rules that lets one program request data or actions from another","A database that stores equipment readings","A special kind of Python file"],a:1,e:"An API is a defined doorway between programs. It is not a UI (for humans) or a database (for storage); it sits in front of data and logic."},
+ {q:"In this module, what is Uvicorn's job?",o:["It checks data types using Pydantic","It writes the /docs page","It runs as the server that listens on the port and passes requests to FastAPI","It stores the simulated readings"],a:2,e:"Uvicorn is the ASGI server. FastAPI is the framework with routing, validation and docs. Uvicorn opens the port and hands requests to FastAPI."},
+ {q:"Which HTTP method is normally used to read data without changing it?",o:["GET","POST","PUT","DELETE"],a:0,e:"GET reads. POST creates, PUT replaces and DELETE removes. All endpoints in our app use GET."},
+ {q:"What does @app.get(\"/health\") above a function do?",o:["Creates a database table named health","Starts the Uvicorn server","Tells FastAPI to run that function when a GET request arrives for /health","Checks the computer's health"],a:2,e:"The decorator registers the route: method GET plus path /health, linked to the function below it."},
+ {q:"Which URL uses a query parameter?",o:["http://127.0.0.1:8000/health","http://127.0.0.1:8000/readings/SUB-101","http://127.0.0.1:8000/docs","http://127.0.0.1:8000/alerts?status=active"],a:3,e:"A query parameter comes after a question mark. SUB-101 in /readings/SUB-101 is a path parameter."},
+ {q:"A JSON response begins with [ and ends with ]. What does that usually mean?",o:["A single object","A list of items","An HTML web page","An error in the Python code"],a:1,e:"Square brackets hold a list, curly braces hold an object. /readings returns a list of three objects."},
+ {q:"You request /readings/SUB-999 but no such ID exists. Which status code does our app return?",o:["422","500","404","200"],a:2,e:"The function raises HTTPException(404). A 422 would mean an invalid value, and 500 would mean a server crash."},
+ {q:"In python -m uvicorn app:app, what does the second \"app\" refer to?",o:["The variable named app created with FastAPI(...) inside app.py","The folder name","The Python version","The port number"],a:0,e:"The format is file_name:variable_name. The first app is app.py, the second is the object app = FastAPI(...)."},
+ {q:"Which address opens FastAPI's interactive documentation on your local server?",o:["http://127.0.0.1:8000/help","http://127.0.0.1:8000/manual","http://127.0.0.1:8000/readings/docs","http://127.0.0.1:8000/docs"],a:3,e:"FastAPI generates /docs automatically. It works only while your local server is running."},
+ {q:"Starting the server shows: ModuleNotFoundError: No module named 'fastapi'. What is the most likely cause?",o:["The virtual environment is not active, or the packages were not installed in it","Port 8000 is busy","The JSON is invalid","The data list is empty"],a:0,e:"Activate the virtual environment and run python -m pip install -r requirements.txt. A busy port gives a different error."},
+ {q:"Why should the app listen on 0.0.0.0 inside a container?",o:["So it runs faster","So it accepts connections that arrive from outside the container, not only from inside it","So it uses port 80","So it needs no dependencies"],a:1,e:"Inside a container 127.0.0.1 means the container only. 0.0.0.0 listens on all interfaces so the published port can reach the app."},
+ {q:"What is the --reload option for?",o:["Making production faster","Reloading the browser page","Restarting the app automatically when code changes, for development only","Resetting the port to 8000"],a:2,e:"--reload watches your files and restarts on every save. It is convenient for development but not intended for production."}];
+var qa=0,qs=0;
+function renderQuiz(){
+ var box=$("quiz");box.innerHTML="";qa=0;qs=0;$("quizEnd").style.display="none";
+ Q.forEach(function(q,qi){
+  var d=document.createElement("div");d.className="q";
+  d.innerHTML='<p><strong>Question '+(qi+1)+" of "+Q.length+"</strong></p><p>"+esc(q.q)+"</p>";
+  var opts=[];q.o.forEach(function(t,oi){var b=document.createElement("button");b.type="button";b.className="opt";b.textContent=String.fromCharCode(65+oi)+".  "+t;
+   b.onclick=function(){if(d.classList.contains("answered"))return;d.classList.add("answered");qa++;
+    opts.forEach(function(x,xi){x.disabled=true;if(xi===q.a)x.classList.add("right")});
+    var ok=oi===q.a;if(ok)qs++;else b.classList.add("wrong");
+    w.innerHTML=(ok?"<strong>Correct.</strong> ":"<strong>Not quite.</strong> The right answer is "+String.fromCharCode(65+q.a)+". ")+esc(q.e);
+    w.className="why callout "+(ok?"ok":"warn");
+    if(qa===Q.length)finish()};
+   opts.push(b);d.appendChild(b)});
+  var w=document.createElement("div");w.className="why";w.setAttribute("aria-live","polite");d.appendChild(w);box.appendChild(d)})}
+function finish(){
+ var e=$("quizEnd");e.style.display="block";$("quizScore").textContent=qs+" / "+Q.length;
+ $("quizMsg").textContent=qs>=10?"Excellent. You are ready for Docker.":(qs>=8?"Good. Review the sections behind any missed questions, then retry.":"Review Sections A to I, run the lab again, and retry the quiz.");
+ e.scrollIntoView({behavior:"smooth",block:"center"})}
+$("quizRetry").onclick=function(){renderQuiz();window.scrollTo(0,0)};
+renderQuiz();
+
+/* ---------- start ---------- */
+enhance(document);
+var start=0,h=location.hash.replace("#","");secs.forEach(function(s,i){if(s.id===h)start=i});
+show(start);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,2794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DevOps Explained: From Code to Production</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --ink: #0b1220;
+      --ink2: #1e293b;
+      --line: #b6c3d4;
+      --brand: #0b3d91;
+      --brand-d: #082a66;
+      --teal: #0b6b7a;
+      --ok: #0f6a37;
+      --okbg: #e3f6ea;
+      --warn: #8a4b00;
+      --warnbg: #fff1d6;
+      --bad: #9b1c1c;
+      --badbg: #fde6e6;
+      --info: #0b3d91;
+      --infobg: #e4edfb
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      font-size: 18px
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      line-height: 1.6
+    }
+
+    [hidden] {
+      display: none !important
+    }
+
+    a.skip {
+      position: absolute;
+      left: -999px;
+      top: 0;
+      background: #fff;
+      padding: .5rem;
+      z-index: 100
+    }
+
+    a.skip:focus {
+      left: 8px;
+      top: 8px
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    :focus-visible {
+      outline: 3px solid #b45309;
+      outline-offset: 2px
+    }
+
+    header.top {
+      background: #fff;
+      border-bottom: 4px solid var(--brand)
+    }
+
+    header.top .in {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: .8rem 1.25rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap
+    }
+
+    .brandrow {
+      display: flex;
+      gap: .8rem;
+      align-items: center
+    }
+
+    .t1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--brand-d);
+      line-height: 1.2
+    }
+
+    .t2 {
+      font-size: .85rem;
+      color: var(--ink2)
+    }
+
+    .tools {
+      display: flex;
+      gap: .4rem;
+      align-items: center;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .tools button {
+      border: 2px solid var(--brand);
+      background: #fff;
+      color: var(--brand-d);
+      border-radius: 8px;
+      padding: .15rem .6rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: .9rem
+    }
+
+    #stepnav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: .4rem;
+      overflow-x: auto;
+      padding: .5rem 1.25rem
+    }
+
+    .pill {
+      white-space: nowrap;
+      border: 2px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: .2rem .75rem;
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    .pill b {
+      display: inline-block;
+      min-width: 1.3rem;
+      text-align: center;
+      background: #e4edfb;
+      color: var(--brand-d);
+      border-radius: 999px;
+      margin-right: .3rem;
+      padding: 0 .3rem
+    }
+
+    .pill.on {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff
+    }
+
+    .pill.on b {
+      background: #fff;
+      color: var(--brand-d)
+    }
+
+    .pill.seen {
+      border-color: var(--ok)
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 1.25rem 1.25rem 6rem
+    }
+
+    .slide {
+      display: none
+    }
+
+    .slide.active {
+      display: block;
+      animation: fade .3s
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      line-height: 1.2;
+      color: var(--brand-d);
+      margin: .2rem 0 .6rem
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      color: var(--brand-d);
+      display: flex;
+      gap: .7rem;
+      align-items: center;
+      margin: .2rem 0 1rem;
+      line-height: 1.25
+    }
+
+    h2 .num {
+      background: var(--brand);
+      color: #fff;
+      border-radius: 10px;
+      min-width: 2.4rem;
+      height: 2.4rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      padding: 0 .5rem;
+      flex: none
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      margin: .2rem 0 .5rem;
+      color: var(--brand-d)
+    }
+
+    h4 {
+      margin: 0 0 .3rem;
+      font-size: 1rem
+    }
+
+    p {
+      margin: .4rem 0 .8rem
+    }
+
+    ul,
+    ol {
+      margin: .3rem 0 .8rem;
+      padding-left: 1.4rem
+    }
+
+    li {
+      margin: .25rem 0
+    }
+
+    .kicker {
+      font-weight: 800;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-size: .8rem;
+      margin: 0
+    }
+
+    .lead {
+      font-size: 1.15rem
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.1rem 1.3rem;
+      margin: 0 0 1.1rem;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .08)
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.1rem
+    }
+
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.1rem
+    }
+
+    .callout {
+      border-left: 6px solid;
+      border-radius: 8px;
+      padding: .7rem 1rem;
+      margin: 0 0 1.1rem
+    }
+
+    .callout.info {
+      background: var(--infobg);
+      border-color: var(--info)
+    }
+
+    .callout.warn {
+      background: var(--warnbg);
+      border-color: var(--warn)
+    }
+
+    .callout.ok {
+      background: var(--okbg);
+      border-color: var(--ok)
+    }
+
+    .callout.bad {
+      background: var(--badbg);
+      border-color: var(--bad)
+    }
+
+    code {
+      background: #e8eef6;
+      padding: .05rem .35rem;
+      border-radius: 4px;
+      font-family: Consolas, Menlo, monospace;
+      font-size: .9em;
+      color: #0b1220
+    }
+
+    pre {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: .8rem;
+      overflow: auto;
+      font-size: .85rem;
+      line-height: 1.45;
+      margin: 0;
+      color: #0b1220;
+      font-family: Consolas, Menlo, monospace
+    }
+
+    .term {
+      border-bottom: 2px dotted var(--brand);
+      cursor: help;
+      font-weight: 600;
+      color: var(--brand-d)
+    }
+
+    #tip {
+      position: absolute;
+      display: none;
+      max-width: 320px;
+      background: #0b1220;
+      color: #fff;
+      padding: .6rem .8rem;
+      border-radius: 8px;
+      font-size: .85rem;
+      line-height: 1.4;
+      z-index: 50;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .3)
+    }
+
+    .four {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: .8rem;
+      margin: 0 0 1.1rem
+    }
+
+    .four .f {
+      border-radius: 12px;
+      padding: .8rem 1rem;
+      border: 1px solid var(--line);
+      border-top-width: 6px
+    }
+
+    .four .f p {
+      margin: 0
+    }
+
+    .four .why {
+      background: #e4edfb;
+      border-top-color: var(--brand)
+    }
+
+    .four .how {
+      background: #dcf1f4;
+      border-top-color: var(--teal)
+    }
+
+    .four .ex {
+      background: #e3f6ea;
+      border-top-color: var(--ok)
+    }
+
+    .four .mis {
+      background: #fde6e6;
+      border-top-color: var(--bad)
+    }
+
+    .four h4 {
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .05em
+    }
+
+    .btn {
+      background: var(--brand);
+      color: #fff;
+      border: 2px solid var(--brand);
+      padding: .45rem 1rem;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin: .2rem .3rem .2rem 0
+    }
+
+    .btn.alt {
+      background: #fff;
+      color: var(--brand-d)
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .btn.sm {
+      padding: .2rem .7rem;
+      font-size: .85rem
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem;
+      align-items: center;
+      margin: .4rem 0
+    }
+
+    .msg {
+      background: #fff;
+      border: 2px dashed var(--brand);
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      min-height: 3.4rem;
+      margin: .6rem 0
+    }
+
+    .info-panel {
+      background: #fff;
+      border: 2px solid var(--brand);
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      margin: .6rem 0;
+      min-height: 4rem
+    }
+
+    .svgwrap {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .5rem;
+      margin: .5rem 0 .8rem
+    }
+
+    svg {
+      max-width: 100%;
+      height: auto;
+      display: block
+    }
+
+    svg text {
+      fill: var(--ink);
+      font-family: "Segoe UI", system-ui, Arial, sans-serif;
+      font-size: 16px
+    }
+
+    svg .sm {
+      font-size: 14px
+    }
+
+    svg .lg {
+      font-size: 20px;
+      font-weight: 800;
+      fill: #082a66
+    }
+
+    svg .b {
+      font-weight: 700
+    }
+
+    svg .nt {
+      font-size: 15px;
+      font-weight: 700
+    }
+
+    svg text.numt {
+      fill: #fff
+    }
+
+    svg .bx {
+      stroke-width: 2.5
+    }
+
+    svg [data-k],
+    svg .node {
+      cursor: pointer
+    }
+
+    svg [data-k]:hover .bx,
+    svg [data-k]:focus .bx,
+    svg .node:hover .bx {
+      stroke-width: 4.5
+    }
+
+    svg [data-k].picked .bx,
+    svg .node.sel .bx {
+      stroke-width: 6
+    }
+
+    svg .c-blue {
+      fill: #e4edfb;
+      stroke: #0b3d91
+    }
+
+    svg .c-teal {
+      fill: #dcf1f4;
+      stroke: #0b6b7a
+    }
+
+    svg .c-green {
+      fill: #e3f6ea;
+      stroke: #0f6a37
+    }
+
+    svg .c-amber {
+      fill: #fff1d6;
+      stroke: #8a4b00
+    }
+
+    svg .c-red {
+      fill: #fde6e6;
+      stroke: #9b1c1c
+    }
+
+    svg .c-grey {
+      fill: #eef2f7;
+      stroke: #475569
+    }
+
+    svg .c-white {
+      fill: #fff;
+      stroke: #334155
+    }
+
+    svg .ghost {
+      fill: #f8fafc;
+      stroke: #475569;
+      stroke-dasharray: 8 6;
+      stroke-width: 2
+    }
+
+    svg .numc {
+      fill: #0b3d91;
+      stroke: #fff;
+      stroke-width: 2
+    }
+
+    svg .ln {
+      stroke: #0b3d91;
+      stroke-width: 2.5;
+      fill: none;
+      marker-end: url(#ah)
+    }
+
+    svg .ln.red {
+      stroke: #9b1c1c;
+      marker-end: url(#ahr)
+    }
+
+    svg .ln.g {
+      stroke: #334155;
+      marker-end: url(#ahg)
+    }
+
+    svg .ln.dash {
+      stroke-dasharray: 7 5
+    }
+
+    svg .plain {
+      stroke: #334155;
+      stroke-width: 2.5;
+      fill: none
+    }
+
+    svg .wall {
+      stroke: #9b1c1c;
+      stroke-width: 3;
+      stroke-dasharray: 6 5
+    }
+
+    svg .badge circle {
+      fill: #8a4b00;
+      stroke: #fff;
+      stroke-width: 2
+    }
+
+    svg .badge text {
+      fill: #fff;
+      font-weight: 800;
+      font-size: 13px
+    }
+
+    .flash {
+      animation: flash .7s 4
+    }
+
+    @keyframes flash {
+
+      0%,
+      100% {
+        fill: #e4edfb
+      }
+
+      50% {
+        fill: #ffc58a
+      }
+    }
+
+    #pkgDot,
+    #ticket {
+      transition: transform .8s ease
+    }
+
+    #pkgDot {
+      fill: #b45309;
+      stroke: #fff;
+      stroke-width: 3
+    }
+
+    #ticket {
+      fill: #b45309;
+      stroke: #fff;
+      stroke-width: 3
+    }
+
+    .pulse {
+      animation: pulse 1.2s infinite
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: .35
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        animation: none !important;
+        transition: none !important
+      }
+    }
+
+    .tblwrap {
+      overflow-x: auto;
+      margin: 0 0 1.1rem
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: #fff
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: .5rem .7rem;
+      text-align: left;
+      vertical-align: top;
+      font-size: .92rem
+    }
+
+    th {
+      background: #e4edfb;
+      color: var(--brand-d)
+    }
+
+    details.acc {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      margin: 0 0 .6rem
+    }
+
+    details.acc>summary {
+      cursor: pointer;
+      padding: .7rem 1rem;
+      font-weight: 700;
+      list-style: none
+    }
+
+    details.acc>summary::-webkit-details-marker {
+      display: none
+    }
+
+    details.acc>summary::before {
+      content: "\25B8  ";
+      color: var(--brand)
+    }
+
+    details.acc[open]>summary::before {
+      content: "\25BE  "
+    }
+
+    details.acc[open]>summary {
+      border-bottom: 1px solid var(--line);
+      background: #f1f5fb;
+      border-radius: 10px 10px 0 0
+    }
+
+    details.acc .body {
+      padding: .6rem 1rem .4rem
+    }
+
+    .badge2 {
+      display: inline-block;
+      padding: .05rem .6rem;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: .78rem;
+      border: 2px solid
+    }
+
+    .badge2.ok {
+      background: var(--okbg);
+      color: var(--ok);
+      border-color: var(--ok)
+    }
+
+    .badge2.bad {
+      background: var(--badbg);
+      color: var(--bad);
+      border-color: var(--bad)
+    }
+
+    .badge2.warn {
+      background: var(--warnbg);
+      color: var(--warn);
+      border-color: var(--warn)
+    }
+
+    .badge2.info {
+      background: var(--infobg);
+      color: var(--info);
+      border-color: var(--info)
+    }
+
+    .badge2.grey {
+      background: #eef2f7;
+      color: #334155;
+      border-color: #64748b
+    }
+
+    .opt {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 2px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: .65rem .9rem;
+      margin: .4rem 0;
+      font-size: 1rem;
+      color: var(--ink);
+      cursor: pointer
+    }
+
+    .opt:hover:not(:disabled) {
+      border-color: var(--brand);
+      background: #f1f5fb
+    }
+
+    .opt.ok {
+      background: var(--okbg);
+      border-color: var(--ok)
+    }
+
+    .opt.bad {
+      background: var(--badbg);
+      border-color: var(--bad)
+    }
+
+    .opt:disabled {
+      cursor: default;
+      color: var(--ink)
+    }
+
+    .fb {
+      margin: .5rem 0;
+      padding: .6rem .9rem;
+      border-radius: 8px;
+      display: none
+    }
+
+    .fb.ok {
+      display: block;
+      background: var(--okbg);
+      border-left: 6px solid var(--ok)
+    }
+
+    .fb.bad {
+      display: block;
+      background: var(--badbg);
+      border-left: 6px solid var(--bad)
+    }
+
+    .fb.info {
+      display: block;
+      background: var(--infobg);
+      border-left: 6px solid var(--info)
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      margin: .3rem 0 .8rem
+    }
+
+    .chip {
+      border: 2px solid var(--brand);
+      background: #fff;
+      color: var(--brand-d);
+      border-radius: 999px;
+      padding: .15rem .8rem;
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer
+    }
+
+    .chip.on {
+      background: var(--brand);
+      color: #fff
+    }
+
+    .det {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: .7rem
+    }
+
+    .det>div {
+      background: #f1f5fb;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: .6rem .8rem
+    }
+
+    .det h5 {
+      margin: 0 0 .2rem;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--brand-d)
+    }
+
+    .det p {
+      margin: 0;
+      font-size: .95rem
+    }
+
+    .steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin: .6rem 0
+    }
+
+    .stepbox {
+      flex: 1 1 150px;
+      border: 2px solid var(--line);
+      border-radius: 10px;
+      padding: .5rem .7rem;
+      background: #fff;
+      font-size: .9rem
+    }
+
+    .stepbox.auto {
+      border-color: var(--brand);
+      background: #e4edfb
+    }
+
+    .stepbox.manual {
+      border-color: var(--warn);
+      background: var(--warnbg)
+    }
+
+    .stepbox.off {
+      border-style: dashed;
+      color: #334155;
+      background: #f1f5f9
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: .6rem
+    }
+
+    .board>div {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: .5rem .8rem
+    }
+
+    .board small {
+      display: block;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #334155;
+      font-size: .72rem
+    }
+
+    .logbox {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: .4rem;
+      font-family: Consolas, Menlo, monospace;
+      font-size: .82rem
+    }
+
+    .logline {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #fff;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: .15rem .4rem;
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--ink);
+      cursor: default
+    }
+
+    .logline.pick {
+      cursor: pointer
+    }
+
+    .logline.pick:hover {
+      border-color: var(--brand);
+      background: #f1f5fb
+    }
+
+    .logline.err {
+      background: #fde6e6
+    }
+
+    .logline.chosen {
+      outline: 3px solid var(--ok)
+    }
+
+    .bar2 {
+      height: 34px;
+      background: #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: .2rem 0 .6rem
+    }
+
+    .bar2>div {
+      height: 100%;
+      width: 0;
+      transition: width 1.4s;
+      display: flex;
+      align-items: center;
+      padding-left: .6rem;
+      color: #fff;
+      font-weight: 700;
+      font-size: .85rem;
+      white-space: nowrap
+    }
+
+    .qprog {
+      display: flex;
+      gap: .3rem;
+      flex-wrap: wrap;
+      margin: .4rem 0
+    }
+
+    .qprog span {
+      width: 1.6rem;
+      height: .6rem;
+      border-radius: 4px;
+      background: #cbd5e1
+    }
+
+    .qprog span.cur {
+      background: var(--brand)
+    }
+
+    .qprog span.right {
+      background: var(--ok)
+    }
+
+    .qprog span.wrong {
+      background: var(--bad)
+    }
+
+    .bigscore {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--brand-d);
+      line-height: 1
+    }
+
+    .road {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: .5rem
+    }
+
+    .road button {
+      width: 100%;
+      text-align: left;
+      border: 2px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: .5rem .8rem;
+      font-size: .95rem;
+      cursor: pointer;
+      color: var(--ink)
+    }
+
+    .road button:hover {
+      border-color: var(--brand);
+      background: #f1f5fb
+    }
+
+    .road b {
+      color: var(--brand-d)
+    }
+
+    dl.gl dt {
+      font-weight: 800;
+      color: var(--brand-d);
+      margin-top: .6rem
+    }
+
+    dl.gl dd {
+      margin: 0 0 .3rem
+    }
+
+    input[type=text],
+    input[type=search] {
+      font: inherit;
+      padding: .4rem .7rem;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 420px;
+      color: var(--ink);
+      background: #fff
+    }
+
+    input[type=range] {
+      width: 220px;
+      vertical-align: middle
+    }
+
+    .bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 3px solid var(--brand);
+      z-index: 30
+    }
+
+    .bar .in {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: .55rem 1.25rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center
+    }
+
+    .bar .mid {
+      flex: 1
+    }
+
+    .bar .cnt {
+      font-weight: 700;
+      font-size: .85rem;
+      color: var(--ink2);
+      margin-bottom: .2rem
+    }
+
+    .track {
+      height: 8px;
+      background: #dbe3ee;
+      border-radius: 6px;
+      overflow: hidden
+    }
+
+    .track>div {
+      height: 100%;
+      background: var(--brand);
+      width: 0;
+      transition: width .3s
+    }
+
+    @media (max-width:640px) {
+      html {
+        font-size: 16px
+      }
+
+      h1 {
+        font-size: 1.8rem
+      }
+
+      h2 {
+        font-size: 1.4rem
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <marker id="ah" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"
+        markerUnits="userSpaceOnUse">
+        <path d="M0,0 L10,4 L0,8 z" fill="#0b3d91" />
+      </marker>
+      <marker id="ahr" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"
+        markerUnits="userSpaceOnUse">
+        <path d="M0,0 L10,4 L0,8 z" fill="#9b1c1c" />
+      </marker>
+      <marker id="ahg" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"
+        markerUnits="userSpaceOnUse">
+        <path d="M0,0 L10,4 L0,8 z" fill="#334155" />
+      </marker>
+      <g id="db">
+        <path d="M-34,0 v30 a34,9 0 0 0 68,0 v-30" fill="#dcf1f4" stroke="#0b6b7a" stroke-width="2.5" />
+        <ellipse cx="0" cy="0" rx="34" ry="9" fill="#bfe6ec" stroke="#0b6b7a" stroke-width="2.5" />
+      </g>
+      <g id="srv">
+        <rect width="60" height="44" rx="5" fill="#fff" stroke="#334155" stroke-width="2.5" />
+        <rect x="8" y="8" width="44" height="8" rx="2" fill="#475569" />
+        <rect x="8" y="21" width="44" height="8" rx="2" fill="#475569" />
+        <circle cx="48" cy="37" r="2.5" fill="#0f6a37" />
+      </g>
+      <g id="mon">
+        <rect width="64" height="44" rx="5" fill="#fff" stroke="#0b3d91" stroke-width="2.5" />
+        <polyline points="8,34 20,24 30,30 42,14 56,20" fill="none" stroke="#0b3d91" stroke-width="3" />
+      </g>
+    </defs>
+  </svg>
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top">
+    <div class="in">
+      <div class="brandrow">
+        <svg width="46" height="46" viewBox="0 0 46 46" role="img" aria-label="Pipeline symbol">
+          <rect width="46" height="46" rx="10" fill="#0b3d91" />
+          <path d="M8 23h22" stroke="#fff" stroke-width="4" fill="none" />
+          <path d="M26 13l12 10-12 10z" fill="#fff" />
+        </svg>
+        <div>
+          <div class="t1">DevOps Explained: From Code to Production</div>
+          <div class="t2"></div>
+        </div>
+      </div>
+      <div class="tools" role="group" aria-label="Text size">Text size <button type="button" id="fsm"
+          aria-label="Smaller text">A&minus;</button><button type="button" id="fsp" aria-label="Larger text">A+</button>
+      </div>
+    </div>
+  </header>
+  <nav id="stepnav" aria-label="Module sections"></nav>
+
+  <main id="main">
+
+    <!-- ============ 0 WELCOME ============ -->
+    <section class="slide active" id="s0" data-title="Welcome" data-n="&#9733;">
+      <div class="card">
+        <p class="kicker">Training module &middot; Beginner level &middot; about 90 minutes</p>
+        <h1>DevOps Explained: From Code to Production</h1>
+        <p class="lead">How does a piece of software travel from a developer's keyboard to a system that people rely on
+          every day &mdash; and how can that journey be fast, safe and repeatable? This module explains it step by step,
+          in plain English, using an example from the power sector.</p>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h3>By the end you will understand</h3>
+          <ul>
+            <li>How software moves from <em>development</em> to <em>production</em> (the live system people use).</li>
+            <li>Why <span class="term" data-g="devops">DevOps</span> exists and which problems it solves.</li>
+            <li>How a <span class="term" data-g="monolith">monolith</span> differs from <span class="term"
+                data-g="microservice">microservices</span>.</li>
+            <li>Where Docker, automated delivery, orchestration and monitoring fit in the complete workflow.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>How to use this module</h3>
+          <ul>
+            <li><strong>Dotted words</strong> are technical terms. Hover, tap or press Tab on them for a plain-English
+              definition. A full glossary is on the last page.</li>
+            <li><strong>Click</strong> the boxes in diagrams and the buttons beside them &mdash; they reveal more.</li>
+            <li><strong>Expand</strong> the arrowed headings to read details.</li>
+            <li>Use <strong>Previous / Next</strong> below, or the left and right arrow keys. Use <strong>A+</strong> at
+              top right for projectors.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout info"><strong>Our running analogy.</strong> Releasing software is like bringing a new
+        component into service at a substation: it is designed, checked against a standard test list, packaged,
+        installed by an approved procedure, watched after energising, and the lessons are fed back into the next job.
+        DevOps is the discipline of making that cycle smooth and repeatable for software.</div>
+      <div class="callout warn"><strong>About the example in this module.</strong> The &ldquo;Power Operations
+        Monitoring System&rdquo; is a <strong>fictional</strong> teaching application. It uses <strong>simulated data
+          only</strong> and is <strong>not connected to any real power infrastructure</strong>.</div>
+      <div class="card">
+        <h3>The journey (click any step to jump)</h3>
+        <ol class="road" id="road"></ol>
+      </div>
+    </section>
+
+    <!-- ============ 1 WHY DEVOPS ============ -->
+    <section class="slide" id="s1" data-title="Why DevOps exists" data-n="1">
+      <h2><span class="num">1</span> Why DevOps exists</h2>
+      <p class="lead">Before we meet any tool, let us look at the people and the problem. <strong>Software</strong> is a
+        set of instructions that tells computers what to do. Four groups of people usually touch it before it reaches
+        users:</p>
+      <div class="grid2">
+        <div class="card">
+          <ul>
+            <li><strong>Developers</strong> write the software.</li>
+            <li><strong>Testers</strong> check that it works and is safe to release.</li>
+            <li><strong>Infrastructure team</strong> prepares the <span class="term" data-g="server">servers</span> (the
+              computers that run software for many users).</li>
+            <li><strong>Operations team</strong> keeps the live system running day and night.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <p><strong>The traditional handoff.</strong> Each group finished its part and &ldquo;threw it over the
+            wall&rdquo; to the next, often by email, tickets or a long document. Click a box below, then press the
+            button to watch one small change travel through this old process.</p>
+        </div>
+      </div>
+      <div class="svgwrap">
+        <svg viewBox="0 0 1000 230" role="img"
+          aria-label="Four teams separated by walls: developers, testers, infrastructure team, operations team"
+          id="hoSvg">
+          <text x="500" y="22" text-anchor="middle" class="lg">The traditional relay: work is handed over the
+            wall</text>
+          <line class="wall" x1="240" y1="48" x2="240" y2="190" />
+          <line class="wall" x1="490" y1="48" x2="490" y2="190" />
+          <line class="wall" x1="740" y1="48" x2="740" y2="190" />
+          <text x="240" y="42" text-anchor="middle" class="sm b">Handoff 1</text><text x="490" y="42"
+            text-anchor="middle" class="sm b">Handoff 2</text><text x="740" y="42" text-anchor="middle"
+            class="sm b">Handoff 3</text>
+          <g data-k="dev">
+            <rect class="bx c-blue" x="20" y="70" width="190" height="90" rx="12" /><text x="115" y="108"
+              text-anchor="middle" class="b">Developers</text><text x="115" y="132" text-anchor="middle"
+              class="sm">write the software</text>
+          </g>
+          <g data-k="test">
+            <rect class="bx c-teal" x="270" y="70" width="190" height="90" rx="12" /><text x="365" y="108"
+              text-anchor="middle" class="b">Testers</text><text x="365" y="132" text-anchor="middle" class="sm">check
+              that it works</text>
+          </g>
+          <g data-k="infra">
+            <rect class="bx c-amber" x="520" y="70" width="190" height="90" rx="12" /><text x="615" y="108"
+              text-anchor="middle" class="b">Infrastructure team</text><text x="615" y="132" text-anchor="middle"
+              class="sm">prepares the servers</text>
+          </g>
+          <g data-k="ops">
+            <rect class="bx c-green" x="770" y="70" width="190" height="90" rx="12" /><text x="865" y="108"
+              text-anchor="middle" class="b">Operations team</text><text x="865" y="132" text-anchor="middle"
+              class="sm">runs it day to day</text>
+          </g>
+          <path class="ln" d="M212,115 H268" />
+          <path class="ln" d="M462,115 H518" />
+          <path class="ln" d="M712,115 H768" />
+          <circle id="ticket" r="12" cx="0" cy="0" style="transform:translate(115px,185px)" />
+          <text x="500" y="215" text-anchor="middle" class="sm">The orange dot is one small change (&ldquo;a
+            ticket&rdquo;) travelling through the process.</text>
+        </svg>
+      </div>
+      <div class="info-panel" id="hoInfo">Click a team in the diagram to see what it does and what frustrates it.</div>
+      <div class="row"><button class="btn" id="hoGo" type="button">&#9654; Send one small change through the old
+          process</button><button class="btn alt" id="hoReset" type="button">Reset</button></div>
+      <div class="msg" id="hoMsg" aria-live="polite">Press the button to start. (The number of days shown is
+        illustrative &mdash; real figures vary.)</div>
+
+      <h3>Five common problems (expand each)</h3>
+      <details class="acc">
+        <summary>&ldquo;It works on my machine&rdquo;</summary>
+        <div class="body">
+          <p><strong>What it means:</strong> The program runs perfectly on the developer's laptop but fails on the test
+            or production computer.</p>
+          <p><strong>Why:</strong> The two computers differ &mdash; for example a different version of the <span
+              class="term" data-g="python">Python</span> language, a missing add-on library (a <span class="term"
+              data-g="dependency">dependency</span>) or a different setting.</p>
+          <p><strong>How DevOps helps:</strong> The application is packaged together with what it needs (a <span
+              class="term" data-g="container">container</span>), so it behaves the same everywhere.</p>
+        </div>
+      </details>
+      <details class="acc">
+        <summary>Inconsistent environments</summary>
+        <div class="body">
+          <p><strong>What it means:</strong> An <span class="term" data-g="env">environment</span> is a place where
+            software runs: a developer laptop, a test area, a rehearsal area, or the live system. If each was built by
+            hand, no two are identical.</p>
+          <p><strong>Example:</strong> Testing passes in the test area, but the live system has an older database
+            version, so a feature breaks only after release.</p>
+          <p><strong>How DevOps helps:</strong> Environments are described in files and created the same way every time.
+          </p>
+        </div>
+      </details>
+      <details class="acc">
+        <summary>Manual deployments</summary>
+        <div class="body">
+          <p><strong>What it means:</strong> <span class="term" data-g="deployment">Deployment</span> is putting a new
+            version into an environment. Done manually, someone follows a 40-step document at night, copying files and
+            typing commands.</p>
+          <p><strong>Example:</strong> Step 27 is skipped because the person was interrupted. Nobody notices until users
+            complain.</p>
+          <p><strong>How DevOps helps:</strong> A <span class="term" data-g="pipeline">pipeline</span> performs the same
+            steps automatically, every time.</p>
+        </div>
+      </details>
+      <details class="acc">
+        <summary>Configuration mistakes</summary>
+        <div class="body">
+          <p><strong>What it means:</strong> A <em>configuration</em> is a group of settings, such as the address of a
+            database. One typing error or forgotten setting can stop the system.</p>
+          <p><strong>Example:</strong> The test database address is accidentally left in the live system.</p>
+          <p><strong>How DevOps helps:</strong> Settings are kept as reviewed files under <span class="term"
+              data-g="vc">version control</span> instead of being typed by hand.</p>
+        </div>
+      </details>
+      <details class="acc">
+        <summary>Slow incident recovery</summary>
+        <div class="body">
+          <p><strong>What it means:</strong> An <em>incident</em> is an unplanned problem in the live system. Recovery
+            is slow when nobody knows what changed, who can fix it, or how to go back.</p>
+          <p><strong>Example:</strong> At 2 a.m. the application is down; the developer who knows it is unreachable.</p>
+          <p><strong>How DevOps helps:</strong> <span class="term" data-g="monitoring">Monitoring</span> shows what is
+            wrong, every change is recorded, and a <span class="term" data-g="rollback">rollback</span> to the previous
+            working version is quick.</p>
+        </div>
+      </details>
+
+      <div class="card">
+        <h3>So what is DevOps?</h3>
+        <p><strong>DevOps</strong> (&ldquo;Development&rdquo; plus &ldquo;Operations&rdquo;) is a way of working in
+          which the people who build software and the people who run it share responsibility for it from idea to daily
+          operation, and use <strong>automation</strong> to make releases small, frequent and safe.</p>
+        <p>It has three parts: <strong>people and culture</strong> (shared goals, no blame), <strong>process</strong>
+          (small changes, regular feedback) and <strong>tools</strong> (automation). It is <em>not</em> a product you
+          can buy, and not a job title for one person.</p>
+      </div>
+      <div class="four">
+        <div class="f why">
+          <h4>Why it matters</h4>
+          <p>Slow, error-prone releases cost time and cause outages. Shared responsibility and automation shorten
+            delivery and make it more reliable.</p>
+        </div>
+        <div class="f how">
+          <h4>How it works</h4>
+          <p>Teams work together, release small changes, automate repeatable steps, and watch the live system to learn
+            quickly.</p>
+        </div>
+        <div class="f ex">
+          <h4>Example</h4>
+          <p>A report layout change goes live in hours, with automatic checks and a quick undo, instead of waiting for a
+            monthly release night.</p>
+        </div>
+        <div class="f mis">
+          <h4>Common mistake</h4>
+          <p>Buying tools but leaving teams working separately. Tools without shared responsibility just automate the
+            old handoffs.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 2 EXAMPLE SYSTEM ============ -->
+    <section class="slide" id="s2" data-title="Example system" data-n="2">
+      <h2><span class="num">2</span> A realistic power-sector example</h2>
+      <div class="callout warn"><strong>Simulated data only.</strong> The &ldquo;Power Operations Monitoring
+        System&rdquo; (we will call it <strong>POMS</strong>) is a fictional teaching application. Every number you see
+        is randomly generated. It is <strong>not connected to actual power infrastructure</strong>.</div>
+      <p>POMS does four simple jobs. We use it throughout the module so each technical idea is attached to something
+        concrete.</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 1000 170" role="img"
+          aria-label="POMS flow: simulated readings, intake, abnormal-reading check, API, status screen">
+          <text x="500" y="22" text-anchor="middle" class="lg">What POMS does</text>
+          <g>
+            <rect class="bx c-grey" x="15" y="50" width="170" height="80" rx="10" style="stroke-dasharray:7 5" /><text
+              x="100" y="82" text-anchor="middle" class="b">Simulated</text><text x="100" y="104" text-anchor="middle"
+              class="b">equipment readings</text>
+          </g>
+          <g>
+            <rect class="bx c-blue" x="215" y="50" width="170" height="80" rx="10" /><text x="300" y="82"
+              text-anchor="middle" class="b">1. Receive</text><text x="300" y="104" text-anchor="middle"
+              class="sm">accept the readings</text>
+          </g>
+          <g>
+            <rect class="bx c-amber" x="415" y="50" width="170" height="80" rx="10" /><text x="500" y="82"
+              text-anchor="middle" class="b">2. Check</text><text x="500" y="104" text-anchor="middle" class="sm">find
+              abnormal values</text>
+          </g>
+          <g>
+            <rect class="bx c-teal" x="615" y="50" width="170" height="80" rx="10" /><text x="700" y="82"
+              text-anchor="middle" class="b">3. Expose an API</text><text x="700" y="104" text-anchor="middle"
+              class="sm">answer requests</text>
+          </g>
+          <g>
+            <rect class="bx c-green" x="815" y="50" width="170" height="80" rx="10" /><text x="900" y="82"
+              text-anchor="middle" class="b">4. Display</text><text x="900" y="104" text-anchor="middle"
+              class="sm">operational status</text>
+          </g>
+          <path class="ln" d="M187,90 H213" />
+          <path class="ln" d="M387,90 H413" />
+          <path class="ln" d="M587,90 H613" />
+          <path class="ln" d="M787,90 H813" />
+          <text x="500" y="156" text-anchor="middle" class="sm b">SIMULATED DATA &mdash; not connected to real power
+            infrastructure</text>
+        </svg>
+      </div>
+      <p>An <span class="term" data-g="api">API</span> (Application Programming Interface) is a menu of requests that
+        one program can send to another. Here, the status screen asks POMS for readings and alerts using a few agreed
+        web addresses, and POMS replies in <span class="term" data-g="json">JSON</span>, a simple text format. Try it:
+      </p>
+      <div class="card">
+        <h3>Try the simulator</h3>
+        <div class="row"><button class="btn" id="simGen" type="button">Generate new simulated readings</button>
+          <label for="simMargin"><strong>Allowed margin</strong> beyond normal range: <span
+              id="simMarginV">0</span>%</label> <input type="range" id="simMargin" min="0" max="20" value="0">
+        </div>
+        <p><small>The <em>rule</em> is simple: a reading is <strong>abnormal</strong> if it is outside its normal range
+            (plus any allowed margin). That rule is the &ldquo;business logic&rdquo; of POMS.</small></p>
+        <div class="tblwrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Equipment (fictional)</th>
+                <th>What is measured</th>
+                <th>Reading</th>
+                <th>Normal range</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="simBody"></tbody>
+          </table>
+        </div>
+        <p id="simSum" aria-live="polite"></p>
+        <h4>What the API would return</h4>
+        <div class="chips" id="apiTabs"></div>
+        <pre id="apiOut" aria-live="polite"></pre>
+      </div>
+      <div class="four">
+        <div class="f why">
+          <h4>Why it matters</h4>
+          <p>One small, concrete application lets us follow a single story from code to production instead of discussing
+            tools in the abstract.</p>
+        </div>
+        <div class="f how">
+          <h4>How it works</h4>
+          <p>Readings come in, a rule flags abnormal ones, the API shares them, and a screen shows status. Later we
+            package, test, deploy and monitor exactly this program.</p>
+        </div>
+        <div class="f ex">
+          <h4>Example</h4>
+          <p>A new rule &mdash; &ldquo;cooling pump flow below 80 L/min is abnormal&rdquo; &mdash; is one small change
+            to the checking step.</p>
+        </div>
+        <div class="f mis">
+          <h4>Common mistake</h4>
+          <p>Treating a demo as the real thing. A system that touches real plant equipment needs far stronger security,
+            approvals and regulatory review than this teaching example.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3 MONOLITH VS MICROSERVICES ============ -->
+    <section class="slide" id="s3" data-title="Monolith vs microservices" data-n="3">
+      <h2><span class="num">3</span> Monolithic architecture versus microservices</h2>
+      <p><strong>Architecture</strong> means how an application is divided into parts. There are two broad styles. A
+        <span class="term" data-g="monolith">monolith</span> is built and deployed as one single unit. <span
+          class="term" data-g="microservice">Microservices</span> split the application into small services, each doing
+        one job and deployed separately. Click any part of the diagram, then try the buttons.</p>
+      <div class="row">
+        <button class="btn" id="mmDeploy" type="button">Change only the Alerts feature &amp; deploy</button>
+        <button class="btn" id="mmScale" type="button">Many more readings arrive (scale up)</button>
+        <button class="btn alt" id="mmReset" type="button">Reset</button>
+      </div>
+      <div class="svgwrap">
+        <svg viewBox="0 0 1000 430" role="img" aria-label="Side-by-side diagram of a monolith and microservices"
+          id="mmSvg">
+          <text x="250" y="28" text-anchor="middle" class="lg">MONOLITH: one package</text>
+          <text x="745" y="28" text-anchor="middle" class="lg">MICROSERVICES: separate services</text>
+          <g data-k="mono">
+            <rect id="mono-outer" class="bx c-grey" x="30" y="48" width="440" height="290" rx="14" /><text x="50" y="74"
+              class="sm b">One application package (starts, stops and updates as one)</text>
+          </g>
+          <g data-k="m-ui">
+            <rect id="m-ui" class="bx c-blue" x="50" y="90" width="190" height="80" rx="10" /><text x="145" y="124"
+              text-anchor="middle" class="b">User interface</text><text x="145" y="146" text-anchor="middle"
+              class="sm">screens people see</text>
+          </g>
+          <g data-k="m-logic">
+            <rect id="m-logic" class="bx c-blue" x="260" y="90" width="190" height="80" rx="10" /><text x="355" y="124"
+              text-anchor="middle" class="b">Business logic</text><text x="355" y="146" text-anchor="middle"
+              class="sm">rules: what is abnormal?</text>
+          </g>
+          <g data-k="m-alerts">
+            <rect id="m-alerts" class="bx c-blue" x="50" y="190" width="190" height="80" rx="10" /><text x="145" y="224"
+              text-anchor="middle" class="b">Alerts</text><text x="145" y="246" text-anchor="middle" class="sm">warnings
+              and messages</text>
+          </g>
+          <g data-k="m-data">
+            <rect id="m-data" class="bx c-blue" x="260" y="190" width="190" height="80" rx="10" /><text x="355" y="224"
+              text-anchor="middle" class="b">Data access</text><text x="355" y="246" text-anchor="middle"
+              class="sm">reads and saves data</text>
+          </g>
+          <text x="250" y="312" text-anchor="middle" class="sm b">Parts talk inside the program (no network
+            needed)</text>
+          <path class="ln" d="M250,340 V357" />
+          <g data-k="m-db">
+            <use href="#db" x="250" y="368" /><text x="298" y="394" class="sm b">One shared database</text>
+          </g>
+          <g class="badge" id="bm1" style="display:none">
+            <circle cx="240" cy="90" r="15" /><text x="240" y="95" text-anchor="middle">&times;2</text>
+          </g>
+          <g class="badge" id="bm2" style="display:none">
+            <circle cx="450" cy="90" r="15" /><text x="450" y="95" text-anchor="middle">&times;2</text>
+          </g>
+          <g class="badge" id="bm3" style="display:none">
+            <circle cx="240" cy="190" r="15" /><text x="240" y="195" text-anchor="middle">&times;2</text>
+          </g>
+          <g class="badge" id="bm4" style="display:none">
+            <circle cx="450" cy="190" r="15" /><text x="450" y="195" text-anchor="middle">&times;2</text>
+          </g>
+
+          <line x1="497" y1="36" x2="497" y2="420" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 6" />
+
+          <g data-k="u-ui">
+            <rect id="u-ui" class="bx c-blue" x="515" y="48" width="450" height="56" rx="10" /><text x="740" y="82"
+              text-anchor="middle" class="b">User interface (web page)</text>
+          </g>
+          <path class="ln" d="M580,106 V138" />
+          <path class="ln" d="M750,106 V138" />
+          <path class="ln" d="M920,106 V138" />
+          <g data-k="s-read">
+            <rect id="s-read" class="bx c-teal" x="515" y="140" width="130" height="110" rx="10" /><text x="580" y="174"
+              text-anchor="middle" class="b">Readings</text><text x="580" y="194" text-anchor="middle"
+              class="b">service</text><text x="580" y="224" text-anchor="middle" class="sm">stores values</text>
+          </g>
+          <g data-k="s-alert">
+            <rect id="s-alert" class="bx c-teal" x="685" y="140" width="130" height="110" rx="10" /><text x="750"
+              y="174" text-anchor="middle" class="b">Alerts</text><text x="750" y="194" text-anchor="middle"
+              class="b">service</text><text x="750" y="224" text-anchor="middle" class="sm">flags abnormal</text>
+          </g>
+          <g data-k="s-report">
+            <rect id="s-report" class="bx c-teal" x="855" y="140" width="130" height="110" rx="10" /><text x="920"
+              y="174" text-anchor="middle" class="b">Reporting</text><text x="920" y="194" text-anchor="middle"
+              class="b">service</text><text x="920" y="224" text-anchor="middle" class="sm">summaries</text>
+          </g>
+          <g data-k="net">
+            <path class="ln dash" d="M647,195 H683" />
+            <path class="ln dash" d="M817,195 H853" /><text x="665" y="184" text-anchor="middle" class="sm b"
+              style="font-size:12px">network</text><text x="835" y="184" text-anchor="middle" class="sm b"
+              style="font-size:12px">network</text>
+          </g>
+          <path class="ln" d="M580,252 V289" />
+          <path class="ln" d="M750,252 V289" />
+          <path class="ln" d="M920,252 V289" />
+          <use href="#db" x="580" y="300" />
+          <use href="#db" x="750" y="300" />
+          <use href="#db" x="920" y="300" />
+          <text x="580" y="354" text-anchor="middle" class="sm">own data</text><text x="750" y="354"
+            text-anchor="middle" class="sm">own data</text><text x="920" y="354" text-anchor="middle" class="sm">own
+            data</text>
+          <text x="745" y="396" text-anchor="middle" class="sm b">Each service is built, deployed and scaled on its
+            own</text>
+          <g class="badge" id="bu1" style="display:none">
+            <circle cx="645" cy="140" r="15" /><text x="645" y="145" text-anchor="middle">&times;2</text>
+          </g>
+        </svg>
+      </div>
+      <div class="info-panel" id="mmInfo">Click any box in the diagram for an explanation.</div>
+      <div class="msg" id="mmMsg" aria-live="polite">Use the buttons above to compare what happens in each style.</div>
+
+      <h3>Comparing the two styles</h3>
+      <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Monolith</th>
+              <th>Microservices</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Deployment</th>
+              <td>One package is deployed. Simple, but every change means redeploying everything.</td>
+              <td>Each service is deployed separately. More pieces to deploy, but a small change touches a small piece.
+              </td>
+            </tr>
+            <tr>
+              <th>Scaling (handling more load)</th>
+              <td>You run more copies of the whole application, even if only one part is busy.</td>
+              <td>You add copies of only the busy service.</td>
+            </tr>
+            <tr>
+              <th>Independent changes</th>
+              <td>Teams share one code base and one release schedule; changes can collide.</td>
+              <td>Teams can change and release their own service on their own schedule, if agreements between services
+                are kept.</td>
+            </tr>
+            <tr>
+              <th>Network communication</th>
+              <td>Parts call each other inside one program: fast and reliable.</td>
+              <td>Services call each other over the network: slower, and calls can fail or time out, so extra care is
+                needed.</td>
+            </tr>
+            <tr>
+              <th>Complexity</th>
+              <td>Simpler to understand and test at first; can become tangled as it grows.</td>
+              <td>Each service is simple, but the <em>whole</em> system is more complex (many moving parts, data spread
+                out).</td>
+            </tr>
+            <tr>
+              <th>Operational overhead</th>
+              <td>Low: one thing to deploy, monitor and back up.</td>
+              <td>High: many things to deploy, monitor, secure and troubleshoot; usually needs automation and
+                orchestration.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid2">
+        <div class="callout ok"><strong>When a monolith is a sensible choice</strong>
+          <ul>
+            <li>A small team and a fairly simple application.</li>
+            <li>The requirements are still changing and speed of learning matters.</li>
+            <li>Few users, so scaling parts separately is not needed.</li>
+            <li>The team has limited experience running many services.</li>
+          </ul>
+        </div>
+        <div class="callout info"><strong>When microservices can help</strong>
+          <ul>
+            <li>Several teams need to release independently.</li>
+            <li>Some parts have very different load or reliability needs.</li>
+            <li>The application is large and a single package has become hard to change.</li>
+            <li>The organisation can support the extra automation and monitoring.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout warn"><strong>Microservices are not &ldquo;better&rdquo;; they are a trade-off.</strong> They
+        solve some problems of large systems and create others. Many successful systems are well-organised monoliths,
+        and many organisations start there.</div>
+      <div class="four">
+        <div class="f why">
+          <h4>Why it matters</h4>
+          <p>The architecture you choose decides how you build, release, scale and operate the system for years.</p>
+        </div>
+        <div class="f how">
+          <h4>How it works</h4>
+          <p>Monolith: one package with internal calls. Microservices: separate services that cooperate through network
+            requests.</p>
+        </div>
+        <div class="f ex">
+          <h4>Example</h4>
+          <p>POMS could start as a monolith. If the reporting part grows and needs its own team, it could be separated
+            into a reporting service later.</p>
+        </div>
+        <div class="f mis">
+          <h4>Common mistake</h4>
+          <p>Splitting a small application into many services &ldquo;because it is modern&rdquo;, and then spending more
+            time on the plumbing than on the features.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 4 WORKFLOW ============ -->
+    <section class="slide" id="s4" data-title="End-to-end workflow" data-n="4">
+      <h2><span class="num">4</span> The end-to-end DevOps workflow</h2>
+      <p>Here is the complete journey of one change to POMS. A <span class="term" data-g="pipeline">pipeline</span> is a
+        fixed series of automatic steps a change must pass. Click any stage, or press <strong>Play</strong> to watch the
+        change travel from the developer to the running system and back again as feedback.</p>
+      <div class="row">
+        <button class="btn" id="pPlay" type="button">&#9654; Play walk-through</button>
+        <button class="btn alt" id="pPrev" type="button">&larr; Previous stage</button>
+        <button class="btn alt" id="pNext" type="button">Next stage &rarr;</button>
+      </div>
+      <div class="svgwrap"><svg viewBox="0 0 1080 340" role="img"
+          aria-label="End-to-end software delivery pipeline with eleven stages" id="pipeSvg">
+          <rect x="20" y="6" width="16" height="16" class="c-blue bx" style="stroke-width:2" /><text x="42" y="20"
+            class="sm">Create and check</text>
+          <rect x="200" y="6" width="16" height="16" class="c-teal bx" style="stroke-width:2" /><text x="222" y="20"
+            class="sm">Package</text>
+          <rect x="330" y="6" width="16" height="16" class="c-green bx" style="stroke-width:2" /><text x="352" y="20"
+            class="sm">Run</text>
+          <rect x="420" y="6" width="16" height="16" class="c-amber bx" style="stroke-width:2" /><text x="442" y="20"
+            class="sm">Observe and learn</text>
+          <g id="pipeLinks"></g>
+          <g id="pipeNodes"></g>
+          <circle id="pkgDot" r="11" cx="0" cy="0" style="transform:translate(95px,38px)" />
+        </svg></div>
+      <div class="card" id="pipeDetail" aria-live="polite"></div>
+
+      <div class="four">
+        <div class="f why">
+          <h4>Why it matters</h4>
+          <p>Every manual step is a chance for error. A pipeline makes the route from code to production the same every
+            time.</p>
+        </div>
+        <div class="f how">
+          <h4>How it works</h4>
+          <p>Code is stored and checked, tested automatically, packaged into a container image, stored in a registry,
+            deployed, kept running, and watched.</p>
+        </div>
+        <div class="f ex">
+          <h4>Example</h4>
+          <p>A developer changes the alert threshold for transformer temperature. Within minutes the pipeline has tested
+            and packaged it, ready for release.</p>
+        </div>
+        <div class="f mis">
+          <h4>Common mistake</h4>
+          <p>Skipping stages &ldquo;just this once&rdquo; under deadline pressure. The urgent fixes are exactly the ones
+            that most need the checks.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 4b RELEASE TYPES AND LOOP ============ -->
+    <section class="slide" id="s5" data-title="Release types &amp; feedback loop" data-n="4+">
+      <h2><span class="num">4+</span> Three kinds of &ldquo;automatic&rdquo; &mdash; and the feedback loop</h2>
+      <p>People often use three similar terms. Choose one to see which steps are automatic and where a person decides.
+      </p>
+      <div class="chips" id="cdTabs" role="tablist" aria-label="Release types"></div>
+      <div class="card" id="cdBody" aria-live="polite"></div>
+
+      <h3>The DevOps feedback loop</h3>
+      <p>DevOps is a <strong>loop</strong>, not a straight line. What we learn from the running system flows back into
+        planning. Click a stage, or let the loop trace one improvement.</p>
+      <div class="row"><button class="btn" id="lpPlay" type="button">&#9654; Trace one improvement</button></div>
+      <div class="svgwrap"><svg viewBox="0 0 1000 470" role="img" aria-label="DevOps feedback loop with eight stages"
+          id="loopSvg"></svg></div>
+      <div class="info-panel" id="lpInfo">Click any stage in the loop.</div>
+      <div class="four">
+        <div class="f why">
+          <h4>Why it matters</h4>
+          <p>Release speed is only useful if quality stays high. Feedback is how teams catch problems early and improve
+            with every release.</p>
+        </div>
+        <div class="f how">
+          <h4>How it works</h4>
+          <p>Small changes flow through the pipeline; monitoring and users report what happened; the team turns the
+            findings into the next change.</p>
+        </div>
+        <div class="f ex">
+          <h4>Example</h4>
+          <p>Monitoring shows POMS slows down every morning when many people open the status screen. The team plans,
+            builds and releases a fix within days.</p>
+        </div>
+        <div class="f mis">
+          <h4>Common mistake</h4>
+          <p>Treating &ldquo;deployed&rdquo; as &ldquo;done&rdquo;. The loop only closes when someone looks at the
+            results and acts.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 5 TECH STACK ============ -->
+    <section class="slide" id="s6" data-title="Technology stack" data-n="5">
+      <h2><span class="num">5</span> The technology stack, explained</h2>
+      <p>These are the tools you will hear about. Each solves one specific problem. The ones named here are widely used
+        <em>examples</em>; most have good alternatives, and the ideas matter more than the product names. Filter by
+        purpose, then expand a card.</p>
+      <div class="chips" id="toolChips"></div>
+      <div id="toolList"></div>
+      <h3>How the observation tools connect</h3>
+      <p>Once POMS is running, it produces two kinds of evidence: <span class="term" data-g="log">logs</span> (written
+        records of events) and <span class="term" data-g="metric">metrics</span> (numbers measured over time).</p>
+      <div class="svgwrap"><svg viewBox="0 0 1000 230" role="img"
+          aria-label="Application sends logs to log storage and metrics to Prometheus, which feeds Grafana dashboards and alerts">
+          <g>
+            <rect class="bx c-green" x="20" y="80" width="180" height="80" rx="10" /><text x="110" y="114"
+              text-anchor="middle" class="b">POMS running</text><text x="110" y="136" text-anchor="middle" class="sm">in
+              a container</text>
+          </g>
+          <g>
+            <rect class="bx c-white" x="380" y="15" width="230" height="64" rx="10" /><text x="495" y="42"
+              text-anchor="middle" class="b">Log storage</text><text x="495" y="64" text-anchor="middle"
+              class="sm">readable event records</text>
+          </g>
+          <g>
+            <rect class="bx c-amber" x="380" y="150" width="230" height="64" rx="10" /><text x="495" y="177"
+              text-anchor="middle" class="b">Prometheus</text><text x="495" y="199" text-anchor="middle"
+              class="sm">collects the numbers</text>
+          </g>
+          <g>
+            <rect class="bx c-blue" x="730" y="150" width="240" height="64" rx="10" /><text x="745" y="177"
+              class="b">Grafana</text><text x="745" y="199" class="sm">shows dashboards</text>
+            <use href="#mon" x="898" y="160" />
+          </g>
+          <g>
+            <rect class="bx c-red" x="730" y="15" width="240" height="64" rx="10" /><text x="850" y="42"
+              text-anchor="middle" class="b">Alert message</text><text x="850" y="64" text-anchor="middle" class="sm">to
+              the engineer on duty</text>
+          </g>
+          <path class="ln" d="M202,100 L378,52" /><text x="215" y="66" class="sm b">writes logs</text>
+          <path class="ln" d="M202,142 L378,182" /><text x="215" y="176" class="sm b">offers metrics</text>
+          <path class="ln" d="M612,182 H728" /><text x="620" y="172" class="sm">stored numbers</text>
+          <path class="ln" d="M612,160 C690,160 670,47 728,47" /><text x="640" y="116" class="sm b">alert rule</text>
+        </svg></div>
+      <div class="four">
+        <div class="f why">
+          <h4>Why it matters</h4>
+          <p>Knowing what each tool is <em>for</em> prevents both confusion and overspending on tools you do not need.
+          </p>
+        </div>
+        <div class="f how">
+          <h4>How it works</h4>
+          <p>Tools line up along the journey: write &rarr; store &rarr; test &rarr; package &rarr; run &rarr; observe.
+            Each hands its result to the next.</p>
+        </div>
+        <div class="f ex">
+          <h4>Example</h4>
+          <p>Git stores POMS code, tests check the alert rule, Docker packages it, a registry stores the package, and
+            Grafana shows if it is healthy.</p>
+        </div>
+        <div class="f mis">
+          <h4>Common mistake</h4>
+          <p>Adopting a tool because others do. Start from the problem you have, then pick the simplest tool that solves
+            it.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6 VM VS CONTAINERS ============ -->
+    <section class="slide" id="s7" data-title="VMs vs containers" data-n="6">
+      <h2><span class="num">6</span> Virtual machines versus containers</h2>
+      <p>Both let several applications share one physical computer without interfering with each other. They do it in
+        different ways. First, some words. The <span class="term" data-g="os">operating system</span> (OS) is the main
+        software of a computer, such as Windows or Linux. Its core, the <span class="term"
+          data-g="kernel">kernel</span>, controls hardware and running programs. <strong>Isolation</strong> means
+        keeping programs separated so that a problem in one does not spread to another.</p>
+      <div class="svgwrap"><svg viewBox="0 0 1000 470" role="img"
+          aria-label="Comparison of virtual machine stack and container stack" id="vmSvg">
+          <text x="257" y="26" text-anchor="middle" class="lg">VIRTUAL MACHINES</text>
+          <text x="750" y="26" text-anchor="middle" class="lg">CONTAINERS</text>
+          <!-- VMs -->
+          <g data-k="vm">
+            <rect class="bx c-white" x="35" y="40" width="135" height="304" rx="8" />
+            <rect class="bx c-green" x="43" y="48" width="119" height="50" rx="6" /><text x="102" y="78"
+              text-anchor="middle" class="b">App 1</text>
+            <rect class="bx c-teal" x="43" y="104" width="119" height="44" rx="6" /><text x="102" y="131"
+              text-anchor="middle" class="sm b">Libraries</text>
+            <rect class="bx c-amber" x="43" y="154" width="119" height="182" rx="6" /><text x="102" y="226"
+              text-anchor="middle" class="b">Guest OS</text><text x="102" y="248" text-anchor="middle" class="sm">(VM
+              1)</text><text x="102" y="270" text-anchor="middle" class="sm">a full copy of an</text><text x="102"
+              y="288" text-anchor="middle" class="sm">operating system</text>
+          </g>
+          <g data-k="vm">
+            <rect class="bx c-white" x="190" y="40" width="135" height="304" rx="8" />
+            <rect class="bx c-green" x="198" y="48" width="119" height="50" rx="6" /><text x="257" y="78"
+              text-anchor="middle" class="b">App 2</text>
+            <rect class="bx c-teal" x="198" y="104" width="119" height="44" rx="6" /><text x="257" y="131"
+              text-anchor="middle" class="sm b">Libraries</text>
+            <rect class="bx c-amber" x="198" y="154" width="119" height="182" rx="6" /><text x="257" y="226"
+              text-anchor="middle" class="b">Guest OS</text><text x="257" y="248" text-anchor="middle" class="sm">(VM
+              2)</text><text x="257" y="270" text-anchor="middle" class="sm">a full copy of an</text><text x="257"
+              y="288" text-anchor="middle" class="sm">operating system</text>
+          </g>
+          <g data-k="vm">
+            <rect class="bx c-white" x="345" y="40" width="135" height="304" rx="8" />
+            <rect class="bx c-green" x="353" y="48" width="119" height="50" rx="6" /><text x="412" y="78"
+              text-anchor="middle" class="b">App 3</text>
+            <rect class="bx c-teal" x="353" y="104" width="119" height="44" rx="6" /><text x="412" y="131"
+              text-anchor="middle" class="sm b">Libraries</text>
+            <rect class="bx c-amber" x="353" y="154" width="119" height="182" rx="6" /><text x="412" y="226"
+              text-anchor="middle" class="b">Guest OS</text><text x="412" y="248" text-anchor="middle" class="sm">(VM
+              3)</text><text x="412" y="270" text-anchor="middle" class="sm">a full copy of an</text><text x="412"
+              y="288" text-anchor="middle" class="sm">operating system</text>
+          </g>
+          <g data-k="hyp">
+            <rect class="bx c-blue" x="35" y="352" width="445" height="44" rx="6" /><text x="257" y="380"
+              text-anchor="middle" class="b">Hypervisor: creates virtual machines</text>
+          </g>
+          <g data-k="hw">
+            <rect class="bx c-grey" x="35" y="404" width="445" height="44" rx="6" />
+            <use href="#srv" x="50" y="404" transform="translate(0,0) scale(.9)" style="display:none" /><text x="257"
+              y="432" text-anchor="middle" class="b">Physical server (hardware)</text>
+          </g>
+          <line x1="497" y1="36" x2="497" y2="456" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 6" />
+          <!-- Containers -->
+          <g data-k="noguest">
+            <rect class="ghost" x="520" y="40" width="460" height="128" rx="10" /><text x="750" y="86"
+              text-anchor="middle" class="b">No guest operating system</text><text x="750" y="110" text-anchor="middle"
+              class="b">for each application</text><text x="750" y="140" text-anchor="middle" class="sm">&rarr; much
+              less to store, start and maintain</text>
+          </g>
+          <g data-k="ctr">
+            <rect class="bx c-white" x="535" y="178" width="135" height="118" rx="8" />
+            <rect class="bx c-green" x="543" y="186" width="119" height="50" rx="6" /><text x="602" y="216"
+              text-anchor="middle" class="b">App 1</text>
+            <rect class="bx c-teal" x="543" y="242" width="119" height="46" rx="6" /><text x="602" y="270"
+              text-anchor="middle" class="sm b">Libraries</text>
+          </g>
+          <g data-k="ctr">
+            <rect class="bx c-white" x="690" y="178" width="135" height="118" rx="8" />
+            <rect class="bx c-green" x="698" y="186" width="119" height="50" rx="6" /><text x="757" y="216"
+              text-anchor="middle" class="b">App 2</text>
+            <rect class="bx c-teal" x="698" y="242" width="119" height="46" rx="6" /><text x="757" y="270"
+              text-anchor="middle" class="sm b">Libraries</text>
+          </g>
+          <g data-k="ctr">
+            <rect class="bx c-white" x="845" y="178" width="135" height="118" rx="8" />
+            <rect class="bx c-green" x="853" y="186" width="119" height="50" rx="6" /><text x="912" y="216"
+              text-anchor="middle" class="b">App 3</text>
+            <rect class="bx c-teal" x="853" y="242" width="119" height="46" rx="6" /><text x="912" y="270"
+              text-anchor="middle" class="sm b">Libraries</text>
+          </g>
+          <g data-k="rt">
+            <rect class="bx c-blue" x="535" y="304" width="445" height="42" rx="6" /><text x="757" y="331"
+              text-anchor="middle" class="b">Container runtime: starts and isolates containers</text>
+          </g>
+          <g data-k="kernel">
+            <rect class="bx c-amber" x="535" y="352" width="445" height="46" rx="6" /><text x="757" y="381"
+              text-anchor="middle" class="b">Host operating system (one shared kernel)</text>
+          </g>
+          <g data-k="hw">
+            <rect class="bx c-grey" x="535" y="404" width="445" height="44" rx="6" /><text x="757" y="432"
+              text-anchor="middle" class="b">Physical server (hardware)</text>
+          </g>
+        </svg></div>
+      <p><small>Simplified: some virtual-machine set-ups also include a host operating system beneath the
+          hypervisor.</small></p>
+      <div class="info-panel" id="vmInfo">Click any layer for an explanation.</div>
+
+      <div class="card">
+        <h3>See the difference (illustrative figures, not a benchmark)</h3>
+        <p>Imagine starting three small applications. Each application itself needs about 0.5 GB of memory; a guest
+          operating system typically needs about 1.5 GB more.</p>
+        <button class="btn" id="vmRun" type="button">Start the three applications</button> <button class="btn alt"
+          id="vmReset" type="button">Reset</button>
+        <p><strong>Virtual machines</strong> &mdash; memory used: <span id="vmMemA">0</span> GB &middot; typical
+          start-up: <span id="vmTimeA">&ndash;</span></p>
+        <div class="bar2" aria-hidden="true">
+          <div id="vmBarA" style="background:#8a4b00"></div>
+        </div>
+        <p><strong>Containers</strong> &mdash; memory used: <span id="vmMemB">0</span> GB &middot; typical start-up:
+          <span id="vmTimeB">&ndash;</span></p>
+        <div class="bar2" aria-hidden="true">
+          <div id="vmBarB" style="background:#0f6a37"></div>
+        </div>
+      </div>
+      <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Virtual machine</th>
+              <th>Container</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>What it contains</th>
+              <td>A full guest operating system plus libraries plus the application.</td>
+              <td>The application plus its libraries; it uses the host's kernel.</td>
+            </tr>
+            <tr>
+              <th>Isolation</th>
+              <td>Strong: separate operating systems.</td>
+              <td>Good: separated by the kernel, but all share one kernel, so the host must be kept secure and up to
+                date.</td>
+            </tr>
+            <tr>
+              <th>Size and speed</th>
+              <td>Larger (gigabytes); typically takes minutes to start.</td>
+              <td>Smaller (often megabytes); typically starts in seconds.</td>
+            </tr>
+            <tr>
+              <th>Different operating systems</th>
+              <td>Yes: a Windows VM and a Linux VM can run side by side.</td>
+              <td>Containers share the host's kernel, so they follow the host's operating-system family.</td>
+            </tr>
+            <tr>
+              <th>Typical use</th>
+              <td>Legacy applications, strict separation, whole-server environments.</td>
+              <td>Packaging and running modern applications consistently.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout info"><strong>Not either/or.</strong> Many organisations run containers <em>inside</em>
+        virtual machines: the VM gives strong separation between teams, and containers give light, consistent packaging.
+      </div>
+      <div class="four">
+        <div class="f why">
+          <h4>Why it matters</h4>
+          <p>Lighter packaging means faster releases, quicker recovery and fewer servers for the same workload.</p>
+        </div>
+        <div class="f how">
+          <h4>How it works</h4>
+          <p>A VM virtualises hardware and carries its own operating system. A container virtualises at the
+            operating-system level and shares the host kernel.</p>
+        </div>
+        <div class="f ex">
+          <h4>Example</h4>
+          <p>POMS's readings, alerts and report parts can run as three small containers on one server, rather than three
+            full virtual machines.</p>
+        </div>
+        <div class="f mis">
+          <h4>Common mistake</h4>
+          <p>Believing containers are &ldquo;tiny virtual machines&rdquo; with equal isolation. They are lighter
+            precisely because they share more.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7 CONTAINERS VS ORCHESTRATION ============ -->
+    <section class="slide" id="s8" data-title="Containers vs orchestration" data-n="7">
+      <h2><span class="num">7</span> Containers versus orchestration</h2>
+      <p>A <span class="term" data-g="container">container</span> is a sealed, lightweight box holding one application
+        and what it needs. Three tools appear here, each with a different scope. Their jobs overlap a little, but they
+        are not the same.</p>
+      <div class="svgwrap"><svg viewBox="0 0 1000 340" role="img"
+          aria-label="Scope of Docker, Docker Compose and Kubernetes" id="orcSvg">
+          <text x="165" y="24" text-anchor="middle" class="lg">DOCKER</text>
+          <rect class="bx c-grey" x="15" y="40" width="300" height="210" rx="12" />
+          <use href="#srv" x="30" y="50" /><text x="105" y="72" class="sm b">One computer</text>
+          <rect class="bx c-green" x="95" y="115" width="140" height="95" rx="10" /><text x="165" y="150"
+            text-anchor="middle" class="b">Container</text><text x="165" y="172" text-anchor="middle" class="sm">POMS
+            application</text>
+          <text x="165" y="276" text-anchor="middle" class="b">Packages and runs</text><text x="165" y="298"
+            text-anchor="middle" class="sm">containers on one computer</text>
+
+          <text x="500" y="24" text-anchor="middle" class="lg">DOCKER COMPOSE</text>
+          <rect class="bx c-grey" x="345" y="40" width="310" height="210" rx="12" />
+          <use href="#srv" x="360" y="50" /><text x="435" y="72" class="sm b">One computer</text>
+          <rect class="bx c-white" x="440" y="52" width="205" height="28" rx="6" /><text x="542" y="71"
+            text-anchor="middle" class="sm b">1 configuration file</text>
+          <path class="plain" d="M435,160 H475 M525,160 H565" />
+          <rect class="bx c-green" x="360" y="120" width="76" height="80" rx="8" /><text x="398" y="154"
+            text-anchor="middle" class="sm b">Web</text><text x="398" y="174" text-anchor="middle"
+            class="sm b">page</text>
+          <rect class="bx c-green" x="462" y="120" width="76" height="80" rx="8" /><text x="500" y="154"
+            text-anchor="middle" class="sm b">Read-</text><text x="500" y="174" text-anchor="middle"
+            class="sm b">ings</text>
+          <rect class="bx c-green" x="564" y="120" width="76" height="80" rx="8" /><text x="602" y="154"
+            text-anchor="middle" class="sm b">Data-</text><text x="602" y="174" text-anchor="middle"
+            class="sm b">base</text>
+          <text x="500" y="276" text-anchor="middle" class="b">Starts and connects</text><text x="500" y="298"
+            text-anchor="middle" class="sm">a few containers on one computer</text>
+
+          <text x="835" y="24" text-anchor="middle" class="lg">KUBERNETES</text>
+          <rect class="bx c-blue" x="685" y="38" width="300" height="38" rx="8" /><text x="835" y="63"
+            text-anchor="middle" class="b">Control plane (the manager)</text>
+          <g id="kS1">
+            <rect class="bx c-grey" x="685" y="92" width="94" height="170" rx="8" id="kS1r" /><text x="732" y="112"
+              text-anchor="middle" class="sm b">Server 1</text>
+          </g>
+          <g id="kS2">
+            <rect class="bx c-grey" x="788" y="92" width="94" height="170" rx="8" id="kS2r" /><text x="835" y="112"
+              text-anchor="middle" class="sm b">Server 2</text>
+          </g>
+          <g id="kS3">
+            <rect class="bx c-grey" x="891" y="92" width="94" height="170" rx="8" id="kS3r" /><text x="938" y="112"
+              text-anchor="middle" class="sm b">Server 3</text>
+          </g>
+          <rect class="bx c-green" x="693" y="122" width="78" height="38" rx="6" id="ka1" />
+          <rect class="bx c-green" x="693" y="166" width="78" height="38" rx="6" id="ka2" />
+          <rect class="bx c-green" x="796" y="122" width="78" height="38" rx="6" id="kb1" />
+          <rect class="bx c-green" x="796" y="166" width="78" height="38" rx="6" id="kb2" />
+          <rect class="bx c-green" x="899" y="122" width="78" height="38" rx="6" id="kc1" />
+          <rect class="bx c-green" x="899" y="166" width="78" height="38" rx="6" id="kr1" style="display:none" />
+          <rect class="bx c-green" x="693" y="210" width="78" height="38" rx="6" id="kr2" style="display:none" />
+          <rect class="bx c-green" x="899" y="210" width="78" height="38" rx="6" id="kr3" style="display:none" />
+          <text x="732" y="185" text-anchor="middle" class="sm b" id="kt-a2" style="display:none"></text>
+          <g id="kx2" style="display:none">
+            <path d="M800,170 L870,200 M870,170 L800,200" stroke="#9b1c1c" stroke-width="5" />
+          </g>
+          <g id="kx1" style="display:none">
+            <path d="M800,126 L870,156 M870,126 L800,156" stroke="#9b1c1c" stroke-width="5" />
+          </g>
+          <text x="835" y="276" text-anchor="middle" class="b">Manages many containers</text><text x="835" y="298"
+            text-anchor="middle" class="sm">across many computers (a cluster)</text>
+          <text x="835" y="326" text-anchor="middle" class="sm" id="kStatus" style="font-weight:700">All containers
+            healthy</text>
+        </svg></div>
+      <div class="row"><button class="btn" id="kCrash" type="button">A container crashes</button><button class="btn"
+          id="kFail" type="button">A whole server fails</button><button class="btn alt" id="kReset"
+          type="button">Reset</button></div>
+      <div class="msg" id="kMsg" aria-live="polite">Try the buttons to see how the orchestrator reacts (the Kubernetes
+        panel above).</div>
+
+      <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Docker</th>
+              <th>Docker Compose</th>
+              <th>Kubernetes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Main job</th>
+              <td>Build container images and run containers.</td>
+              <td>Describe and run several related containers together.</td>
+              <td>Run and manage containers across a group of computers.</td>
+            </tr>
+            <tr>
+              <th>Scope</th>
+              <td>One container, one computer.</td>
+              <td>A small application, one computer.</td>
+              <td>Many applications, many computers (a <span class="term" data-g="cluster">cluster</span>).</td>
+            </tr>
+            <tr>
+              <th>If a container crashes</th>
+              <td>Can be restarted on the same computer if you set that option.</td>
+              <td>Same: can restart on the same computer.</td>
+              <td>Detects and replaces it automatically, on any suitable computer.</td>
+            </tr>
+            <tr>
+              <th>If the computer fails</th>
+              <td>Everything on it is down until a person acts.</td>
+              <td>Same.</td>
+              <td>Starts replacements on other computers.</td>
+            </tr>
+            <tr>
+              <th>Scaling</th>
+              <td>Manual.</td>
+              <td>Limited, on one computer.</td>
+              <td>Adds or removes copies automatically or on request.</td>
+            </tr>
+            <tr>
+              <th>Effort to learn and run</th>
+              <td>Low.</td>
+              <td>Low.</td>
+              <td>Higher; usually needs a dedicated platform team or a managed service.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout info"><strong>Overlap, not replacement.</strong> Docker (and compatible tools) create the
+        container images; Kubernetes runs those standard container images at scale. Docker and Compose can restart a
+        crashed container, and Compose can run several containers, so the responsibilities overlap &mdash; but only an
+        orchestrator coordinates a whole cluster. <strong>Do not choose Kubernetes for a small application</strong> that
+        fits comfortably on one server.</div>
+      <div class="four">
+        <div class="f why">
+          <h4>Why it matters</h4>
+          <p>Choosing the right level avoids both under-engineering (manual recovery at 2 a.m.) and over-engineering (a
+            complex cluster for one small tool).</p>
+        </div>
+        <div class="f how">
+          <h4>How it works</h4>
+          <p>You describe what you want (&ldquo;run three copies of this image&rdquo;). The tool makes it so, and keeps
+            it so, within its scope.</p>
+        </div>
+        <div class="f ex">
+          <h4>Example</h4>
+          <p>A training copy of POMS runs fine under Docker Compose. A busy shared version for many sites may justify
+            Kubernetes.</p>
+        </div>
+        <div class="f mis">
+          <h4>Common mistake</h4>
+          <p>Thinking Kubernetes replaces Docker, or that every project needs it. They solve different-sized problems.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 8 FAILURE SIMULATION ============ -->
+    <section class="slide" id="s9" data-title="Failure simulation" data-n="8">
+      <h2><span class="num">8</span> A deployment failure simulation</h2>
+      <p>Follow a realistic problem from deployment to recovery. Version 2.1 of POMS (fictional, simulated data) will
+        fail in production. Your job is to find out why. Each step must be completed before the next.</p>
+      <div class="svgwrap"><svg viewBox="0 0 1000 110" role="img" aria-label="Failure recovery flow with seven steps"
+          id="fsSvg">
+          <g id="fn0">
+            <rect class="bx c-blue" x="8" y="30" width="122" height="52" rx="8" /><text x="69" y="52"
+              text-anchor="middle" class="sm b">1 Deploy</text><text x="69" y="70" text-anchor="middle"
+              class="sm">version 2.1</text>
+          </g>
+          <g id="fn1">
+            <rect class="bx c-grey" x="148" y="30" width="122" height="52" rx="8" /><text x="209" y="52"
+              text-anchor="middle" class="sm b">2 Failure</text><text x="209" y="70" text-anchor="middle"
+              class="sm">appears</text>
+          </g>
+          <g id="fn2">
+            <rect class="bx c-grey" x="288" y="30" width="122" height="52" rx="8" /><text x="349" y="52"
+              text-anchor="middle" class="sm b">3 Read</text><text x="349" y="70" text-anchor="middle" class="sm">the
+              logs</text>
+          </g>
+          <g id="fn3">
+            <rect class="bx c-grey" x="428" y="30" width="122" height="52" rx="8" /><text x="489" y="52"
+              text-anchor="middle" class="sm b">4 Diagnose</text><text x="489" y="70" text-anchor="middle"
+              class="sm">the cause</text>
+          </g>
+          <g id="fn4">
+            <rect class="bx c-grey" x="568" y="30" width="122" height="52" rx="8" /><text x="629" y="52"
+              text-anchor="middle" class="sm b">5 Correct</text><text x="629" y="70" text-anchor="middle" class="sm">the
+              problem</text>
+          </g>
+          <g id="fn5">
+            <rect class="bx c-grey" x="708" y="30" width="122" height="52" rx="8" /><text x="769" y="52"
+              text-anchor="middle" class="sm b">6 Redeploy</text><text x="769" y="70" text-anchor="middle"
+              class="sm">and verify</text>
+          </g>
+          <g id="fn6">
+            <rect class="bx c-grey" x="848" y="30" width="122" height="52" rx="8" /><text x="909" y="52"
+              text-anchor="middle" class="sm b">7 Healthy</text><text x="909" y="70" text-anchor="middle" class="sm">and
+              learn</text>
+          </g>
+          <path class="ln g" d="M131,56 H146" />
+          <path class="ln g" d="M271,56 H286" />
+          <path class="ln g" d="M411,56 H426" />
+          <path class="ln g" d="M551,56 H566" />
+          <path class="ln g" d="M691,56 H706" />
+          <path class="ln g" d="M831,56 H846" />
+        </svg></div>
+      <div class="card">
+        <h3>Production status board (simulated)</h3>
+        <div class="board">
+          <div><small>Version</small><span id="fsVer">2.0</span></div>
+          <div><small>Status</small><span id="fsStat"></span></div>
+          <div><small>Automatic restarts</small><span id="fsRs">0</span></div>
+          <div><small>What users see</small><span id="fsUser"></span></div>
+        </div>
+        <div class="callout bad" id="fsAlert" style="margin:.7rem 0 0" hidden></div>
+      </div>
+      <div class="grid2">
+        <div class="card" id="fsPanel" aria-live="polite"></div>
+        <div class="card">
+          <h3>Application logs</h3>
+          <div class="logbox" id="fsLog"><em>Logs not opened yet.</em></div>
+        </div>
+      </div>
+      <div class="four">
+        <div class="f why">
+          <h4>Why it matters</h4>
+          <p>Failures are normal. What distinguishes good teams is how quickly they find the cause and recover.</p>
+        </div>
+        <div class="f how">
+          <h4>How it works</h4>
+          <p>Observe the symptom, read the evidence (logs), form a diagnosis, correct the cause the repeatable way,
+            redeploy, verify.</p>
+        </div>
+        <div class="f ex">
+          <h4>Example</h4>
+          <p>A new feature needs a mail-server setting that was never given to production, so the application stops at
+            start-up.</p>
+        </div>
+        <div class="f mis">
+          <h4>Common mistake</h4>
+          <p>Fixing it by hand on the server. The fix is lost at the next deployment, and nobody knows production
+            differs from the code.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 9 QUIZ ============ -->
+    <section class="slide" id="s10" data-title="Knowledge check" data-n="9">
+      <h2><span class="num">9</span> Knowledge check</h2>
+      <p>Thirteen questions that test understanding rather than memorisation. You get feedback after each answer and a
+        score at the end.</p>
+      <div class="card" id="quiz" aria-live="polite"></div>
+    </section>
+
+    <!-- ============ 10 SUMMARY ============ -->
+    <section class="slide" id="s11" data-title="Summary &amp; glossary" data-n="&#10003;">
+      <h2><span class="num">&#10003;</span> Summary, discussion and glossary</h2>
+      <div class="grid2">
+        <div class="card">
+          <h3>Key takeaways</h3>
+          <ol>
+            <li>DevOps is a way of working: shared responsibility plus automation, not a tool.</li>
+            <li>Environment differences cause &ldquo;works on my machine&rdquo;; containers remove most of them.</li>
+            <li>Monoliths and microservices are trade-offs; a monolith is often the sensible start.</li>
+            <li>A pipeline takes every change through the same tested, repeatable steps.</li>
+            <li>Delivery: a person releases. Deployment: releases are automatic after checks.</li>
+            <li>Containers are lighter than virtual machines because they share the host kernel.</li>
+            <li>Docker packages; Compose coordinates a few containers; Kubernetes manages a cluster.</li>
+            <li>Logs and metrics close the loop: monitoring feeds the next improvement.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Discussion questions for the classroom</h3>
+          <ul>
+            <li>Which steps in our own release or change process are still manual? What could go wrong in each?</li>
+            <li>Where do handoffs between teams cause delay in our organisation?</li>
+            <li>Which of our applications would suit a monolith, and which might benefit from separation?</li>
+            <li>What would we want to see on a monitoring dashboard to trust a new release?</li>
+            <li>What would a blame-free review of the failure simulation conclude?</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout warn"><strong>Remember:</strong> POMS is a fictional teaching example with simulated data.
+        Real power-sector systems involve additional security, safety, regulatory and approval requirements that are
+        outside the scope of this beginner module.</div>
+      <div class="card">
+        <h3>Glossary</h3><label for="glq"><strong>Search the glossary</strong></label><br><input type="search" id="glq"
+          placeholder="Type a word, e.g. container">
+        <dl class="gl" id="glist"></dl>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="bar">
+    <div class="in">
+      <button class="btn alt" id="prev" type="button">&larr; Previous</button>
+      <div class="mid">
+        <div class="cnt" id="count"></div>
+        <div class="track">
+          <div id="progFill"></div>
+        </div>
+      </div>
+      <button class="btn" id="next" type="button">Next &rarr;</button>
+    </div>
+  </div>
+  <div id="tip" role="tooltip"></div>
+
+  <script>
+    (function () {
+      'use strict';
+      var $ = function (s, r) { return (r || document).querySelector(s) };
+      var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)) };
+
+      /* ---------- GLOSSARY ---------- */
+      var GLOSS = {
+        api: ["API (Application Programming Interface)", "A set of agreed requests one program can send to another to get information or trigger an action, like a menu a waiter understands."],
+        automatedtest: ["Automated test", "A small program that automatically checks that another program behaves as expected."],
+        cdelivery: ["Continuous delivery", "Every tested change is automatically prepared for release, but a person decides when to release it to production."],
+        cdeploy: ["Continuous deployment", "Every change that passes all automatic checks is released to production automatically, with no human approval step."],
+        ci: ["CI (Continuous Integration)", "Merging everyone's changes into the shared code often, and checking each merge automatically by building and testing it."],
+        cluster: ["Cluster", "A group of computers managed together as one pool of capacity."],
+        compose: ["Docker Compose", "A tool that starts and connects several containers on one computer from a single configuration file."],
+        container: ["Container", "A sealed, lightweight box holding one application and everything it needs, isolated from other applications on the same computer."],
+        dashboard: ["Dashboard", "A screen of charts and status indicators that summarises how a system is doing."],
+        dependency: ["Dependency", "Another piece of software, such as a library, that an application needs in order to run."],
+        deployment: ["Deployment", "Putting a new version of software into an environment so it can be used."],
+        devops: ["DevOps", "A way of working where development and operations teams share responsibility and use automation to build, release and run software reliably."],
+        docker: ["Docker", "A widely used tool for building container images and running containers on one computer."],
+        env: ["Environment", "A place where software runs: a developer laptop, a test area, a rehearsal (staging) area or production."],
+        envvar: ["Environment variable", "A named setting given to a program from outside its code, such as the address of a mail server."],
+        git: ["Git", "A widely used tool that records every change to code, so teams can collaborate and restore earlier versions."],
+        grafana: ["Grafana", "An open-source tool that turns stored data, such as Prometheus metrics, into dashboards."],
+        guestos: ["Guest operating system", "A complete operating system installed inside a virtual machine."],
+        hostos: ["Host operating system", "The operating system installed on the physical computer itself."],
+        hypervisor: ["Hypervisor", "Software that divides one physical computer into several virtual machines."],
+        image: ["Container image", "A read-only template, like a master copy, from which containers are started."],
+        isolation: ["Isolation", "Keeping programs separated so that a problem in one cannot easily affect another."],
+        json: ["JSON", "A simple text format for structured data that both people and programs can read."],
+        k8s: ["Kubernetes", "An open-source system that runs and manages containers across a cluster: restarting failures, scaling and updating."],
+        kernel: ["Kernel", "The core of an operating system. It controls the hardware, memory and running programs."],
+        log: ["Log", "A time-stamped written record of events inside an application."],
+        metric: ["Metric", "A number measured repeatedly over time, such as requests per minute or memory used."],
+        microservice: ["Microservice", "A small, separately deployable service that does one job and talks to other services over the network."],
+        monitoring: ["Monitoring", "Continuously collecting and checking logs and metrics so that problems are noticed quickly."],
+        monolith: ["Monolith", "An application built and deployed as one single unit."],
+        orchestration: ["Orchestration", "Automatic coordination of many containers: placing, restarting, scaling and updating them."],
+        os: ["Operating system (OS)", "The main software of a computer, such as Windows or Linux, that manages hardware and runs programs."],
+        pipeline: ["Pipeline", "A fixed series of automatic steps, such as build, test, package and deploy, that every change passes through."],
+        production: ["Production", "The live environment that real users depend on."],
+        prometheus: ["Prometheus", "An open-source monitoring tool that collects and stores metrics and can raise alerts."],
+        python: ["Python", "A widely used, readable programming language."],
+        registry: ["Image registry", "A storage service for container images, with version labels, from which servers download them."],
+        rollback: ["Rollback", "Returning to the previous working version after a faulty release."],
+        scaling: ["Scaling", "Adding or removing copies of an application to match demand."],
+        server: ["Server", "A computer that runs software for many users, usually in a data centre or the cloud."],
+        staging: ["Staging", "A rehearsal environment that closely resembles production, used for final checks."],
+        vc: ["Version control", "Keeping a complete, retrievable history of every change to files."],
+        vm: ["Virtual machine (VM)", "A software-made \"computer inside a computer\" with its own full operating system."]
+      };
+
+      /* ---------- TOOLTIPS ---------- */
+      var tip = $('#tip'), tipEl = null;
+      function showTip(el) {
+        var g = GLOSS[el.getAttribute('data-g')]; if (!g) return; tipEl = el; tip.innerHTML = '<strong>' + g[0] + '</strong><br>' + g[1]; tip.style.display = 'block';
+        var r = el.getBoundingClientRect(), sx = window.pageXOffset, sy = window.pageYOffset, w = tip.offsetWidth, h = tip.offsetHeight;
+        var x = Math.max(8 + sx, Math.min(r.left + sx, sx + window.innerWidth - w - 8)); var y = r.bottom + sy + 8;
+        if (r.bottom + h + 90 > window.innerHeight && r.top > h + 16) y = r.top + sy - h - 8;
+        tip.style.left = x + 'px'; tip.style.top = y + 'px';
+      }
+      function hideTip() { tip.style.display = 'none'; tipEl = null; }
+      document.addEventListener('mouseover', function (e) { var t = e.target.closest && e.target.closest('.term'); if (t) showTip(t); });
+      document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest('.term'); if (t) hideTip(); });
+      document.addEventListener('focusin', function (e) { var t = e.target.closest && e.target.closest('.term'); if (t) showTip(t); });
+      document.addEventListener('focusout', function (e) { if (e.target.closest && e.target.closest('.term')) hideTip(); });
+      document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('.term'); if (t) { if (tipEl === t && tip.style.display === 'block') hideTip(); else showTip(t); } else hideTip(); });
+      $$('.term').forEach(function (t) { t.setAttribute('tabindex', '0'); t.setAttribute('role', 'button'); });
+
+      /* ---------- TEXT SIZE ---------- */
+      var fsz = 18;
+      function setFs(n) { fsz = Math.max(15, Math.min(26, n)); document.documentElement.style.fontSize = fsz + 'px'; }
+      $('#fsp').onclick = function () { setFs(fsz + 2) }; $('#fsm').onclick = function () { setFs(fsz - 2) };
+
+      /* ---------- NAVIGATION ---------- */
+      var slides = $$('.slide'), nav = $('#stepnav'), prevB = $('#prev'), nextB = $('#next'), cur = 0, seen = {};
+      slides.forEach(function (s, i) { var b = document.createElement('button'); b.type = 'button'; b.className = 'pill'; b.innerHTML = '<b>' + s.getAttribute('data-n') + '</b>' + s.getAttribute('data-title'); b.onclick = function () { go(i) }; nav.appendChild(b); });
+      function go(i) {
+        if (i < 0 || i >= slides.length) return; stopAll(); cur = i; seen[i] = 1;
+        slides.forEach(function (s, k) { s.classList.toggle('active', k === i) });
+        $$('.pill').forEach(function (p, k) { p.classList.toggle('on', k === i); p.classList.toggle('seen', !!seen[k] && k !== i); if (k === i && p.scrollIntoView) p.scrollIntoView({ block: 'nearest', inline: 'center' }); });
+        prevB.disabled = i === 0; nextB.disabled = i === slides.length - 1;
+        $('#count').textContent = 'Section ' + (i + 1) + ' of ' + slides.length + ': ' + slides[i].getAttribute('data-title').replace('&amp;', '&');
+        $('#progFill').style.width = ((i + 1) / slides.length * 100) + '%'; hideTip(); window.scrollTo(0, 0);
+        try { history.replaceState(null, '', '#s' + i) } catch (e) { }
+      }
+      prevB.onclick = function () { go(cur - 1) }; nextB.onclick = function () { go(cur + 1) };
+      document.addEventListener('keydown', function (e) { var t = e.target.tagName; if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return; if (e.key === 'ArrowRight') go(cur + 1); else if (e.key === 'ArrowLeft') go(cur - 1); });
+      var road = $('#road');
+      slides.forEach(function (s, i) { if (i === 0) return; var li = document.createElement('li'); var b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<b>' + s.getAttribute('data-n') + '</b> &middot; ' + s.getAttribute('data-title'); b.onclick = function () { go(i) }; li.appendChild(b); road.appendChild(li); });
+
+      /* ---------- helpers ---------- */
+      var timers = [];
+      function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
+      var intervals = [];
+      function stopAll() { timers.forEach(clearTimeout); timers = []; intervals.forEach(clearInterval); intervals = []; if (window.__pipeStop) window.__pipeStop(); if (window.__loopStop) window.__loopStop(); }
+      function bindInfo(svg, panel, data) {
+        $$('[data-k]', svg).forEach(function (g) {
+          g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
+          var act = function () { var k = g.getAttribute('data-k'); if (!data[k]) return; $$('[data-k]', svg).forEach(function (x) { x.classList.remove('picked') }); g.classList.add('picked'); panel.innerHTML = data[k]; };
+          g.addEventListener('click', act); g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } });
+        });
+      }
+
+      /* ---------- S1 handoff ---------- */
+      var HO = {
+        dev: "<strong>Developers</strong> write the software. Their goal is new features. Frustration: &ldquo;Once I hand it over, I lose sight of what happens to it.&rdquo;",
+        test: "<strong>Testers</strong> check the software against requirements. Frustration: they often wait for a test server, and receive large changes with little notice.",
+        infra: "<strong>Infrastructure team</strong> prepares servers and networks. Frustration: requests arrive late, with unclear requirements, and each environment is set up slightly differently.",
+        ops: "<strong>Operations team</strong> keeps the live system running. Frustration: they are blamed for outages caused by changes they did not make and do not fully understand."
+      };
+      bindInfo($('#hoSvg'), $('#hoInfo'), HO);
+      var hoSteps = [
+        { x: 115, t: "<strong>Developers</strong> finish the change (about 5 days) and email a package to the testers." },
+        { x: 365, t: "<strong>Testers</strong> wait for a test server, then test for about 4 days. Any failure goes back to the developers." },
+        { x: 615, t: "<strong>Infrastructure team</strong> prepares the servers by hand from a long document (about 3 days)." },
+        { x: 865, t: "<strong>Operations team</strong> schedules a night-time manual deployment (about 2 days)." }];
+      function hoReset() { stopAll(); $('#ticket').style.transform = 'translate(115px,185px)'; $('#hoMsg').innerHTML = 'Press the button to start. (The number of days shown is illustrative &mdash; real figures vary.)'; }
+      $('#hoReset').onclick = hoReset;
+      $('#hoGo').onclick = function () {
+        hoReset(); var i = 0; function step() { if (i < hoSteps.length) { $('#ticket').style.transform = 'translate(' + hoSteps[i].x + 'px,185px)'; $('#hoMsg').innerHTML = hoSteps[i].t; i++; later(step, 2400); } else { $('#hoMsg').innerHTML = "<strong>Total: about 14 working days</strong> for one small change &mdash; and the first real problems often appear only now, in production. With DevOps, the same small change can reach production in hours, with the checks built in."; } }
+        step();
+      };
+
+      /* ---------- S2 simulator ---------- */
+      var EQ = [
+        { n: "Transformer T-101", m: "Oil temperature", u: "\u00B0C", min: 40, max: 85, d: 0 },
+        { n: "Feeder F-12", m: "Load", u: "MW", min: 10, max: 60, d: 0 },
+        { n: "Generator G-3", m: "Vibration", u: "mm/s", min: 0, max: 7, d: 1 },
+        { n: "Substation S-2", m: "Bus voltage", u: "kV", min: 10.5, max: 11.5, d: 2 },
+        { n: "Battery bank B-1", m: "Charge level", u: "%", min: 60, max: 100, d: 0 },
+        { n: "Cooling pump P-4", m: "Flow rate", u: "L/min", min: 80, max: 140, d: 0 }];
+      var RD = [];
+      function margin() { return +$('#simMargin').value; }
+      function isAbn(r) { var m = (r.max - r.min) * margin() / 100; return r.value < r.min - m || r.value > r.max + m; }
+      function gen() {
+        RD = EQ.map(function (e) {
+          var span = e.max - e.min, v; if (Math.random() < 0.3) { var o = span * (0.08 + Math.random() * 0.25); v = Math.random() < 0.5 ? e.max + o : e.min - o; if (v < 0) v = e.max + o; } else v = e.min + span * (0.1 + Math.random() * 0.8);
+          var r = {}; for (var k in e) r[k] = e[k]; r.value = +v.toFixed(e.d); return r;
+        });
+        if (!RD.some(function (r) { return r.value < r.min || r.value > r.max })) { var j = Math.floor(Math.random() * RD.length), e = RD[j]; e.value = +(e.max + (e.max - e.min) * 0.18).toFixed(e.d); }
+        renderSim();
+      }
+      var apiMode = 'readings';
+      function renderSim() {
+        var body = $('#simBody'); body.innerHTML = ''; var n = 0;
+        RD.forEach(function (r) {
+          var a = isAbn(r); if (a) n++; var tr = document.createElement('tr');
+          tr.innerHTML = '<td>' + r.n + '</td><td>' + r.m + '</td><td><strong>' + r.value + ' ' + r.u + '</strong></td><td>' + r.min + ' to ' + r.max + ' ' + r.u + '</td><td>' + (a ? '<span class="badge2 bad">&#9650; ABNORMAL</span>' : '<span class="badge2 ok">&#10003; Normal</span>') + '</td>'; body.appendChild(tr);
+        });
+        $('#simSum').innerHTML = '<strong>' + RD.length + ' simulated readings received &middot; ' + n + ' abnormal</strong>' + (n ? ' &mdash; an alert is raised for each abnormal reading.' : ' &mdash; no alerts.'); renderApi();
+      }
+      function renderApi() {
+        var o;
+        if (apiMode === 'readings') o = { source: "simulated", readings: RD.map(function (r) { return { equipment: r.n, measure: r.m, value: r.value, unit: r.u, status: isAbn(r) ? "abnormal" : "normal" } }) };
+        else if (apiMode === 'alerts') { var al = RD.filter(isAbn).map(function (r) { return { equipment: r.n, message: r.m + " " + r.value + " " + r.u + " is " + (r.value > r.max ? "above the normal maximum of " + r.max : "below the normal minimum of " + r.min) + " " + r.u, severity: "warning" } }); o = { source: "simulated", count: al.length, alerts: al }; }
+        else o = { service: "Power Operations Monitoring System", version: "2.0", status: "running", data: "simulated - not connected to real power infrastructure" };
+        $('#apiOut').textContent = (apiMode === 'readings' ? 'GET /api/readings' : apiMode === 'alerts' ? 'GET /api/alerts' : 'GET /api/status') + '\n\n' + JSON.stringify(o, null, 2);
+      }
+      ['readings', 'alerts', 'status'].forEach(function (m) { var b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (m === 'readings' ? ' on' : ''); b.textContent = '/api/' + m; b.onclick = function () { apiMode = m; $$('#apiTabs .chip').forEach(function (c) { c.classList.remove('on') }); b.classList.add('on'); renderApi(); }; $('#apiTabs').appendChild(b); });
+      $('#simGen').onclick = gen;
+      $('#simMargin').oninput = function () { $('#simMarginV').textContent = margin(); renderSim(); };
+      gen();
+
+      /* ---------- S3 mono vs micro ---------- */
+      var MM = {
+        mono: "<strong>The monolith.</strong> One package that is built, tested, installed and started as a single unit. Simple to run, but any change means redeploying the whole thing.",
+        'm-ui': "<strong>User interface</strong> &mdash; the screens operators see. In a monolith it is part of the same package as everything else.",
+        'm-logic': "<strong>Business logic</strong> &mdash; the rules of the application, such as &ldquo;oil temperature above 85 &deg;C is abnormal&rdquo;. It calls other parts directly inside the program: fast and simple.",
+        'm-alerts': "<strong>Alerts</strong> &mdash; creates warnings and messages. In a monolith a change here still means rebuilding and redeploying everything.",
+        'm-data': "<strong>Data access</strong> &mdash; the part that reads and saves data in the database.",
+        'm-db': "<strong>One shared database</strong> &mdash; all parts use the same one. Simple, but a heavy change to it affects every part.",
+        'u-ui': "<strong>User interface</strong> &mdash; the web page. It asks the services for what it needs over the network.",
+        's-read': "<strong>Readings service</strong> &mdash; receives and stores equipment readings. Can be scaled up on its own when many readings arrive.",
+        's-alert': "<strong>Alerts service</strong> &mdash; checks readings and flags abnormal ones. It can be changed and released without touching the other services, as long as its agreed requests stay compatible.",
+        's-report': "<strong>Reporting service</strong> &mdash; builds summaries. Used less often, so it can run as a single small copy.",
+        net: "<strong>Network calls</strong> &mdash; services talk over the network. This is slower than calls inside a program, and calls can fail or time out, so services must be written to cope. It is one of the main costs of microservices."
+      };
+      bindInfo($('#mmSvg'), $('#mmInfo'), MM);
+      var mmIds = ['m-ui', 'm-logic', 'm-alerts', 'm-data', 'mono-outer', 's-alert'];
+      function mmClear() { mmIds.forEach(function (i) { $('#' + i).classList.remove('flash') });['bm1', 'bm2', 'bm3', 'bm4', 'bu1'].forEach(function (i) { $('#' + i).style.display = 'none' }); }
+      $('#mmReset').onclick = function () { mmClear(); $('#mmMsg').innerHTML = 'Use the buttons above to compare what happens in each style.'; };
+      $('#mmDeploy').onclick = function () {
+        mmClear(); void $('#mmSvg').getBoundingClientRect(); mmIds.forEach(function (i) { $('#' + i).classList.add('flash') });
+        $('#mmMsg').innerHTML = '<strong>Monolith:</strong> all four parts and the whole package are rebuilt, retested and redeployed, even though only alerts changed. <strong>Microservices:</strong> only the Alerts service is redeployed (highlighted); the others keep running. <em>But</em> the Alerts service must still work with the others, so its agreed requests must stay compatible.';
+      };
+      $('#mmScale').onclick = function () {
+        mmClear();['bm1', 'bm2', 'bm3', 'bm4', 'bu1'].forEach(function (i) { $('#' + i).style.display = '' });
+        $('#mmMsg').innerHTML = '<strong>Monolith:</strong> to cope with more readings you run a second copy of <em>everything</em> (every part shows &times;2). <strong>Microservices:</strong> you add a copy of the Readings service only (&times;2 on that service), which uses fewer resources.';
+      };
+
+      /* ---------- S4 pipeline ---------- */
+      var ST = [
+        { a: "Developer writes", b: "Python code", c: "c-blue", what: "A <strong>developer</strong> (a person who creates software) writes instructions in <span class='term' data-g='python'>Python</span>, a widely used programming language, telling the computer how to read equipment values and flag abnormal ones.", why: "Every change to the system starts as code. Small, focused changes are easier to check and to undo.", who: "Developers.", ex: "Like drafting a revised operating procedure before it is reviewed and issued.", bad: "Large untested changes written over weeks, or code that only works with settings found on the developer's own laptop." },
+        { a: "Git version", b: "control", c: "c-blue", what: "<span class='term' data-g='git'>Git</span> records every change to the code: who made it, when and why. This is <span class='term' data-g='vc'>version control</span>. Colleagues review each change before it is accepted.", why: "Teams can work on the same code without overwriting each other, and any faulty change can be traced and undone.", who: "Developers, with reviewers (colleagues who check changes).", ex: "Like a controlled drawing register: each revision is numbered, signed and can be retrieved.", bad: "Sharing code by email or pen drive so nobody knows which copy is the latest; storing passwords inside the code." },
+        { a: "Automated", b: "tests", c: "c-blue", what: "<span class='term' data-g='automatedtest'>Automated tests</span> are small programs that check the code behaves as expected, for example that a transformer temperature of 95 &deg;C is flagged abnormal. They run by themselves in seconds.", why: "People forget steps; machines do not. Tests catch mistakes before they reach users, and they can be repeated unlimited times.", who: "Developers write them; testers decide what must be checked.", ex: "Like a standard pre-commissioning checklist, run identically every time.", bad: "Too few tests; tests that pass even when the code is broken; ignoring a failing test to meet a deadline." },
+        { a: "CI pipeline", b: "(build and check)", c: "c-blue", what: "<span class='term' data-g='ci'>Continuous Integration</span> (CI) means merging everyone's changes into the shared code often and letting a <span class='term' data-g='pipeline'>pipeline</span> &mdash; an automatic series of steps &mdash; build and test the result each time.", why: "Conflicts and mistakes are found within minutes rather than at the end of a project.", who: "Platform or DevOps engineers maintain the pipeline; developers use it.", ex: "Like a conveyor with quality gates: a part that fails a gate is rejected immediately.", bad: "A pipeline that is often red and ignored, or one so slow that people avoid it." },
+        { a: "Build container", b: "image", c: "c-teal", what: "A <span class='term' data-g='container'>container</span> is a sealed box holding an application and everything it needs. An <span class='term' data-g='image'>image</span> is the template containers are started from. Building the image packages POMS, Python and its libraries together.", why: "The same image runs the same way on a laptop, in a test area or in production. This ends &ldquo;works on my machine&rdquo;.", who: "Developers write the recipe; the pipeline builds the image.", ex: "Like a sealed, labelled toolkit: everything needed for the job is inside, and every kit is identical.", bad: "Putting passwords inside the image, or using vague labels such as &ldquo;latest&rdquo; so nobody knows which version is running." },
+        { a: "Image", b: "registry", c: "c-teal", what: "An <span class='term' data-g='registry'>image registry</span> is a storage service for container images, with version labels such as <code>poms:2.1</code>.", why: "Servers need one trusted place to fetch the exact approved package from.", who: "The infrastructure or platform team runs it; the pipeline uploads to it.", ex: "Like a central store where approved spare parts are kept with part numbers.", bad: "Letting anyone upload unchecked images, or deleting old versions so that going back is impossible." },
+        { a: "Deployment", b: "", c: "c-green", what: "<span class='term' data-g='deployment'>Deployment</span> puts a new version into an <span class='term' data-g='env'>environment</span>. Usually it goes first to a test area, then a rehearsal area (<span class='term' data-g='staging'>staging</span>), then <span class='term' data-g='production'>production</span>. The pipeline tells the target to fetch the image and start it with the right settings.", why: "Automating it removes manual steps, so every deployment is repeatable and quick.", who: "The pipeline performs it; the release or operations team approves where required.", ex: "Like a switching procedure carried out from an approved, written sequence instead of from memory.", bad: "Manual changes on the server, or a missing setting such as an environment variable (see the simulation in section 8)." },
+        { a: "App running in", b: "a container", c: "c-green", what: "The container is started from the image and POMS begins its work: receiving simulated readings, flagging abnormal ones and answering the status screen's requests.", why: "Running in a container separates the application from others on the same computer.", who: "Operations or platform team; developers support.", ex: "Like a machine in its own sealed cabinet: it has its own supplies and can be removed without disturbing its neighbours.", bad: "Assuming it is healthy because it started; storing important data inside the container, where it disappears when the container is replaced." },
+        { a: "Orchestration", b: "", c: "c-green", what: "<span class='term' data-g='orchestration'>Orchestration</span> software manages many containers across many computers: it restarts failed ones, adds copies when load rises and updates without stopping the service. <span class='term' data-g='k8s'>Kubernetes</span> is the best-known example.", why: "People cannot watch hundreds of containers around the clock; automation can.", who: "Platform or infrastructure engineers.", ex: "Like a control-room shift supervisor who reassigns work when a unit trips.", bad: "Adopting it for a tiny application that does not need it, adding cost and complexity." },
+        { a: "Monitoring", b: "and logs", c: "c-amber", what: "<span class='term' data-g='log'>Logs</span> are time-stamped written records of what the application did. <span class='term' data-g='metric'>Metrics</span> are numbers measured over time. <span class='term' data-g='monitoring'>Monitoring</span> tools collect both, show them on <span class='term' data-g='dashboard'>dashboards</span> and raise alerts.", why: "You cannot fix what you cannot see. Early warnings reduce outages and shorten recovery.", who: "Operations, together with developers.", ex: "Like control-room displays and the event recorder that show what happened and when.", bad: "So many alerts that people ignore them, or nobody watching outside office hours." },
+        { a: "Feedback and", b: "improvement", c: "c-amber", what: "What was learned &mdash; failures, slow responses, user suggestions &mdash; is turned into the next improvement, which starts a new trip through the pipeline.", why: "Learning makes each release safer and more useful than the last.", who: "The whole team: developers, testers, operations and business owners.", ex: "Like a review after an incident that results in an updated procedure.", bad: "Blaming individuals instead of fixing the process, or never acting on the findings." }];
+      var pSel = 0, pTimer = null, PW = 150, PH = 64;
+      function pos(i) { return i < 6 ? { x: 20 + i * 175, y: 50 } : { x: 20 + (i - 6) * 175, y: 190 }; }
+      (function buildPipe() {
+        var h = '', l = '';
+        for (var i = 0; i < ST.length; i++) {
+          var p = pos(i), s = ST[i];
+          h += '<g class="node" data-i="' + i + '" tabindex="0" role="button" aria-label="Stage ' + (i + 1) + ': ' + s.a + ' ' + s.b + '"><rect class="bx ' + s.c + '" x="' + p.x + '" y="' + p.y + '" width="' + PW + '" height="' + PH + '" rx="10"/><circle class="numc" cx="' + (p.x + 4) + '" cy="' + (p.y + 4) + '" r="13"/><text class="sm b numt" x="' + (p.x + 4) + '" y="' + (p.y + 9) + '" text-anchor="middle">' + (i + 1) + '</text><text class="nt" x="' + (p.x + 75) + '" y="' + (p.y + (s.b ? 28 : 38)) + '" text-anchor="middle">' + s.a + '</text>' + (s.b ? '<text class="nt" x="' + (p.x + 75) + '" y="' + (p.y + 48) + '" text-anchor="middle">' + s.b + '</text>' : '') + '</g>';
+          if (i < 5 || (i > 5 && i < 10)) { var q = pos(i); l += '<path class="ln" d="M' + (q.x + PW + 2) + ',' + (q.y + 32) + ' H' + (q.x + 175 - 3) + '"/>'; }
+        }
+        l += '<path class="ln" d="M970,116 V152 H95 V188"/>';
+        l += '<path class="ln red" d="M795,256 V304 H8 V82 H18"/><text x="420" y="296" text-anchor="middle" class="b" style="fill:#9b1c1c">Feedback: what we learn becomes the next change</text>';
+        l += '<g><rect class="bx c-white" x="905" y="190" width="150" height="64" rx="10" style="stroke-dasharray:6 5"/><use href="#mon" x="919" y="200"/><text x="1000" y="215" class="sm b" text-anchor="start">watches</text><text x="1000" y="233" class="sm" text-anchor="start">the live app</text></g>';
+        $('#pipeNodes').innerHTML = h; $('#pipeLinks').innerHTML = l;
+      })();
+      function pSelect(i) {
+        pSel = Math.max(0, Math.min(ST.length - 1, i)); $$('#pipeNodes .node').forEach(function (n, k) { n.classList.toggle('sel', k === pSel) });
+        var p = pos(pSel); $('#pkgDot').style.transform = 'translate(' + (p.x + 75) + 'px,' + (p.y - 14 + (pSel < 6 ? -0 : 0)) + 'px)';
+        var s = ST[pSel]; $('#pipeDetail').innerHTML = '<h3>Stage ' + (pSel + 1) + ' of ' + ST.length + ': ' + s.a + ' ' + s.b + '</h3><div class="det"><div><h5>What happens</h5><p>' + s.what + '</p></div><div><h5>Why it exists</h5><p>' + s.why + '</p></div><div><h5>Who is responsible</h5><p>' + s.who + '</p></div><div><h5>A familiar example</h5><p>' + s.ex + '</p></div><div><h5>What can go wrong</h5><p>' + s.bad + '</p></div></div>';
+        $$('#pipeDetail .term').forEach(function (t) { t.setAttribute('tabindex', '0'); t.setAttribute('role', 'button'); });
+      }
+      $$('#pipeNodes .node').forEach(function (n) { n.addEventListener('click', function () { pPause(); pSelect(+n.getAttribute('data-i')); }); n.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pPause(); pSelect(+n.getAttribute('data-i')); } }); });
+      function pPause() { if (pTimer) { clearInterval(pTimer); pTimer = null; } $('#pPlay').innerHTML = '&#9654; Play walk-through'; }
+      window.__pipeStop = pPause;
+      $('#pPlay').onclick = function () { if (pTimer) { pPause(); return; } if (pSel >= ST.length - 1) pSelect(0); $('#pPlay').innerHTML = '&#10074;&#10074; Pause'; pTimer = setInterval(function () { if (pSel < ST.length - 1) pSelect(pSel + 1); else pPause(); }, 4500); };
+      $('#pPrev').onclick = function () { pPause(); pSelect(pSel - 1) }; $('#pNext').onclick = function () { pPause(); pSelect(pSel + 1) };
+      pSelect(0);
+
+      /* ---------- S4+ release types ---------- */
+      var CDSTEPS = ["Developer merges a change", "Automatic build and tests", "Package ready and stored in the registry", "Automatic deployment to a test area", "Human approval to release", "Deployment to production"];
+      var CD = {
+        ci: { t: "Continuous Integration", st: ['auto', 'auto', 'off', 'off', 'off', 'off'], d: "<span class='term' data-g='ci'>Continuous Integration</span> covers the <em>front</em> of the journey: changes are merged often and checked automatically. It does not by itself release anything to users." },
+        cdel: { t: "Continuous Delivery", st: ['auto', 'auto', 'auto', 'auto', 'manual', 'manual'], d: "<span class='term' data-g='cdelivery'>Continuous delivery</span> keeps every change <em>ready to release</em>. A person (for example a release manager) decides when to release to production, usually with one approved action. Common where changes need business sign-off." },
+        cdep: { t: "Continuous Deployment", st: ['auto', 'auto', 'auto', 'auto', 'off', 'auto'], d: "<span class='term' data-g='cdeploy'>Continuous deployment</span> goes one step further: every change that passes all automatic checks is released to production automatically. The human approval step is replaced by strong automated checks. It needs very good tests and monitoring." }
+      };
+      var cdKey = 'cdel';
+      function renderCd() {
+        var c = CD[cdKey], h = '<h3>' + c.t + '</h3><p>' + c.d + '</p><div class="steps">';
+        c.st.forEach(function (s, i) { h += '<div class="stepbox ' + s + '"><strong>' + (i + 1) + '. ' + CDSTEPS[i] + '</strong><br><span class="badge2 ' + (s === 'auto' ? 'info' : s === 'manual' ? 'warn' : 'grey') + '">' + (s === 'auto' ? 'Automatic' : s === 'manual' ? 'A person decides' : (cdKey === 'cdep' && i === 4 ? 'Replaced by automatic checks' : 'Not part of this')) + '</span></div>'; });
+        h += '</div>'; $('#cdBody').innerHTML = h; $$('#cdBody .term').forEach(function (t) { t.setAttribute('tabindex', '0'); t.setAttribute('role', 'button'); });
+      }
+      Object.keys(CD).forEach(function (k) { var b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (k === cdKey ? ' on' : ''); b.textContent = CD[k].t; b.onclick = function () { cdKey = k; $$('#cdTabs .chip').forEach(function (c) { c.classList.remove('on') }); b.classList.add('on'); renderCd(); }; $('#cdTabs').appendChild(b); });
+      renderCd();
+
+      /* ---------- feedback loop ---------- */
+      var LP = [
+        { n: "Plan", c: "c-blue", d: "The business and operations teams decide what to improve (for example, a new cooling-pump alert) and break it into small tasks." },
+        { n: "Code", c: "c-blue", d: "Developers write the change in Python and store it in version control." },
+        { n: "Build and test", c: "c-teal", d: "The pipeline builds the container image and runs the automated tests." },
+        { n: "Release", c: "c-teal", d: "The approved image is stored in the registry with a version number, ready to deploy." },
+        { n: "Deploy", c: "c-green", d: "The new version is rolled out, first to a test area, then to production." },
+        { n: "Operate", c: "c-green", d: "The orchestrator keeps the containers running, restarts failures and adds capacity when needed." },
+        { n: "Monitor", c: "c-amber", d: "Logs and metrics show how the system behaves; dashboards and alerts tell people when something is wrong." },
+        { n: "Learn", c: "c-amber", d: "The team reviews what monitoring and users showed, without blame, and feeds findings into the next plan." }];
+      var LCX = 500, LCY = 235, LRX = 340, LRY = 170, LW = 140, LH = 48;
+      function lclip(cx, cy, tx, ty) { var dx = tx - cx, dy = ty - cy; var s = Math.min((LW / 2 + 4) / Math.abs(dx || 1e-6), (LH / 2 + 4) / Math.abs(dy || 1e-6)); return [cx + dx * s, cy + dy * s]; }
+      (function buildLoop() {
+        var P = LP.map(function (_, i) { var a = (-90 + i * 45) * Math.PI / 180; return { x: LCX + LRX * Math.cos(a), y: LCY + LRY * Math.sin(a) }; }); var h = '';
+        for (var i = 0; i < 8; i++) { var a = P[i], b = P[(i + 1) % 8], p1 = lclip(a.x, a.y, b.x, b.y), p2 = lclip(b.x, b.y, a.x, a.y); h += '<path class="ln" d="M' + p1[0].toFixed(1) + ',' + p1[1].toFixed(1) + ' L' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1) + '"/>'; }
+        for (var j = 0; j < 8; j++) { var q = P[j]; h += '<g data-k="l' + j + '"><rect class="bx ' + LP[j].c + '" x="' + (q.x - LW / 2).toFixed(1) + '" y="' + (q.y - LH / 2).toFixed(1) + '" width="' + LW + '" height="' + LH + '" rx="10" id="lr' + j + '"/><text class="b" x="' + q.x.toFixed(1) + '" y="' + (q.y + 6).toFixed(1) + '" text-anchor="middle">' + (j + 1) + '. ' + LP[j].n + '</text></g>'; }
+        h += '<use href="#mon" x="468" y="190"/><text x="500" y="262" text-anchor="middle" class="lg">Continuous</text><text x="500" y="286" text-anchor="middle" class="lg">improvement</text><text x="500" y="312" text-anchor="middle" class="sm">learning feeds the next plan</text>';
+        $('#loopSvg').innerHTML = h; var data = {}; LP.forEach(function (s, i) { data['l' + i] = '<strong>' + (i + 1) + '. ' + s.n + '</strong> &mdash; ' + s.d; }); bindInfo($('#loopSvg'), $('#lpInfo'), data);
+      })();
+      var lpT = null;
+      function lpStop() { if (lpT) { clearInterval(lpT); lpT = null; } $('#lpPlay').innerHTML = '&#9654; Trace one improvement'; }
+      window.__loopStop = lpStop;
+      $('#lpPlay').onclick = function () {
+        if (lpT) { lpStop(); return; } var i = 0; $('#lpPlay').innerHTML = '&#10074;&#10074; Pause'; function s() { $$('#loopSvg [data-k]').forEach(function (x) { x.classList.remove('picked') }); var g = $('#loopSvg [data-k="l' + (i % 8) + '"]'); g.classList.add('picked'); $('#lpInfo').innerHTML = '<strong>' + ((i % 8) + 1) + '. ' + LP[i % 8].n + '</strong> &mdash; ' + LP[i % 8].d; i++; if (i > 8) lpStop(); }
+        s(); lpT = setInterval(s, 3200);
+      };
+
+      /* ---------- S5 tech stack ---------- */
+      var TOOLS = [
+        { n: "Python", g: "Build", one: "A readable programming language.", what: "A general-purpose programming language known for readable code and widely used for data work and automation.", role: "The POMS rules (for example, what counts as an abnormal reading) are written in Python.", like: "The language the operating instructions are written in.", alt: "Java, C#, JavaScript and others do the same job. Choose the language your team can maintain.", bad: "Choosing a language because it is fashionable rather than supportable." },
+        { n: "Git", g: "Build", one: "Records every change to the code.", what: "A version-control tool: it stores the full history of the code, who changed what, and lets many people work in parallel.", role: "Holds the POMS code and its deployment settings, so every change is traceable and reversible.", like: "A controlled drawing register with numbered revisions.", alt: "Other version-control tools exist, but Git is the common standard. It is not the same as a shared folder.", bad: "Committing passwords or keys into the history." },
+        { n: "Automated testing", g: "Build", one: "Programs that check programs.", what: "Small programs that check that the code does what it should, quickly and repeatably.", role: "Check, for example, that 95 \u00B0C is flagged as abnormal and 60 \u00B0C is not.", like: "A standard pre-commissioning checklist, run identically each time.", alt: "Manual testing still has a place (especially exploratory testing), but should not be the only safety net.", bad: "Tests that never fail, or are skipped under time pressure." },
+        { n: "CI/CD", g: "Build", one: "Automatic route from change to release.", what: "Continuous Integration and Continuous Delivery/Deployment: a pipeline that builds, tests, packages and releases each change automatically.", role: "Takes each POMS change through build, test and packaging, then releases it according to the chosen policy.", like: "A conveyor line with quality gates.", alt: "Many products offer pipelines (for example GitHub Actions, GitLab CI, Jenkins). The concept matters more than the product.", bad: "A pipeline nobody trusts or maintains." },
+        { n: "Docker", g: "Package", one: "Packages and runs containers.", what: "A tool that builds container images and runs containers on one computer.", role: "Packages POMS and what it needs into one image that runs the same everywhere.", like: "A sealed, labelled toolkit.", alt: "Other tools can build and run the same standard container images. Docker is not a virtual machine.", bad: "Putting secrets inside the image." },
+        { n: "Container registry", g: "Package", one: "Stores container images.", what: "A storage service for container images with version labels. Organisations often run a private one.", role: "Holds approved POMS images such as version 2.0 and 2.1; servers download from here.", like: "The central stores with part numbers.", alt: "Public and private registries exist; enterprises usually prefer private, access-controlled ones.", bad: "No clear control over who can upload or what is approved." },
+        { n: "Docker Compose", g: "Package", one: "Runs a small group of containers together.", what: "A tool plus one configuration file that describes several containers working together and starts them with one command.", role: "Starts the POMS web page, readings part and database together on one training computer.", like: "A single start-up checklist for a small plant.", alt: "For a single container, plain Docker is enough. For many computers, an orchestrator is more suitable.", bad: "Using it for production at large scale, where an orchestrator is more suitable." },
+        { n: "Kubernetes", g: "Run", one: "Runs containers across many computers.", what: "An open-source orchestrator that runs containers across a cluster, restarting failures, scaling and updating without downtime.", role: "Keeps several copies of POMS running for many users and replaces failed ones automatically.", like: "A control-room shift supervisor.", alt: "Managed versions are offered by cloud providers. Not needed for small applications.", bad: "Adopting it before there is a real need, then struggling to operate it." },
+        { n: "Application logs", g: "Observe", one: "Written records of what happened.", what: "Time-stamped messages the application writes about what it is doing, including errors.", role: "POMS writes a line when it starts, when it receives a reading and when something fails.", like: "The event recorder.", alt: "Logs tell the story of individual events; metrics show trends in numbers.", bad: "Logging too little to diagnose a problem, or logging passwords." },
+        { n: "Metrics", g: "Observe", one: "Numbers measured over time.", what: "Measurements taken regularly, such as requests per minute, response time and memory used.", role: "Show how busy and how healthy POMS is, and reveal trends before users complain.", like: "Gauges and trend charts on a control panel.", alt: "Metrics are numbers; logs are stories. You usually need both.", bad: "Measuring everything but looking at nothing." },
+        { n: "Prometheus", g: "Observe", one: "Collects and stores metrics.", what: "An open-source monitoring tool that regularly asks applications for their metrics, stores them over time and can trigger alerts.", role: "Collects POMS numbers and raises an alert if, say, the service stops responding.", like: "The recorder that logs gauge readings every few seconds.", alt: "Other monitoring products do similar work. It does not draw polished dashboards by itself; that is Grafana's job.", bad: "Alert rules so sensitive that people start ignoring them." },
+        { n: "Grafana", g: "Observe", one: "Draws dashboards from stored data.", what: "An open-source tool that turns stored data, such as Prometheus metrics, into charts and dashboards.", role: "Shows the POMS health on one screen for the operations team.", like: "The control-room display wall.", alt: "It shows data; it does not collect it. Other dashboard tools exist.", bad: "Cluttered dashboards nobody understands." }];
+      var tFilter = 'All', GR = ['All', 'Build', 'Package', 'Run', 'Observe'];
+      GR.forEach(function (g) { var b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (g === 'All' ? ' on' : ''); b.textContent = g === 'All' ? 'All tools' : g === 'Build' ? 'Create and check' : g === 'Package' ? 'Package and store' : g === 'Run' ? 'Run' : 'Observe'; b.onclick = function () { tFilter = g; $$('#toolChips .chip').forEach(function (c) { c.classList.remove('on') }); b.classList.add('on'); renderTools(); }; $('#toolChips').appendChild(b); });
+      function renderTools() {
+        var h = ''; TOOLS.forEach(function (t) {
+          if (tFilter !== 'All' && t.g !== tFilter) return;
+          h += '<details class="acc"><summary>' + t.n + ' <span class="badge2 info">' + (t.g === 'Build' ? 'Create and check' : t.g === 'Package' ? 'Package and store' : t.g) + '</span> &mdash; <span style="font-weight:500">' + t.one + '</span></summary><div class="body"><div class="det"><div><h5>What it is</h5><p>' + t.what + '</p></div><div><h5>Its role in POMS</h5><p>' + t.role + '</p></div><div><h5>Familiar comparison</h5><p>' + t.like + '</p></div><div><h5>Alternatives / do not confuse with</h5><p>' + t.alt + '</p></div><div><h5>Common mistake</h5><p>' + t.bad + '</p></div></div></div></details>';
+        });
+        $('#toolList').innerHTML = h;
+      }
+      renderTools();
+
+      /* ---------- S6 VM vs containers ---------- */
+      var VM = {
+        vm: "<strong>A virtual machine</strong> contains its own application, libraries and a full guest operating system. It behaves like a separate computer, which gives strong separation but uses more memory and time.",
+        hyp: "<strong>Hypervisor</strong> &mdash; the software that divides one physical server into several virtual machines and gives each its share of the hardware.",
+        hw: "<strong>Physical server</strong> &mdash; the real hardware: processors, memory, disks and network connections.",
+        noguest: "<strong>The saving.</strong> A container has no operating system of its own, so there is much less to store, start, update and secure per application.",
+        ctr: "<strong>A container</strong> contains the application and its libraries (<span class='term' data-g='dependency'>dependencies</span>) only. It uses the host's operating system kernel. Starting one is like starting a program, not booting a computer.",
+        rt: "<strong>Container runtime</strong> &mdash; the software that starts containers, keeps them separated and gives each its share of resources.",
+        kernel: "<strong>Shared kernel.</strong> All containers on the server use the same host operating-system kernel. That is why they are light, and also why the host must be kept patched and secure."
+      };
+      bindInfo($('#vmSvg'), $('#vmInfo'), VM);
+      $$('#vmInfo .term').forEach(function (t) { t.setAttribute('tabindex', '0') });
+      var vmObs = new MutationObserver(function () { $$('#vmInfo .term').forEach(function (t) { t.setAttribute('tabindex', '0'); t.setAttribute('role', 'button'); }); }); vmObs.observe($('#vmInfo'), { childList: true });
+      function vmReset() { $('#vmBarA').style.width = '0'; $('#vmBarB').style.width = '0'; $('#vmBarA').textContent = ''; $('#vmBarB').textContent = ''; $('#vmMemA').textContent = '0'; $('#vmMemB').textContent = '0'; $('#vmTimeA').innerHTML = '&ndash;'; $('#vmTimeB').innerHTML = '&ndash;'; }
+      $('#vmReset').onclick = vmReset;
+      $('#vmRun').onclick = function () { vmReset(); later(function () { $('#vmBarA').style.width = '100%'; $('#vmBarA').textContent = '3 apps + 3 guest OS = about 6 GB'; $('#vmBarB').style.width = '30%'; $('#vmBarB').textContent = 'about 1.8 GB'; $('#vmMemA').textContent = 'about 6'; $('#vmMemB').textContent = 'about 1.8'; $('#vmTimeA').textContent = 'typically minutes'; $('#vmTimeB').textContent = 'typically seconds'; }, 60); };
+
+      /* ---------- S7 orchestration ---------- */
+      var K = { crashed: false, failed: false };
+      function kReset() { ['kr1', 'kr2', 'kr3', 'kx1', 'kx2'].forEach(function (i) { $('#' + i).style.display = 'none' });['ka1', 'ka2', 'kb1', 'kb2', 'kc1'].forEach(function (i) { $('#' + i).style.display = ''; $('#' + i).setAttribute('class', 'bx c-green') }); $('#kS2r').setAttribute('class', 'bx c-grey'); $('#kStatus').textContent = 'All containers healthy'; $('#kMsg').innerHTML = 'Try the buttons to see how the orchestrator reacts (the Kubernetes panel above).'; }
+      $('#kReset').onclick = function () { stopAll(); kReset(); };
+      $('#kCrash').onclick = function () {
+        stopAll(); kReset(); $('#kb2').setAttribute('class', 'bx c-red'); $('#kx2').style.display = ''; $('#kStatus').textContent = 'A container on Server 2 has crashed...';
+        $('#kMsg').innerHTML = 'A container has crashed. <strong>Docker / Compose</strong> can restart it on the same computer only if configured to. <strong>Kubernetes</strong> notices that fewer copies are running than requested&hellip;';
+        later(function () { $('#kb2').style.display = 'none'; $('#kx2').style.display = 'none'; $('#kr1').style.display = ''; $('#kStatus').textContent = 'Replacement started automatically on Server 3'; $('#kMsg').innerHTML = '<strong>Kubernetes</strong> started a replacement container (on Server 3, which had spare capacity). Nobody had to be woken up.'; }, 2600);
+      };
+      $('#kFail').onclick = function () {
+        stopAll(); kReset(); $('#kS2r').setAttribute('class', 'bx c-red'); $('#kb1').setAttribute('class', 'bx c-red'); $('#kb2').setAttribute('class', 'bx c-red'); $('#kx1').style.display = ''; $('#kx2').style.display = ''; $('#kStatus').textContent = 'Server 2 has failed!';
+        $('#kMsg').innerHTML = 'A whole computer has failed. With <strong>Docker or Compose on that computer</strong>, everything on it is down until a person intervenes. <strong>Kubernetes</strong> notices that the containers on Server 2 are gone&hellip;';
+        later(function () { $('#kb1').style.display = 'none'; $('#kb2').style.display = 'none'; $('#kx1').style.display = 'none'; $('#kx2').style.display = 'none'; $('#kr2').style.display = ''; $('#kr3').style.display = ''; $('#kStatus').textContent = 'Containers restarted on Servers 1 and 3'; $('#kMsg').innerHTML = '<strong>Kubernetes</strong> restarted the lost containers on the healthy servers. The application keeps running while the failed server is repaired.'; }, 2800);
+      };
+
+      /* ---------- S8 failure simulation ---------- */
+      var F = { step: 0, rolled: false, rs: 0, pickOk: false, diagOk: false, fixOk: false }, rtT = null;
+      var LOGS = [
+        { t: "09:14:01 INFO  Starting Power Operations Monitoring System v2.1", k: "info" },
+        { t: "09:14:01 INFO  Loading settings", k: "info" },
+        { t: "09:14:02 INFO  Connected to simulated readings store", k: "info" },
+        { t: "09:14:02 WARN  Slow response from time server (180 ms)", k: "warn" },
+        { t: "09:14:02 ERROR Required setting ALERT_MAIL_SERVER is not set", k: "cause" },
+        { t: "09:14:02 ERROR Startup aborted, exiting with code 1", k: "result" },
+        { t: "09:14:12 INFO  Container restart attempt 3 of 5 (orchestrator)", k: "info" }];
+      var LOGFB = { info: "That line is normal start-up activity, not the cause of the failure.", warn: "A warning worth noting, but it does not stop the application from starting.", result: "This is the <em>result</em>: start-up was aborted. Look one line above for the reason it aborted.", cause: "Yes. This line names the exact problem: a required setting is missing." };
+      function board() {
+        var a = F.step; var ok = (a === 0) || F.rolled || a >= 6; var v = (a === 0 || F.rolled) ? '2.0' : '2.1';
+        $('#fsVer').textContent = v;
+        $('#fsStat').innerHTML = ok ? '<span class="badge2 ok">&#10003; Running normally</span>' : '<span class="badge2 bad">&#9650; Crashing and restarting</span>';
+        $('#fsRs').textContent = F.rs;
+        $('#fsUser').textContent = ok ? 'The operations screen works.' : 'The screen shows "Service unavailable".';
+        var al = $('#fsAlert'); if (!ok) { al.hidden = false; al.innerHTML = '<strong>Monitoring alert:</strong> Power Operations Monitoring System has been unavailable for 2 minutes.'; } else if (F.rolled && a < 6) { al.hidden = false; al.className = 'callout ok'; al.style.margin = '.7rem 0 0'; al.innerHTML = '<strong>Service restored</strong> by rolling back to version 2.0. Version 2.1 is still not live; the underlying problem is not yet fixed.'; } else al.hidden = true;
+        if (!(F.rolled && a < 6)) al.className = 'callout bad';
+      }
+      function startRt() { stopRt(); rtT = setInterval(function () { if (F.step >= 1 && F.step <= 5 && !F.rolled && F.rs < 9) { F.rs++; board(); } }, 1500); intervals.push(rtT); }
+      function stopRt() { if (rtT) { clearInterval(rtT); rtT = null; } }
+      function logRender(pick) {
+        var h = ''; var show = F.step >= 2; if (!show) { $('#fsLog').innerHTML = '<em>Logs not opened yet.</em>'; return; }
+        LOGS.forEach(function (l, i) { h += '<button type="button" class="logline' + (l.k === 'cause' || l.k === 'result' ? ' err' : '') + (pick ? ' pick' : '') + (F.pickOk && l.k === 'cause' ? ' chosen' : '') + '" data-i="' + i + '"' + (pick ? '' : ' tabindex="-1"') + '>' + l.t + '</button>'; });
+        if (F.step >= 5) h += '<button type="button" class="logline" tabindex="-1" style="color:#0f6a37">' + (F.step >= 6 ? '09:31:40 INFO  Starting Power Operations Monitoring System v2.1<br>09:31:40 INFO  ALERT_MAIL_SERVER found, mail alerts enabled<br>09:31:41 INFO  Application ready, health check passed' : '(new logs will appear after redeployment)') + '</button>';
+        $('#fsLog').innerHTML = h;
+      }
+      function mcq(host, opts, onOk) { host.innerHTML = ''; var fb = document.createElement('div'); fb.className = 'fb'; opts.forEach(function (o) { var b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.textContent = o.t; b.onclick = function () { if (o.ok) { $$('.opt', host).forEach(function (x) { x.disabled = true }); b.classList.add('ok'); fb.className = 'fb ok'; fb.innerHTML = '<strong>&#10003; Correct.</strong> ' + o.f; onOk(); } else { b.classList.add('bad'); fb.className = 'fb bad'; fb.innerHTML = '<strong>&#10007; Not quite.</strong> ' + o.f; } }; host.appendChild(b); }); host.appendChild(fb); }
+      function fsRender() {
+        for (var i = 0; i < 7; i++) { var r = $('#fn' + i + ' rect'); r.setAttribute('class', 'bx ' + (i < F.step ? 'c-green' : (i === F.step ? 'c-blue' : 'c-grey'))); }
+        board(); logRender(F.step === 2 && !F.pickOk); var P = $('#fsPanel'), h = '';
+        if (F.step === 0) { h = '<h3>Step 1 of 7: Deploy the new version</h3><p>The team has built <strong>version 2.1</strong> of POMS. It adds <em>email notification</em> for serious alerts, so the program now needs one new <span class="term" data-g="envvar">environment variable</span>: <code>ALERT_MAIL_SERVER</code> (the address of the mail server).</p><p>On the developer\'s laptop that setting exists. The pipeline ran all automated tests and they all passed, because the test environment has the setting too.</p><button class="btn" id="fsGo" type="button">Deploy version 2.1 to production</button>'; }
+        else if (F.step === 1) { h = '<h3>Step 2 of 7: Something is wrong</h3><p>Within a minute the status board turns red and monitoring raises an alert. The pipeline said &ldquo;success&rdquo; and the tests passed, yet production is failing.</p><p>Do not guess. Look at the evidence the system left behind.</p><button class="btn" id="fsGo" type="button">Open the application logs</button>'; }
+        else if (F.step === 2) { h = '<h3>Step 3 of 7: Read the logs</h3><p><span class="term" data-g="log">Logs</span> are time-stamped written records. <strong>Click the line in the log panel that best explains <em>why</em> the application keeps failing.</strong></p><div class="fb" id="fsPickFb"></div><button class="btn" id="fsGo" type="button" ' + (F.pickOk ? '' : 'disabled') + '>Continue to diagnosis</button>'; }
+        else if (F.step === 3) { h = '<h3>Step 4 of 7: Diagnose</h3><p>Based on the log, what is the most likely cause?</p><div id="fsMcq"></div><button class="btn" id="fsGo" type="button" ' + (F.diagOk ? '' : 'disabled') + '>Continue to the fix</button>'; }
+        else if (F.step === 4) { h = '<h3>Step 5 of 7: Correct the problem</h3><p>How should the team fix this?</p><div id="fsMcq"></div><div class="callout info" style="margin-top:.6rem"><strong>Real-world note:</strong> many teams first <em>roll back</em> to the previous working version to restore service, then fix the cause calmly. Try it if you like.<br><button class="btn alt sm" id="fsRoll" type="button" ' + (F.rolled ? 'disabled' : '') + '>Roll back to version 2.0 first (optional)</button></div><button class="btn" id="fsGo" type="button" ' + (F.fixOk ? '' : 'disabled') + '>Continue to redeployment</button>'; }
+        else if (F.step === 5) { h = '<h3>Step 6 of 7: Redeploy and verify</h3><p>The setting is now part of the deployment configuration, stored under version control and reviewed by a colleague. Redeploy version 2.1 through the normal pipeline.</p><button class="btn" id="fsGo" type="button">Redeploy version 2.1 with the corrected setting</button>'; }
+        else { h = '<h3>Step 7 of 7: Healthy &mdash; now learn</h3><div class="callout ok"><strong>Recovered.</strong> Logs show the setting was found and the health check passed. The status board is green.</div><p><strong>Prevention checklist</strong></p><ul><li>The application checks for required settings at start-up and says clearly which one is missing.</li><li>Settings are stored in version control and reviewed like code.</li><li>Staging has the same kind of settings as production, so this failure appears there first.</li><li>A short release checklist lists any <em>new</em> setting a version needs.</li><li>The review is blame-free: the aim is to fix the process, not to find a culprit.</li></ul><button class="btn alt" id="fsAgain" type="button">Restart the simulation</button>'; }
+        P.innerHTML = h; $$('#fsPanel .term').forEach(function (t) { t.setAttribute('tabindex', '0'); t.setAttribute('role', 'button'); });
+        var go = $('#fsGo');
+        if (go) go.onclick = function () { if (F.step === 0) { F.rs = 1; F.step = 1; startRt(); } else F.step++; if (F.step === 6) { F.rs = F.rs; stopRt(); } fsRender(); };
+        if (F.step === 3) mcq($('#fsMcq'), [
+          { t: "There is a bug in the alert-detection logic.", ok: false, f: "The log shows the program never got that far: it stopped at start-up, before processing any readings." },
+          { t: "The production server's hardware has failed.", ok: false, f: "The application starts and runs its start-up steps. A hardware failure would not produce a message naming a missing setting." },
+          { t: "The new version needs a setting that production was never given.", ok: true, f: "The log names the missing setting. It worked in testing because the setting existed there: the environments were not the same." },
+          { t: "The network cable between the servers has been unplugged.", ok: false, f: "The log shows the connection to the readings store succeeded. The problem is a missing setting, not the network." }],
+          function () { F.diagOk = true; $('#fsGo').disabled = false; });
+        if (F.step === 3 && F.diagOk) {/* restore state on re-render */ }
+        if (F.step === 4) mcq($('#fsMcq'), [
+          { t: "Log in to the production server and start the program by hand with the setting.", ok: false, f: "This is a manual change nobody has recorded. It will be lost at the next deployment, and production now differs from the code." },
+          { t: "Add ALERT_MAIL_SERVER to the production deployment configuration, keep that configuration in version control, and redeploy.", ok: true, f: "The fix is repeatable, recorded and reviewed, so it will survive future deployments." },
+          { t: "Switch off monitoring alerts so that the warnings stop.", ok: false, f: "That hides the symptom and removes the safety net. The service would still be down." },
+          { t: "Delete the email feature from the code and push it to production immediately.", ok: false, f: "This skips testing and review, and does not address why production differs from testing." }],
+          function () { F.fixOk = true; $('#fsGo').disabled = false; });
+        var ro = $('#fsRoll'); if (ro) ro.onclick = function () { F.rolled = true; ro.disabled = true; board(); $('#fsPanel').insertAdjacentHTML('beforeend', '<div class="fb info">Rolled back. Users are served again by version 2.0 while the team fixes version 2.1.</div>'); };
+        var ag = $('#fsAgain'); if (ag) ag.onclick = function () { F = { step: 0, rolled: false, rs: 0, pickOk: false, diagOk: false, fixOk: false }; stopRt(); fsRender(); };
+        if (F.step === 2) { $$('#fsLog .logline.pick').forEach(function (b) { b.onclick = function () { var l = LOGS[+b.getAttribute('data-i')]; var fb = $('#fsPickFb'); if (l.k === 'cause') { F.pickOk = true; fb.className = 'fb ok'; fb.innerHTML = '<strong>&#10003; Correct.</strong> ' + LOGFB.cause; fsRenderKeep(); } else { fb.className = 'fb bad'; fb.innerHTML = '<strong>&#10007; Not quite.</strong> ' + LOGFB[l.k]; } }; }); }
+      }
+      function fsRenderKeep() { var fbHtml = $('#fsPickFb').innerHTML; fsRender(); var fb = $('#fsPickFb'); fb.className = 'fb ok'; fb.innerHTML = fbHtml; }
+      fsRender();
+
+      /* ---------- S9 quiz ---------- */
+      var Q = [
+        { q: "A developer says: \"It works on my machine, but it fails on the test server.\" What is the most likely underlying problem?", o: ["The test server's screen is too small.", "The two environments are set up differently, for example different software versions or settings.", "Automated tests are always wrong.", "The code has not been written yet."], a: 1, w: "Differences between environments are the classic cause. Packaging the application with what it needs (a container) and describing environments in files reduces these differences." },
+        { q: "Which statement best describes DevOps?", o: ["A software product that an organisation buys to automate deployments.", "A separate team that takes over after developers have finished.", "A way of working in which development and operations share responsibility and use automation to deliver and run software reliably.", "A programming language used on servers."], a: 2, w: "DevOps is about people, process and automation together. Tools support it, but buying a tool does not create DevOps." },
+        { q: "What is the main benefit of packaging an application as a container image?", o: ["It makes the code shorter.", "The same package, with its dependencies, runs the same way in different places.", "It removes the need for testing.", "It makes the application immune to failures."], a: 1, w: "The image carries the application and what it needs, so it behaves consistently on a laptop, in testing and in production. It does not remove the need for tests or prevent failures." },
+        { q: "A small team is building an internal tool for about 50 users. The application is simple and changes rarely. Which approach is most sensible?", o: ["A well-organised monolith.", "Thirty microservices, because it is modern.", "No version control, to keep things simple.", "Rewriting everything as microservices before the first release."], a: 0, w: "A monolith is often the sensible choice for small, simple applications and small teams. Microservices add network communication and operational work that may not pay off." },
+        { q: "Which is a genuine cost of choosing microservices?", o: ["They cannot be tested.", "More network communication and more things to deploy, monitor and troubleshoot.", "They require physical servers.", "They cannot be written in Python."], a: 1, w: "Splitting an application into services creates network calls that can fail and many more parts to run and watch. That is the price paid for independent changes and scaling." },
+        { q: "Where is a built container image normally stored so that servers can fetch it for deployment?", o: ["In an image registry.", "In an email attachment.", "On each developer's desktop.", "Inside the monitoring dashboard."], a: 0, w: "A registry is the trusted, versioned store for images. Servers pull the exact approved version from it." },
+        { q: "What distinguishes continuous delivery from continuous deployment?", o: ["Delivery means no testing; deployment means testing.", "Delivery only goes to developers' laptops.", "In delivery a person decides when to release to production; in deployment every change that passes the checks is released automatically.", "They mean exactly the same thing."], a: 2, w: "Both keep changes always ready. The difference is the final release step: a human decision in delivery, automatic in deployment." },
+        { q: "What do containers on the same host share that virtual machines do not?", o: ["A separate guest operating system for each.", "The host operating system's kernel.", "The same database.", "The same user passwords."], a: 1, w: "Containers share the host kernel, which is why they are lighter than virtual machines that each carry a full guest operating system." },
+        { q: "When is Docker Compose most appropriate?", o: ["Managing thousands of containers across many servers.", "Replacing Git.", "Starting and connecting the few containers that make up one application on one computer.", "Measuring electricity consumption."], a: 2, w: "Compose describes a small multi-container application in one file and runs it on one computer. For many computers, an orchestrator such as Kubernetes is more suitable." },
+        { q: "What does Kubernetes mainly do?", o: ["Writes Python code.", "Stores the history of source code.", "Draws dashboards.", "Runs and manages many containers across a group of computers, restarting failures and scaling up."], a: 3, w: "Kubernetes is an orchestrator: it keeps the desired number of containers running across a cluster and replaces failed ones." },
+        { q: "In the failure simulation the pipeline passed, but production crashed at start-up. Where should the team look first?", o: ["The application logs.", "The office network cable.", "The source-control history of unrelated projects.", "A user's spreadsheet."], a: 0, w: "Logs record what the application did and why it stopped. Reading evidence first prevents guessing." },
+        { q: "What is the difference between logs and metrics?", o: ["Logs are numbers over time; metrics are written event records.", "They are the same thing.", "Both are used only by developers.", "Logs are written records of events; metrics are numbers measured over time."], a: 3, w: "Logs tell the story of individual events. Metrics show trends such as requests per minute. Good monitoring uses both." },
+        { q: "What roles do Prometheus and Grafana usually play?", o: ["Prometheus builds container images; Grafana stores source code.", "Prometheus collects and stores metrics and can raise alerts; Grafana turns data into dashboards.", "Both are programming languages.", "Both replace Kubernetes."], a: 1, w: "They are common monitoring partners: one gathers the numbers, the other shows them." }];
+      var qs = { i: 0, score: 0, ans: [], done: false };
+      function qRender() {
+        var host = $('#quiz');
+        if (qs.done) {
+          var pct = Math.round(qs.score / Q.length * 100), msg = pct >= 85 ? 'Excellent. You have a solid beginner understanding of the DevOps journey.' : pct >= 60 ? 'Good progress. Review the topics below and try again.' : 'A good start. Revisit the sections and try again; these ideas take practice.';
+          var miss = ''; Q.forEach(function (q, i) { if (qs.ans[i] !== q.a) miss += '<li><strong>' + q.q + '</strong><br>Correct answer: ' + q.o[q.a] + '<br><em>' + q.w + '</em></li>'; });
+          host.innerHTML = '<h3>Your result</h3><p class="bigscore">' + qs.score + ' / ' + Q.length + '</p><p><strong>' + pct + '%</strong> &mdash; ' + msg + '</p>' + (miss ? '<h4>Questions to review</h4><ol>' + miss + '</ol>' : '<p>You answered every question correctly.</p>') + '<button class="btn" id="qAgain" type="button">Try again</button>';
+          $('#qAgain').onclick = function () { qs = { i: 0, score: 0, ans: [], done: false }; qRender(); }; return;
+        }
+        var q = Q[qs.i], h = '<div class="qprog" aria-hidden="true">'; for (var k = 0; k < Q.length; k++) { h += '<span class="' + (k === qs.i ? 'cur' : (qs.ans[k] === undefined ? '' : (qs.ans[k] === Q[k].a ? 'right' : 'wrong'))) + '"></span>'; }
+        h += '</div><p><strong>Question ' + (qs.i + 1) + ' of ' + Q.length + '</strong> &middot; Score so far: ' + qs.score + '</p><h3>' + q.q + '</h3><div id="qopts"></div><div class="fb" id="qfb"></div><button class="btn" id="qNext" type="button" hidden>' + (qs.i === Q.length - 1 ? 'See my score' : 'Next question &rarr;') + '</button>';
+        host.innerHTML = h; var oh = $('#qopts');
+        q.o.forEach(function (t, i) {
+          var b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.textContent = String.fromCharCode(65 + i) + '.  ' + t; b.onclick = function () {
+            if (qs.ans[qs.i] !== undefined) return; qs.ans[qs.i] = i; var ok = i === q.a; if (ok) qs.score++;
+            $$('.opt', oh).forEach(function (x, j) { x.disabled = true; if (j === q.a) x.classList.add('ok'); else if (j === i) x.classList.add('bad'); });
+            var fb = $('#qfb'); fb.className = 'fb ' + (ok ? 'ok' : 'bad'); fb.innerHTML = '<strong>' + (ok ? '&#10003; Correct.' : '&#10007; Not quite.') + '</strong> ' + (ok ? '' : 'The right answer is ' + String.fromCharCode(65 + q.a) + '. ') + q.w;
+            var nb = $('#qNext'); nb.hidden = false; nb.focus(); nb.onclick = function () { if (qs.i === Q.length - 1) qs.done = true; else qs.i++; qRender(); };
+          }; oh.appendChild(b);
+        });
+      }
+      qRender();
+
+      /* ---------- S10 glossary ---------- */
+      function renderGl(q) {
+        var keys = Object.keys(GLOSS).sort(function (a, b) { return GLOSS[a][0].localeCompare(GLOSS[b][0]); }); var h = ''; q = (q || '').toLowerCase();
+        keys.forEach(function (k) { var g = GLOSS[k]; if (q && (g[0] + ' ' + g[1]).toLowerCase().indexOf(q) < 0) return; h += '<dt>' + g[0] + '</dt><dd>' + g[1] + '</dd>'; });
+        $('#glist').innerHTML = h || '<dd>No matching terms.</dd>';
+      }
+      $('#glq').oninput = function () { renderGl(this.value) }; renderGl('');
+
+      /* ---------- start ---------- */
+      var start = 0; if (location.hash) { var m = /^#s(\d+)$/.exec(location.hash); if (m && +m[1] < slides.length) start = +m[1]; }
+      go(start);
+    })();
+  </script>
+</body>
+
+</html>

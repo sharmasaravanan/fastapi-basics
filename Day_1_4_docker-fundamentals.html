@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docker Fundamentals: From Python Code to Containers</title>
+<style>
+:root{
+  --bg:#ffffff; --panel:#f3f6fb; --ink:#0b1220; --ink2:#1d2a3f; --muted:#3d4b61;
+  --line:#b9c4d6; --brand:#0a3d91; --brand2:#0b57d0;
+  --ok:#0b6b2c; --okbg:#e3f5e8; --bad:#a3001b; --badbg:#fde8ec;
+  --warn:#7a4300; --warnbg:#fff1d6; --info:#0a4a7a; --infobg:#e2f1fb;
+  --code-bg:#f1f4f9;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--sans)}
+a{color:var(--brand2)}
+h1,h2,h3,h4{color:#07152e;line-height:1.25}
+h1{font-size:1.9rem;margin:0}
+h2{font-size:1.65rem;margin:0}
+h3{font-size:1.2rem;margin:1.5rem 0 .4rem}
+h4{font-size:1.02rem;margin:.2rem 0 .4rem}
+p{margin:.6rem 0}
+ul,ol{padding-left:1.3rem}
+li{margin:.25rem 0}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);border:1px solid #d3dbe8;border-radius:5px;padding:.05em .35em;color:#0b1220}
+pre{margin:0;font-family:var(--mono);font-size:.9rem;line-height:1.5;white-space:pre;overflow-x:auto;color:#0b1220}
+pre code{background:none;border:0;padding:0;font-size:inherit}
+.skip{position:absolute;left:-999px;top:0;background:#fff;padding:.5rem 1rem;z-index:100}
+.skip:focus{left:8px;top:8px;border:2px solid var(--brand)}
+
+/* header, layout, nav */
+.top{background:#eaf1fc;border-bottom:4px solid var(--brand);padding:1rem 1.5rem}
+.top .sub{margin:.3rem 0 .8rem;color:var(--ink2);font-weight:500}
+.top .ctl{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.top .ctl b{font-size:.95rem}
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);max-width:1440px;margin:0 auto}
+nav#toc{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:14px;border-right:1px solid var(--line);background:var(--panel)}
+nav#toc a{display:flex;gap:.5rem;align-items:center;padding:.4rem .6rem;border:2px solid transparent;border-radius:8px;color:var(--ink);text-decoration:none;font-size:.95rem;font-weight:500}
+nav#toc a:hover{background:#e3ebf7}
+nav#toc a.active{background:#fff;border-color:var(--brand);font-weight:700}
+nav#toc .num{display:inline-grid;place-items:center;min-width:1.7rem;height:1.7rem;border-radius:50%;background:var(--brand);color:#fff;font-size:.8rem;font-weight:700}
+nav#toc .tick{margin-left:auto;color:var(--ok);font-weight:800}
+.prog{height:12px;background:#d6deec;border-radius:7px;overflow:hidden;margin:.3rem 0 .2rem}
+.prog>i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.proglabel{font-size:.85rem;color:var(--muted);margin-bottom:.6rem}
+main{padding:20px 34px 90px;min-width:0}
+section.mod{padding:10px 0 26px;border-top:4px solid var(--brand);margin-top:38px;scroll-margin-top:12px}
+.sechead{display:flex;gap:.8rem;align-items:center;margin:.8rem 0}
+.secnum{display:inline-grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;font-size:1.1rem;flex:none}
+.lead{font-size:1.12rem;color:var(--ink2)}
+.done-row{margin-top:1.4rem;padding:.6rem .9rem;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.done-row label{cursor:pointer;font-weight:600}
+@media(max-width:900px){
+  .layout{display:block}
+  nav#toc{position:sticky;top:0;height:auto;display:flex;gap:.3rem;overflow-x:auto;white-space:nowrap;z-index:20;border-right:none;border-bottom:2px solid var(--line);padding:8px}
+  nav#toc .prog,nav#toc .proglabel{display:none}
+  main{padding:14px 14px 80px}
+  body{font-size:16px}
+}
+
+/* buttons */
+.btn{font:600 .95rem var(--sans);padding:.5rem .9rem;border-radius:8px;border:2px solid var(--brand);background:#fff;color:var(--brand);cursor:pointer}
+.btn:hover{background:#e6eefb}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.primary:hover{background:#082f70}
+.btn.active,.btn[aria-pressed="true"]{background:var(--brand);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn.danger:hover{background:var(--badbg)}
+.btn.small{padding:.25rem .6rem;font-size:.85rem}
+button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #e07000;outline-offset:2px}
+input[type=text],input[type=number],select{font:inherit;padding:.35rem .5rem;border:2px solid var(--muted);border-radius:6px;background:#fff;color:var(--ink)}
+input[type=number]{width:6.5rem}
+label{font-weight:600}
+
+/* callouts + badges */
+.callout{border-left:6px solid;padding:.7rem 1rem;border-radius:8px;margin:1rem 0}
+.callout.info{background:var(--infobg);border-color:var(--info)}
+.callout.ok{background:var(--okbg);border-color:var(--ok)}
+.callout.bad{background:var(--badbg);border-color:var(--bad)}
+.callout.warn{background:var(--warnbg);border-color:var(--warn)}
+.callout .t{display:block;font-weight:800;margin-bottom:.15rem}
+.badge{display:inline-block;font:700 .72rem var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:.2rem .5rem;border-radius:5px;border:1.5px solid;white-space:nowrap}
+.badge.terminal{background:#ffe9a8;border-color:#7a4300;color:#3b2200}
+.badge.sim{background:#dbeafe;border-color:#0a3d91;color:#062a66}
+.badge.out{background:#eef1f6;border-color:#3d4b61;color:#1b2536}
+.badge.file{background:#e3f5e8;border-color:#0b6b2c;color:#064019}
+
+/* code boxes */
+.codebox{border:2px solid #7a4300;border-radius:10px;margin:.9rem 0;background:#fffdf5;overflow:hidden}
+.codebox.out{border:2px dashed #3d4b61;background:#f6f8fb}
+.codebox.file{border-color:#0b6b2c;background:#f7fcf8}
+.cmdhead{display:flex;gap:.6rem;align-items:center;justify-content:space-between;padding:.4rem .7rem;background:#fff1c9;border-bottom:1px solid #d9b45f;flex-wrap:wrap}
+.codebox.out .cmdhead{background:#e9edf3;border-bottom:1px solid #b9c4d6}
+.codebox.file .cmdhead{background:#dff3e5;border-bottom:1px solid #9cc8a8}
+.codebox pre{padding:.8rem 1rem}
+.cmdhead .fname{font-family:var(--mono);font-weight:700;font-size:.9rem}
+.cm{color:#4a5568;font-style:italic}
+
+/* OS toggle */
+body[data-os="unix"] [data-os="win"]{display:none}
+body[data-os="win"] [data-os="unix"]{display:none}
+
+/* generic components */
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin:1rem 0}
+.card{border:1.5px solid var(--line);border-radius:12px;padding:.8rem 1rem;background:#fff}
+.card h4{margin-top:0}
+.sim{border:2px solid var(--brand);border-radius:12px;padding:1rem;background:#f8fbff;margin:1.1rem 0}
+.simhead{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem}
+.tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}
+.tablewrap{overflow-x:auto;margin:.8rem 0}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:#e3ebf7;color:#07152e}
+.term-out{font-family:var(--mono);font-size:.88rem;background:#f6f8fb;border:1px solid var(--line);border-left:6px solid #3d4b61;padding:.7rem 1rem;white-space:pre-wrap;color:#0b1220;min-height:4rem;border-radius:6px;overflow-x:auto}
+.term-out.err{border-left-color:var(--bad);background:#fff5f6}
+.term-out.good{border-left-color:var(--ok);background:#f2fbf4}
+.pill{display:inline-block;padding:.15rem .6rem;border-radius:999px;font-weight:700;font-size:.85rem;border:2px solid}
+.pill.ok{background:var(--okbg);border-color:var(--ok);color:#064019}
+.pill.bad{background:var(--badbg);border-color:var(--bad);color:#6d0013}
+.pill.warn{background:var(--warnbg);border-color:var(--warn);color:#3b2200}
+.pill.gray{background:#eef1f6;border-color:var(--muted);color:#1b2536}
+.row{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;margin:.5rem 0}
+.hint{color:var(--muted);font-size:.92rem}
+
+/* svg */
+.svgwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#fff;padding:.5rem;margin:.8rem 0}
+.svgwrap svg{display:block;width:100%;min-width:680px;height:auto}
+svg text{font-family:var(--sans);fill:#0b1220}
+svg .t{font-size:14px;font-weight:600}
+svg .ts{font-size:12px;font-weight:500}
+svg .tl{font-size:16px;font-weight:700}
+svg .sh{stroke-width:2}
+svg .f-blue{fill:#dbe8fb;stroke:#0a3d91}
+svg .f-green{fill:#dff3e5;stroke:#0b6b2c}
+svg .f-amber{fill:#ffefc2;stroke:#7a4300}
+svg .f-red{fill:#fde3e8;stroke:#a3001b}
+svg .f-gray{fill:#eef1f6;stroke:#3d4b61}
+svg .f-white{fill:#fff;stroke:#0a3d91}
+svg .node{cursor:pointer}
+svg .node.hl rect,svg rect.hl{stroke:#c25e00;stroke-width:4}
+svg .node.dim,svg .arrow.dim,svg .dimmable.dim{opacity:.35}
+svg .arrow{stroke:#0b1220;stroke-width:2.2;fill:none;marker-end:url(#ah)}
+svg .arrow.hl{stroke:#c25e00;stroke-width:4;marker-end:url(#ahh)}
+svg .arrow.ok{stroke:#0b6b2c;stroke-width:3;marker-end:url(#ahg)}
+svg .arrow.no{stroke:#a3001b;stroke-width:3;stroke-dasharray:7 5;marker-end:url(#ahr)}
+svg .state.cur rect{fill:#fff0b3;stroke:#c25e00;stroke-width:4}
+
+/* annotated code */
+.annot{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:1rem;margin:.9rem 0}
+@media(max-width:900px){.annot{grid-template-columns:1fr}}
+.annot-code{border:2px solid #0b6b2c;border-radius:10px;background:#f7fcf8;padding:.4rem 0;overflow-x:auto}
+.annot-top{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.2rem .8rem .5rem;border-bottom:1px solid #9cc8a8;margin-bottom:.3rem;flex-wrap:wrap}
+.ln{display:flex;width:100%;min-width:max-content;text-align:left;background:none;border:0;padding:0 .8rem 0 0;font-family:var(--mono);font-size:.88rem;line-height:1.55;cursor:pointer;color:#0b1220}
+.ln .n{display:inline-block;width:2.6rem;text-align:right;padding-right:.8rem;color:#4a5568;user-select:none;flex:none}
+.ln .c{white-space:pre}
+.ln:hover{background:#e6f2e9}
+.ln.sel{background:#fff0b3;box-shadow:inset 4px 0 0 #c25e00}
+.ln.blank{cursor:default}
+.annot-note{border:2px solid var(--brand);border-radius:10px;padding:.8rem 1rem;background:#f1f6ff;position:sticky;top:12px;align-self:start;min-height:6rem}
+.annot-note h4{margin-top:0}
+
+/* layers etc */
+.layerlist{list-style:none;padding:0;margin:.5rem 0}
+.layerlist li{border:2px solid var(--line);border-radius:8px;padding:.4rem .7rem;margin:.3rem 0;display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;background:#fff;font-family:var(--mono);font-size:.88rem}
+.layerlist li.cached{border-color:var(--ok);background:var(--okbg)}
+.layerlist li.rebuilt{border-color:var(--bad);background:var(--badbg)}
+.layerlist li.meta{border-style:dashed}
+.ic-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}
+@media(max-width:800px){.ic-top{grid-template-columns:1fr}}
+.ic-containers{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:1rem}
+.ic-c{border:2px solid var(--ok);border-radius:10px;background:#fff;padding:.6rem .8rem}
+.ic-c.stopped{border-color:var(--muted);background:#eef1f6}
+.ic-c .wl{border:2px dashed var(--warn);border-radius:6px;background:var(--warnbg);padding:.3rem .5rem;margin:.4rem 0;font-family:var(--mono);font-size:.82rem;min-height:2.4rem}
+.ps-grid{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin:.8rem 0}
+.ps-box{border:2px solid var(--line);border-radius:10px;padding:.6rem .8rem;background:#fff;min-height:7rem}
+.ps-box.has{border-color:var(--ok);background:var(--okbg)}
+.ps-box.lost{border-color:var(--bad);background:var(--badbg)}
+.ps-box.off{opacity:.55;border-style:dashed}
+.reveal{margin:.6rem 0;border:2px solid var(--line);border-radius:10px;padding:.6rem .9rem;background:#fff}
+.reveal.cause{border-color:var(--warn);background:var(--warnbg)}
+.reveal.diag{border-color:#7a4300}
+.reveal.fix{border-color:var(--ok);background:var(--okbg)}
+.reveal h4{margin:0 0 .3rem}
+
+/* quiz */
+.q{border:2px solid var(--line);border-radius:12px;padding:.8rem 1rem;margin:1rem 0;background:#fff}
+.q h4{margin:0 0 .5rem;font-size:1.05rem}
+.opt{display:block;width:100%;text-align:left;margin:.35rem 0;padding:.55rem .8rem;border:2px solid var(--line);border-radius:8px;background:#fff;font:inherit;color:var(--ink);cursor:pointer}
+.opt:hover:not(:disabled){background:#eef3fb;border-color:var(--brand)}
+.opt.correct{border-color:var(--ok);background:var(--okbg);font-weight:700}
+.opt.wrong{border-color:var(--bad);background:var(--badbg)}
+.opt:disabled{cursor:default;color:var(--ink)}
+.expl{margin-top:.5rem;padding:.5rem .8rem;border-radius:8px;background:var(--infobg);border-left:6px solid var(--info)}
+.scorebar{position:sticky;top:0;z-index:5;background:#fff;border:2px solid var(--brand);border-radius:10px;padding:.5rem .9rem;margin:.8rem 0;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+
+/* lab */
+.lab-step{border:2px solid var(--line);border-radius:12px;padding:.8rem 1rem;margin:1rem 0;background:#fff}
+.lab-step.done{border-color:var(--ok);background:#f6fcf8}
+.lab-step h4{margin:0 0 .3rem;font-size:1.1rem}
+.lab-step label.chk{display:flex;gap:.5rem;align-items:center;cursor:pointer;margin-top:.6rem;font-weight:700}
+input[type=checkbox]{width:1.2rem;height:1.2rem;accent-color:var(--brand)}
+.secline{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:.88rem;border:2px solid var(--line);border-radius:6px;background:#fff;padding:.3rem .6rem;margin:.25rem 0;color:var(--ink);cursor:pointer}
+.secline.picked{border-color:var(--brand);background:#e6eefb}
+.secline.hit{border-color:var(--ok);background:var(--okbg)}
+.secline.miss{border-color:var(--bad);background:var(--badbg)}
+
+@media print{
+  nav#toc,.top .ctl,.btn,.done-row,.tabs{display:none!important}
+  .layout{display:block}
+  body{font-size:12pt}
+  section.mod{break-before:page}
+  [data-os]{display:block!important}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.prog>i{transition:none}}
+</style>
+</head>
+<body data-os="unix">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0b1220"/></marker>
+  <marker id="ahh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#c25e00"/></marker>
+  <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0b6b2c"/></marker>
+  <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a3001b"/></marker>
+</defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <h1>Docker Fundamentals: From Python Code to Containers</h1>
+  <p class="sub">Beginner training module for GETRI, GUVNL and subsidiary teams. Works offline. No Docker engine runs inside this page.</p>
+  <div class="ctl">
+    <b>Show commands for:</b>
+    <button class="btn" data-set-os="unix" aria-pressed="true">Linux / macOS (bash)</button>
+    <button class="btn" data-set-os="win" aria-pressed="false">Windows (PowerShell)</button>
+    <button class="btn small" id="btn-print">Print / save as PDF</button>
+    <button class="btn small danger" id="btn-reset">Reset my progress</button>
+  </div>
+</header>
+
+<div class="layout">
+<nav id="toc" aria-label="Module sections">
+  <div class="proglabel" id="prog-label">Progress: 0 of 12 sections</div>
+  <div class="prog" aria-hidden="true"><i id="prog-bar"></i></div>
+  <a href="#s1" data-sec="s1"><span class="num">1</span>Why Docker?<span class="tick"></span></a>
+  <a href="#s2" data-sec="s2"><span class="num">2</span>What is a container?<span class="tick"></span></a>
+  <a href="#s3" data-sec="s3"><span class="num">3</span>Image vs container<span class="tick"></span></a>
+  <a href="#s4" data-sec="s4"><span class="num">4</span>Docker architecture<span class="tick"></span></a>
+  <a href="#s5" data-sec="s5"><span class="num">5</span>Create a Python app<span class="tick"></span></a>
+  <a href="#s6" data-sec="s6"><span class="num">6</span>Build an image<span class="tick"></span></a>
+  <a href="#s7" data-sec="s7"><span class="num">7</span>Run &amp; inspect<span class="tick"></span></a>
+  <a href="#s8" data-sec="s8"><span class="num">8</span>Config &amp; persistence<span class="tick"></span></a>
+  <a href="#s9" data-sec="s9"><span class="num">9</span>Common errors<span class="tick"></span></a>
+  <a href="#s10" data-sec="s10"><span class="num">10</span>Security basics<span class="tick"></span></a>
+  <a href="#s11" data-sec="s11"><span class="num">11</span>Hands-on lab<span class="tick"></span></a>
+  <a href="#s12" data-sec="s12"><span class="num">12</span>Knowledge check<span class="tick"></span></a>
+  <a href="#glossary" data-sec="glossary"><span class="num">A</span>Glossary<span class="tick"></span></a>
+</nav>
+
+<main id="main">
+
+<div class="card" style="margin-top:1rem">
+  <h3 style="margin-top:0">How to use this module</h3>
+  <p>Work through the sections in order. Each section ends with a checkbox so you can track progress (it is saved in your browser only).</p>
+  <p><b>Three kinds of boxes appear throughout. Learn to tell them apart:</b></p>
+  <ul>
+    <li><span class="badge terminal">Run in your real terminal</span> A command you must type yourself in a terminal where Docker is installed. This page never runs these.</li>
+    <li><span class="badge out">Example output</span> What you will typically see. It is written for teaching and was not produced live; IDs, sizes and times will differ on your machine.</li>
+    <li><span class="badge sim">Concept simulator</span> A small animation inside this page that models an idea (for example, one image producing many containers). It is <b>not</b> Docker and does not talk to Docker.</li>
+    <li><span class="badge file">Source file</span> A complete file you can copy or download and use as-is.</li>
+  </ul>
+  <h3>What you will be able to do</h3>
+  <ul>
+    <li>Explain images, containers, Dockerfiles, registries, ports, environment variables, volumes and the container lifecycle.</li>
+    <li>Follow the steps to containerize a small Python (FastAPI) application.</li>
+    <li>Diagnose the seven most common beginner errors.</li>
+  </ul>
+  <h3>For the real practice (sections 5 to 11) you need</h3>
+  <ul>
+    <li>Docker Desktop (Windows / macOS) or Docker Engine (Linux), confirmed with <code>docker version</code>.</li>
+    <li>Python 3.10 or newer for the optional local run (<code>python --version</code>).</li>
+    <li>Access to Docker Hub and PyPI for the first build, or an internal mirror provided by your IT team. Offline classroom? See the lab prerequisites for <code>docker save</code> / <code>docker load</code>.</li>
+  </ul>
+</div>
+
+<!-- ============ SECTION 1 ============ -->
+<section class="mod" id="s1">
+<div class="sechead"><span class="secnum">1</span><h2>Why Docker?</h2></div>
+<p class="lead">"It works on my machine!" is one of the most common sentences in software teams. Docker exists largely to make that sentence unnecessary.</p>
+
+<h3>The problem</h3>
+<p>An engineer builds a small Python service that reports substation equipment readings. It runs perfectly on their laptop. They hand the code to the operations team, and it fails on the server. The code did not change. The <b>environment</b> did.</p>
+<div class="grid">
+  <div class="card"><h4>Different runtime</h4><p>The laptop has Python 3.12. The server has Python 3.8. Newer syntax simply does not run on the older version.</p></div>
+  <div class="card"><h4>Different dependencies</h4><p>The laptop has FastAPI and uvicorn installed. The server has never had <code>pip install</code> run on it, or has other versions.</p></div>
+  <div class="card"><h4>Different surroundings</h4><p>Operating system, environment variables, file paths, installed system libraries and open ports all differ between machines.</p></div>
+</div>
+
+<div class="sim" id="wm-sim">
+  <div class="simhead"><span class="badge sim">Concept simulator</span><strong>Same code, same command, four environments</strong></div>
+  <p>The service uses one line of modern Python (shown below). Pick an environment to see what happens when the <i>same command</i> is run there.</p>
+  <div class="codebox file">
+    <div class="cmdhead"><span class="badge file">Excerpt</span><span class="fname">app.py (excerpt)</span></div>
+<pre><code>def label(unit: str | None = None) -&gt; str:   <span class="cm"># "str | None" needs Python 3.10 or newer</span>
+    return unit or "n/a"</code></pre>
+  </div>
+  <p>Command run in every environment: <code>python -m uvicorn app:app --port 8000</code></p>
+  <div class="tabs" id="wm-tabs" role="group" aria-label="Choose an environment"></div>
+  <div class="tablewrap" id="wm-table"></div>
+  <p><span class="badge out">Illustrative output</span> <span class="hint">Written for teaching, not produced by a real run.</span></p>
+  <div class="term-out" id="wm-out" aria-live="polite">Choose an environment above.</div>
+</div>
+
+<h3>What Docker changes</h3>
+<div class="tablewrap"><table>
+  <tr><th></th><th>Without Docker</th><th>With Docker</th></tr>
+  <tr><td><b>What you hand over</b></td><td>Source code plus a page of setup instructions.</td><td>An <b>image</b>: code, Python, libraries and settings packaged together.</td></tr>
+  <tr><td><b>Setup on a new machine</b></td><td>Install Python, create a virtual environment, install packages, hope versions match.</td><td>Install Docker once, then run the image.</td></tr>
+  <tr><td><b>Two apps needing different Python versions</b></td><td>Painful, they fight over the same machine-wide installation.</td><td>Each runs in its own container with its own Python.</td></tr>
+  <tr><td><b>Rolling back a bad release</b></td><td>Rebuild the old environment by hand.</td><td>Start the previous image tag.</td></tr>
+</table></div>
+<div class="callout warn"><span class="t">Be realistic</span>Docker does not fix bugs in your code, and a badly built image still fails. It makes the <i>environment</i> repeatable. You still need to know what your application needs.</div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s1"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 2 ============ -->
+<section class="mod" id="s2">
+<div class="sechead"><span class="secnum">2</span><h2>What is a container?</h2></div>
+<p class="lead">A container is a normal process on a host machine, started from an image, that is given its own isolated view of files, processes and networking.</p>
+
+<h3>The parts, from top to bottom</h3>
+<p>Click a term to highlight it in the diagram. Then switch to the virtual machine view and compare.</p>
+<div class="sim">
+  <div class="simhead"><span class="badge sim">Interactive diagram</span>
+    <button class="btn small active" data-view="cont" aria-pressed="true">Containers</button>
+    <button class="btn small" data-view="vm" aria-pressed="false">Virtual machines (for comparison)</button>
+  </div>
+  <div class="tabs" id="gl-tabs">
+    <button class="btn small" data-g="app">Application</button>
+    <button class="btn small" data-g="libs">Libraries &amp; dependencies</button>
+    <button class="btn small" data-g="cont">Container image / container</button>
+    <button class="btn small" data-g="rt">Container runtime</button>
+    <button class="btn small" data-g="os">Host operating system</button>
+  </div>
+  <div class="svgwrap"><svg id="cv-svg" viewBox="0 0 900 430" role="img" aria-label="Layered diagram comparing containers and virtual machines">
+    <g id="cv-cont">
+      <text class="tl" x="40" y="40">Three containers sharing one host</text>
+      <g>
+        <rect class="sh f-green" data-g="cont" x="40" y="60" width="255" height="170" rx="8"/>
+        <text class="t" x="52" y="82">Container 1</text>
+        <rect class="sh f-white" data-g="app" x="52" y="92" width="231" height="34" rx="6"/><text class="ts" x="64" y="114">Your Python app (app.py)</text>
+        <rect class="sh f-white" data-g="libs" x="52" y="134" width="231" height="34" rx="6"/><text class="ts" x="64" y="156">Python 3.12 + FastAPI 0.115</text>
+        <text class="ts" x="52" y="196">From image: substation-monitor:1.0</text>
+        <text class="ts" x="52" y="216">No guest OS inside</text>
+      </g>
+      <g>
+        <rect class="sh f-green" data-g="cont" x="322" y="60" width="255" height="170" rx="8"/>
+        <text class="t" x="334" y="82">Container 2</text>
+        <rect class="sh f-white" data-g="app" x="334" y="92" width="231" height="34" rx="6"/><text class="ts" x="346" y="114">Older reporting tool</text>
+        <rect class="sh f-white" data-g="libs" x="334" y="134" width="231" height="34" rx="6"/><text class="ts" x="346" y="156">Python 3.9 + older libraries</text>
+        <text class="ts" x="334" y="196">From image: legacy-report:3.2</text>
+        <text class="ts" x="334" y="216">Isolated from container 1</text>
+      </g>
+      <g>
+        <rect class="sh f-green" data-g="cont" x="605" y="60" width="255" height="170" rx="8"/>
+        <text class="t" x="617" y="82">Container 3</text>
+        <rect class="sh f-white" data-g="app" x="617" y="92" width="231" height="34" rx="6"/><text class="ts" x="629" y="114">Another service</text>
+        <rect class="sh f-white" data-g="libs" x="617" y="134" width="231" height="34" rx="6"/><text class="ts" x="629" y="156">Its own libraries</text>
+        <text class="ts" x="617" y="196">From image: another-service:2.0</text>
+        <text class="ts" x="617" y="216">Own filesystem and network</text>
+      </g>
+      <rect class="sh f-blue" data-g="rt" x="40" y="240" width="820" height="50" rx="8"/>
+      <text class="t" x="56" y="270">Container runtime: Docker Engine (dockerd, containerd, runc)</text>
+      <rect class="sh f-gray" data-g="os" x="40" y="300" width="820" height="50" rx="8"/>
+      <text class="t" x="56" y="330">Host operating system: ONE Linux kernel shared by every container</text>
+      <rect class="sh f-gray" x="40" y="360" width="820" height="50" rx="8"/>
+      <text class="t" x="56" y="390">Hardware: CPU, memory, disk, network</text>
+    </g>
+    <g id="cv-vm" style="display:none">
+      <text class="tl" x="40" y="40">Three virtual machines on one host</text>
+      <g>
+        <rect class="sh f-amber" x="40" y="60" width="255" height="230" rx="8"/>
+        <text class="t" x="52" y="82">Virtual machine 1</text>
+        <rect class="sh f-white" data-g="app" x="52" y="92" width="231" height="34" rx="6"/><text class="ts" x="64" y="114">Your Python app</text>
+        <rect class="sh f-white" data-g="libs" x="52" y="132" width="231" height="34" rx="6"/><text class="ts" x="64" y="154">Libraries and dependencies</text>
+        <rect class="sh f-gray" data-g="os" x="52" y="174" width="231" height="104" rx="6"/><text class="t" x="64" y="212">Full guest OS</text><text class="ts" x="64" y="234">with its OWN kernel</text><text class="ts" x="64" y="254">(gigabytes, boots in minutes)</text>
+      </g>
+      <g>
+        <rect class="sh f-amber" x="322" y="60" width="255" height="230" rx="8"/>
+        <text class="t" x="334" y="82">Virtual machine 2</text>
+        <rect class="sh f-white" data-g="app" x="334" y="92" width="231" height="34" rx="6"/><text class="ts" x="346" y="114">Another app</text>
+        <rect class="sh f-white" data-g="libs" x="334" y="132" width="231" height="34" rx="6"/><text class="ts" x="346" y="154">Libraries and dependencies</text>
+        <rect class="sh f-gray" data-g="os" x="334" y="174" width="231" height="104" rx="6"/><text class="t" x="346" y="212">Full guest OS</text><text class="ts" x="346" y="234">with its OWN kernel</text>
+      </g>
+      <g>
+        <rect class="sh f-amber" x="605" y="60" width="255" height="230" rx="8"/>
+        <text class="t" x="617" y="82">Virtual machine 3</text>
+        <rect class="sh f-white" data-g="app" x="617" y="92" width="231" height="34" rx="6"/><text class="ts" x="629" y="114">Another app</text>
+        <rect class="sh f-white" data-g="libs" x="617" y="132" width="231" height="34" rx="6"/><text class="ts" x="629" y="154">Libraries and dependencies</text>
+        <rect class="sh f-gray" data-g="os" x="617" y="174" width="231" height="104" rx="6"/><text class="t" x="629" y="212">Full guest OS</text><text class="ts" x="629" y="234">with its OWN kernel</text>
+      </g>
+      <rect class="sh f-blue" data-g="rt" x="40" y="300" width="820" height="50" rx="8"/>
+      <text class="t" x="56" y="330">Hypervisor (for example Hyper-V, KVM, VMware)</text>
+      <rect class="sh f-gray" x="40" y="360" width="820" height="50" rx="8"/>
+      <text class="t" x="56" y="390">Hardware: CPU, memory, disk, network</text>
+    </g>
+  </svg></div>
+  <div class="callout info" id="gl-note" aria-live="polite"><span class="t">Click a term above</span>Each button highlights that layer in the diagram and explains it here.</div>
+</div>
+
+<h3>Container versus virtual machine</h3>
+<div class="callout bad"><span class="t">A container is NOT a virtual machine</span>A virtual machine includes a complete guest operating system with its own kernel, started on virtualized hardware. A container shares the host's kernel. It is an ordinary process (or small group of processes) that the kernel isolates using features called <b>namespaces</b> (what the process can see) and <b>cgroups</b> (how much CPU and memory it may use).</div>
+<div class="tablewrap"><table>
+  <tr><th></th><th>Container</th><th>Virtual machine</th></tr>
+  <tr><td>Own kernel?</td><td>No, shares the host kernel</td><td>Yes, each VM has its own</td></tr>
+  <tr><td>Typical size</td><td>Tens to hundreds of MB</td><td>Often several GB</td></tr>
+  <tr><td>Typical start time</td><td>Usually a second or less</td><td>Usually tens of seconds to minutes</td></tr>
+  <tr><td>Isolation strength</td><td>Good, but weaker boundary than a VM</td><td>Stronger boundary</td></tr>
+  <tr><td>Best for</td><td>Packaging and running one application</td><td>Running a whole separate operating system</td></tr>
+</table></div>
+<div class="callout info"><span class="t">Windows and macOS</span>Linux containers need a Linux kernel. Docker Desktop on Windows or macOS quietly runs a small Linux virtual machine and starts your containers inside it. The containers still share <i>that</i> VM's kernel with each other.</div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s2"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 3 ============ -->
+<section class="mod" id="s3">
+<div class="sechead"><span class="secnum">3</span><h2>Image versus container</h2></div>
+<p class="lead">An <b>image</b> is a read-only template. A <b>container</b> is a running instance created from it. One image can produce many containers.</p>
+<div class="grid">
+  <div class="card"><h4>Analogies that help</h4><ul><li>Image is to container as <b>installer</b> is to <b>running program</b>.</li><li>Or a <b>recipe</b> and the <b>dishes</b> you cook from it.</li><li>Or a <b>class</b> and its <b>objects</b>.</li></ul></div>
+  <div class="card"><h4>Key facts</h4><ul><li>Images are immutable. To change one you build a new image (for example tag <code>1.1</code>).</li><li>Each container adds its own thin <b>writable layer</b> on top of the image.</li><li>Deleting a container does not delete the image.</li></ul></div>
+</div>
+
+<div class="sim" id="ic-sim">
+  <div class="simhead"><span class="badge sim">Concept simulator</span><strong>One image, many containers</strong></div>
+  <p class="hint">This models the idea only. The real command is shown on each card; run it yourself in section 11.</p>
+  <div class="ic-top">
+    <div class="card">
+      <h4>Image: <code>substation-monitor:1.0</code> <span class="badge out">read-only</span></h4>
+      <ul class="layerlist">
+        <li><span>Layer: python:3.12-slim base</span></li>
+        <li><span>Layer: non-root user created</span></li>
+        <li><span>Layer: FastAPI, uvicorn installed</span></li>
+        <li><span>Layer: app.py copied in</span></li>
+        <li class="meta"><span>Metadata: CMD, EXPOSE, USER</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="row">
+        <button class="btn primary" id="ic-run">docker run: create a container</button>
+        <button class="btn" id="ic-reset">Reset</button>
+      </div>
+      <p id="ic-count" aria-live="polite"></p>
+      <p class="hint">Try this: create three containers, press "write file" in only one of them, then notice the others do not see it. Then remove one. The image never changes.</p>
+    </div>
+  </div>
+  <div class="ic-containers" id="ic-containers"></div>
+</div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s3"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 4 ============ -->
+<section class="mod" id="s4">
+<div class="sechead"><span class="secnum">4</span><h2>Docker architecture</h2></div>
+<p class="lead">When you type <code>docker ...</code> you are using a <b>client</b> that sends requests to a background service, the <b>daemon</b>, which does the real work.</p>
+<div class="sim">
+  <div class="simhead"><span class="badge sim">Interactive diagram</span><strong>Choose a command and step through it</strong></div>
+  <div class="tabs" id="ar-tabs" role="group" aria-label="Choose a command">
+    <button class="btn small active" data-sc="pull" aria-pressed="true">docker pull</button>
+    <button class="btn small" data-sc="build" aria-pressed="false">docker build</button>
+    <button class="btn small" data-sc="run" aria-pressed="false">docker run</button>
+  </div>
+  <div class="svgwrap"><svg id="ar-svg" viewBox="0 0 980 500" role="img" aria-label="Docker architecture: client, daemon, registry, images, containers and host">
+    <rect x="240" y="30" width="500" height="420" rx="12" fill="#f8fafc" stroke="#3d4b61" stroke-width="2" stroke-dasharray="8 5"/>
+    <text class="t" x="258" y="54">Docker host (your PC or a server)</text>
+    <path class="arrow" data-id="a-cd" d="M190 205 H270"/>
+    <path class="arrow" data-id="a-dr" d="M460 205 H520"/>
+    <path class="arrow" data-id="a-di" d="M365 240 V330"/>
+    <path class="arrow" data-id="a-ic" d="M460 375 H520"/>
+    <path class="arrow" data-id="a-rc" d="M615 240 V330"/>
+    <path class="arrow" data-id="a-dreg" d="M365 170 V80 H875 V170"/>
+    <path class="arrow" data-id="a-regi" d="M875 250 V480 H330 V420"/>
+    <text class="ts" x="560" y="72">pull / push (daemon talks to registry)</text>
+    <text class="ts" x="560" y="472">image layers downloaded</text>
+    <text class="ts" x="466" y="366">create</text>
+    <text class="ts" x="470" y="198">start</text>
+    <g class="node" data-id="client" tabindex="0" role="button" aria-label="Docker client"><rect class="sh f-green" x="20" y="170" width="170" height="70" rx="8"/><text class="t" x="40" y="200">Docker client</text><text class="ts" x="40" y="220">(docker command)</text></g>
+    <g class="node" data-id="daemon" tabindex="0" role="button" aria-label="Docker daemon"><rect class="sh f-blue" x="270" y="170" width="190" height="70" rx="8"/><text class="t" x="290" y="200">Docker daemon</text><text class="ts" x="290" y="220">(dockerd)</text></g>
+    <g class="node" data-id="runtime" tabindex="0" role="button" aria-label="Container runtime"><rect class="sh f-blue" x="520" y="170" width="190" height="70" rx="8"/><text class="t" x="535" y="200">Container runtime</text><text class="ts" x="535" y="220">(containerd / runc)</text></g>
+    <g class="node" data-id="images" tabindex="0" role="button" aria-label="Local images"><rect class="sh f-amber" x="270" y="330" width="190" height="90" rx="8"/><text class="t" x="290" y="368">Local images</text><text class="ts" x="290" y="390">(read-only layers)</text></g>
+    <g class="node" data-id="containers" tabindex="0" role="button" aria-label="Containers"><rect class="sh f-green" x="520" y="330" width="190" height="90" rx="8"/><text class="t" x="540" y="368">Containers</text><text class="ts" x="540" y="390">(running instances)</text></g>
+    <g class="node" data-id="registry" tabindex="0" role="button" aria-label="Image registry"><rect class="sh f-gray" x="790" y="170" width="170" height="80" rx="8"/><text class="t" x="806" y="204">Image registry</text><text class="ts" x="806" y="224">(Docker Hub or private)</text></g>
+  </svg></div>
+  <div class="row"><button class="btn small" id="ar-prev">Previous step</button><button class="btn small primary" id="ar-next">Next step</button><span class="pill gray" id="ar-count"></span></div>
+  <div class="callout info" id="ar-step" aria-live="polite"></div>
+  <div class="callout ok" id="ar-info" aria-live="polite"><span class="t">Click any box in the diagram</span>to read what that component does.</div>
+</div>
+
+<h3>Terminology cheat sheet</h3>
+<div class="tablewrap"><table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td><b>Docker client</b></td><td>The <code>docker</code> command you type. It sends API requests to the daemon.</td></tr>
+  <tr><td><b>Docker daemon</b> (<code>dockerd</code>)</td><td>Background service that builds images, manages containers, networks and volumes.</td></tr>
+  <tr><td><b>Registry</b></td><td>A server that stores and distributes images, for example Docker Hub or a private registry inside your organisation.</td></tr>
+  <tr><td><b>Image</b></td><td>Read-only template made of layers plus metadata (what to run, which user, and so on).</td></tr>
+  <tr><td><b>Container</b></td><td>A running (or stopped) instance of an image.</td></tr>
+  <tr><td><b>Tag</b></td><td>A label for an image version, such as <code>python:3.12-slim</code>. The part before the colon is the repository name.</td></tr>
+</table></div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s4"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 5 ============ -->
+<section class="mod" id="s5">
+<div class="sechead"><span class="secnum">5</span><h2>Create a Python application</h2></div>
+<p class="lead">We will containerize a tiny web service that exposes two endpoints. The same two files are used in the lab.</p>
+<div class="codebox out"><div class="cmdhead"><span class="badge out">Project layout</span></div>
+<pre><code>gtri-docker-lab/
+├── app.py              the application
+├── requirements.txt    pinned Python dependencies
+├── Dockerfile          recipe for building the image   (section 6)
+└── .dockerignore       files to keep out of the image  (section 6)</code></pre></div>
+
+<h3>app.py</h3>
+<p><b>Click any line</b> to read a beginner-friendly explanation. Use the buttons to download or copy the file.</p>
+<div class="annot" data-file="app.py"></div>
+
+<h3>requirements.txt</h3>
+<div class="annot" data-file="requirements.txt"></div>
+<div class="callout info"><span class="t">Why pinned versions?</span>The set above (FastAPI 0.115.x with Pydantic 2.10.x and uvicorn 0.34.x) is a compatible example set. <code>pip</code> also installs dependencies of these packages, so for strict reproducibility teams later add a lock file. Newer releases exist; when you upgrade, change versions deliberately and re-test.</div>
+
+<h3>What the two endpoints return</h3>
+<div class="codebox out"><div class="cmdhead"><span class="badge out">Example output</span><span class="hint">GET /health</span></div>
+<pre><code>{"status":"ok"}</code></pre></div>
+<div class="codebox out"><div class="cmdhead"><span class="badge out">Example output</span><span class="hint">GET /readings (values are random, site comes from SITE_NAME)</span></div>
+<pre><code>{"site":"GETRI-Lab","timestamp":"2026-10-13T05:30:12.481920+00:00","readings":[
+  {"equipment_id":"TR-01","type":"transformer","metric":"oil_temperature_c","value":63.4},
+  {"equipment_id":"CB-07","type":"circuit_breaker","metric":"load_amps","value":371.9},
+  {"equipment_id":"CAP-02","type":"capacitor_bank","metric":"voltage_kv","value":11.1}]}</code></pre></div>
+
+<h3>Key ideas in this code</h3>
+<div class="grid">
+  <div class="card"><h4>FastAPI vs uvicorn</h4><p>FastAPI is the <b>framework</b> you write routes with. uvicorn is the <b>server</b> that listens on a network port and passes requests to FastAPI.</p></div>
+  <div class="card"><h4>Environment variable</h4><p><code>SITE_NAME</code> is configuration kept <i>outside</i> the code. The same image can then run at different sites.</p></div>
+  <div class="card"><h4>Fail fast</h4><p>We read it with <code>os.environ["SITE_NAME"]</code> on purpose. If it is missing the app stops immediately with a clear error. You will use that in the lab.</p></div>
+</div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s5"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 6 ============ -->
+<section class="mod" id="s6">
+<div class="sechead"><span class="secnum">6</span><h2>Build a Docker image</h2></div>
+<p class="lead">A <b>Dockerfile</b> is a text file of instructions. <code>docker build</code> follows them to produce an image.</p>
+
+<h3>Dockerfile</h3>
+<div class="annot" data-file="Dockerfile"></div>
+
+<div class="callout warn"><span class="t">EXPOSE is documentation, not publishing</span><code>EXPOSE 8000</code> only records that the application is <i>intended</i> to listen on port 8000. It does <b>not</b> make the port reachable from your computer. Publishing happens at run time with <code>-p HOST_PORT:CONTAINER_PORT</code> (or <code>-P</code>, which publishes all exposed ports to random host ports).</div>
+<div class="tablewrap"><table>
+  <tr><th>Situation</th><th>Reachable from the host?</th></tr>
+  <tr><td><code>EXPOSE 8000</code> in Dockerfile, run with no <code>-p</code></td><td>No</td></tr>
+  <tr><td>No <code>EXPOSE</code>, run with <code>-p 8080:8000</code></td><td>Yes, at <code>localhost:8080</code></td></tr>
+  <tr><td><code>EXPOSE 8000</code> and <code>-p 8080:8000</code></td><td>Yes, and the image documents its port</td></tr>
+</table></div>
+
+<h3>.dockerignore</h3>
+<div class="annot" data-file=".dockerignore"></div>
+
+<h3>Build context: what gets sent to Docker</h3>
+<p>When you run <code>docker build ... .</code>, the final <code>.</code> is the <b>build context</b>: the folder whose contents are sent to the daemon. <code>COPY</code> can only use files from this context. <code>.dockerignore</code> keeps unwanted files out of it.</p>
+<div class="sim" id="bc-sim">
+  <div class="simhead"><span class="badge sim">Concept simulator</span><strong>What is sent to the daemon?</strong></div>
+  <div class="row">
+    <label><input type="checkbox" id="bc-ignore" checked> A <code>.dockerignore</code> file is present</label>
+  </div>
+  <div class="tablewrap"><table id="bc-table"></table></div>
+  <div class="callout info" id="bc-msg" aria-live="polite"></div>
+  <p class="hint">Sizes are illustrative.</p>
+</div>
+
+<h3>Image layers and the build cache</h3>
+<p>Each instruction that changes files adds a <b>layer</b>. Docker caches layers: if an instruction and everything it depends on are unchanged, the cached layer is reused. Once one layer changes, <b>every layer after it is rebuilt</b>. That is why the Dockerfile copies <code>requirements.txt</code> and installs packages <i>before</i> copying <code>app.py</code>.</p>
+<div class="sim" id="lc-sim">
+  <div class="simhead"><span class="badge sim">Concept simulator</span><strong>What does a rebuild redo?</strong></div>
+  <div class="row">
+    <label for="lc-change">I changed:</label>
+    <select id="lc-change">
+      <option value="none">Nothing</option>
+      <option value="app" selected>app.py (my code)</option>
+      <option value="req">requirements.txt</option>
+      <option value="base">The base image tag</option>
+    </select>
+    <label><input type="checkbox" id="lc-naive"> Use the naive order (<code>COPY . .</code> before installing packages)</label>
+  </div>
+  <ul class="layerlist" id="lc-layers"></ul>
+  <div class="callout info" id="lc-msg" aria-live="polite"></div>
+</div>
+
+<h3>Build it</h3>
+<div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre><code>docker build -t substation-monitor:1.0 .</code></pre></div>
+<p><code>-t substation-monitor:1.0</code> names and tags the image. The final <code>.</code> is the build context. Run it from the folder that contains the <code>Dockerfile</code>.</p>
+
+<h3>Choices that keep the image small and safe</h3>
+<div class="grid">
+  <div class="card"><h4>Small</h4><ul><li><code>python:3.12-slim</code> instead of the full image</li><li><code>PIP_NO_CACHE_DIR=1</code> so pip's download cache is not stored</li><li><code>.dockerignore</code> keeps junk out</li></ul></div>
+  <div class="card"><h4>Safe</h4><ul><li>Pinned base tag and dependency versions</li><li>Runs as a non-root user (<code>USER appuser</code>)</li><li>No secrets in the Dockerfile or image</li></ul></div>
+  <div class="card"><h4>Fast to rebuild</h4><ul><li>Rarely-changing steps first, frequently-changing steps last</li></ul></div>
+</div>
+<div class="callout info"><span class="t">Expect a pip warning</span>During the build, pip may print a warning about running as the root user. That is expected here because the install step runs before the <code>USER</code> instruction, and it only affects the build, not the final container.</div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s6"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 7 ============ -->
+<section class="mod" id="s7">
+<div class="sechead"><span class="secnum">7</span><h2>Run and inspect the container</h2></div>
+<p class="lead">Ten commands cover most day-to-day work. Select each one to see what it does, how it is built and what you will typically see.</p>
+<div class="callout warn"><span class="t">Reminder</span>Everything in the "Run in your real terminal" boxes must be typed into a real terminal on a machine with Docker. The "Example output" is illustrative only.</div>
+
+<div class="sim">
+  <div class="simhead"><span class="badge sim">Interactive reference</span><strong>Command explorer</strong></div>
+  <div class="tabs" id="cx-tabs" role="group" aria-label="Choose a command"></div>
+  <div id="cx-card"></div>
+</div>
+
+<h3>Command builder: docker run</h3>
+<div class="sim">
+  <div class="simhead"><span class="badge sim">Concept simulator</span><strong>Build a <code>docker run</code> command and read what each part means</strong></div>
+  <div class="row">
+    <label for="rb-name">Name</label><input type="text" id="rb-name" value="monitor" size="12">
+    <label for="rb-host">Host port</label><input type="number" id="rb-host" value="8080" min="1" max="65535">
+    <label for="rb-cont">Container port</label><input type="number" id="rb-cont" value="8000" min="1" max="65535">
+    <label for="rb-site">SITE_NAME</label><input type="text" id="rb-site" value="GETRI-Lab" size="14">
+  </div>
+  <div class="row">
+    <label><input type="checkbox" id="rb-d" checked> <code>-d</code> run in the background (detached)</label>
+    <label><input type="checkbox" id="rb-rm"> <code>--rm</code> delete container when it stops</label>
+    <label><input type="checkbox" id="rb-env" checked> pass <code>-e SITE_NAME</code></label>
+  </div>
+  <p><span class="badge terminal">Run in your real terminal</span> <button class="btn small copy" data-copy-from="rb-out">Copy</button></p>
+  <div class="term-out" id="rb-out" style="min-height:2rem"></div>
+  <ul id="rb-notes"></ul>
+</div>
+
+<h3>Port mapping: <code>-p HOST_PORT:CONTAINER_PORT</code></h3>
+<p>Each container has its own network. A program inside it listens on a <b>container port</b>. To reach it from your computer, you <b>publish</b> a <b>host port</b> that forwards to it. The host port is the one you type in the browser; the container port must match what the app actually listens on.</p>
+<div class="sim">
+  <div class="simhead"><span class="badge sim">Concept simulator</span><strong>Will the request reach the app?</strong></div>
+  <div class="row">
+    <label for="pm-host">Host port</label><input type="number" id="pm-host" value="8080" min="1" max="65535">
+    <label for="pm-cont">Container port in <code>-p</code></label><input type="number" id="pm-cont" value="8000" min="1" max="65535">
+    <label for="pm-app">Port the app listens on</label><input type="number" id="pm-app" value="8000" min="1" max="65535">
+    <label for="pm-bind">App binds to</label>
+    <select id="pm-bind"><option value="0.0.0.0">0.0.0.0 (all interfaces)</option><option value="127.0.0.1">127.0.0.1 (localhost only)</option></select>
+  </div>
+  <div class="svgwrap"><svg viewBox="0 0 900 330" role="img" aria-label="Port mapping from host to container">
+    <rect x="230" y="30" width="640" height="270" rx="12" fill="#f8fafc" stroke="#3d4b61" stroke-width="2" stroke-dasharray="8 5"/>
+    <text class="t" x="248" y="54">Host machine (Docker host)</text>
+    <rect class="sh f-green" x="20" y="120" width="170" height="80" rx="8"/>
+    <text class="t" x="36" y="152">Browser or curl</text><text class="ts" x="36" y="172">on the host</text>
+    <text class="ts" id="pm-t-url" x="20" y="228">http://localhost:8080</text>
+    <rect class="sh f-amber" x="250" y="130" width="150" height="60" rx="8"/>
+    <text class="t" x="264" y="156">Host port</text><text class="tl" id="pm-t-host" x="264" y="178">8080</text>
+    <rect class="sh f-green" x="470" y="60" width="380" height="210" rx="10"/>
+    <text class="t" x="486" y="84">Container (its own network)</text>
+    <rect class="sh f-amber" x="480" y="130" width="130" height="60" rx="8"/>
+    <text class="t" x="492" y="156">Port</text><text class="tl" id="pm-t-cont" x="492" y="178">8000</text>
+    <rect class="sh f-white" x="650" y="110" width="190" height="100" rx="8"/>
+    <text class="t" x="664" y="140">App (uvicorn)</text><text class="ts" x="664" y="162">listens on</text><text class="t" id="pm-t-app" x="664" y="184">0.0.0.0:8000</text>
+    <path class="arrow ok" id="pm-a1" d="M190 160 H250"/>
+    <path class="arrow ok" id="pm-a2" d="M400 160 H480"/>
+    <path class="arrow ok" id="pm-a3" d="M610 160 H650"/>
+    <text class="ts" id="pm-t-map" x="262" y="118">-p 8080:8000</text>
+  </svg></div>
+  <p><b>Command that matches this mapping:</b> <code id="pm-cmd"></code></p>
+  <div class="callout info" id="pm-res" aria-live="polite"></div>
+  <p class="hint">Notice that nothing here depends on <code>EXPOSE</code>. Only <code>-p</code> (and where the app listens) decides reachability. To publish only to your own computer, write <code>-p 127.0.0.1:8080:8000</code>.</p>
+</div>
+
+<h3>Container lifecycle</h3>
+<div class="sim">
+  <div class="simhead"><span class="badge sim">Concept simulator</span><strong>From image to container and back</strong></div>
+  <p class="hint">Use the buttons under the diagram. Only the commands that make sense in the current state are enabled.</p>
+  <div class="svgwrap"><svg viewBox="0 0 900 300" role="img" aria-label="Container lifecycle state diagram">
+    <path class="arrow" d="M190 135 H480"/><text class="ts" x="300" y="127">docker run (create + start)</text>
+    <path class="arrow" d="M105 110 V55 H260"/><text class="ts" x="112" y="45">docker create</text>
+    <path class="arrow" d="M430 55 H570 V100"/><text class="ts" x="440" y="47">docker start</text>
+    <path class="arrow" d="M660 120 H740"/><text class="ts" x="662" y="112">docker stop</text>
+    <path class="arrow" d="M740 150 H660"/><text class="ts" x="662" y="168">docker start</text>
+    <path class="arrow" d="M810 170 V250 H105 V180"/><text class="ts" x="480" y="243">docker rm</text>
+    <path class="arrow" d="M570 170 V215 H150 V180"/><text class="ts" x="300" y="207">docker rm -f</text>
+    <g class="state" data-state="none"><rect class="sh f-gray" x="20" y="110" width="170" height="70" rx="8"/><text class="t" x="40" y="140">No container</text><text class="ts" x="40" y="160">(image only)</text></g>
+    <g class="state" data-state="created"><rect class="sh f-blue" x="260" y="20" width="170" height="70" rx="8"/><text class="t" x="280" y="52">Created</text><text class="ts" x="280" y="72">(not started)</text></g>
+    <g class="state" data-state="running"><rect class="sh f-green" x="480" y="100" width="180" height="70" rx="8"/><text class="t" x="500" y="132">Running</text><text class="ts" x="500" y="152">(Up)</text></g>
+    <g class="state" data-state="stopped"><rect class="sh f-amber" x="740" y="100" width="140" height="70" rx="8"/><text class="t" x="756" y="132">Stopped</text><text class="ts" x="756" y="152">(Exited)</text></g>
+  </svg></div>
+  <div class="row" id="lcs-actions"></div>
+  <p><b>Current state:</b> <span class="pill gray" id="lcs-state">No container</span> &nbsp; <b>Container's own files:</b> <span id="lcs-data" class="pill gray">none</span></p>
+  <div class="term-out" id="lcs-log" aria-live="polite" style="min-height:3rem">Press a button.</div>
+</div>
+
+<h3>Guided exercise: pick the command</h3>
+<div class="sim">
+  <div class="simhead"><span class="badge sim">Exercise</span><strong>Match each job to the right command</strong></div>
+  <div id="mx-list"></div>
+  <div class="row"><button class="btn primary" id="mx-check">Check my answers</button><span id="mx-res" aria-live="polite"></span></div>
+</div>
+
+<h3>Putting it together</h3>
+<div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre><code>docker build -t substation-monitor:1.0 .
+docker images
+docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab substation-monitor:1.0
+docker ps
+docker logs monitor
+docker exec monitor whoami
+docker stop monitor
+docker ps -a
+docker start monitor
+docker stop monitor
+docker rm monitor</code></pre></div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s7"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 8 ============ -->
+<section class="mod" id="s8">
+<div class="sechead"><span class="secnum">8</span><h2>Configuration and persistence</h2></div>
+
+<h3>Environment variables</h3>
+<p>An <b>environment variable</b> is a named setting handed to a process when it starts. They let one image behave differently in different places without rebuilding it. Set them with <code>-e NAME=value</code>, or many at once with <code>--env-file</code>.</p>
+<div class="sim">
+  <div class="simhead"><span class="badge sim">Concept simulator</span><strong>What would our app do?</strong></div>
+  <p class="hint">This models the behaviour of <code>app.py</code>. It is not Docker.</p>
+  <div class="row">
+    <label><input type="checkbox" id="ev-on" checked> Pass <code>-e SITE_NAME</code></label>
+    <label for="ev-site">Value</label><input type="text" id="ev-site" value="GUVNL-Vadodara" size="18">
+  </div>
+  <p><span class="badge terminal">Run in your real terminal</span></p>
+  <div class="term-out" id="ev-cmd" style="min-height:2rem"></div>
+  <p><span class="badge sim">Modelled result</span> <span class="pill gray" id="ev-status"></span></p>
+  <div class="term-out" id="ev-out" aria-live="polite"></div>
+</div>
+<div class="callout warn"><span class="t">Environment variables are not a vault</span>Anyone who can run <code>docker inspect</code> on the container can read its variables. For real secrets (passwords, API keys, tokens) use your platform's secret mechanism or a secrets manager. Just never bake them into the image.</div>
+<div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre><code>docker run -d --name monitor -p 8080:8000 --env-file site.env substation-monitor:1.0</code></pre></div>
+<p>where <code>site.env</code> contains one <code>NAME=value</code> per line, with no quotes: <code>SITE_NAME=GETRI-Lab</code>. Remember to keep such files out of Git and out of the image.</p>
+
+<h3>The container filesystem and where data lives</h3>
+<p>A container's own files live in its thin <b>writable layer</b>. That layer survives <code>docker stop</code> and <code>docker start</code>, but is <b>deleted with the container</b> by <code>docker rm</code>. To keep data, store it outside the container:</p>
+<div class="tablewrap"><table>
+  <tr><th></th><th>Container writable layer</th><th>Bind mount</th><th>Named volume</th></tr>
+  <tr><td><b>Where it lives</b></td><td>Inside the container</td><td>A folder on the host that you choose</td><td>Storage managed by Docker</td></tr>
+  <tr><td><b>Survives <code>docker rm</code>?</b></td><td><b>No</b></td><td><b>Yes</b></td><td><b>Yes</b></td></tr>
+  <tr><td><b>Syntax</b></td><td>(default)</td><td><code>-v /path/on/host:/data</code></td><td><code>-v myvolume:/data</code></td></tr>
+  <tr><td><b>Good for</b></td><td>Temporary scratch files</td><td>Sharing source code or config with the container, inspecting files from the host</td><td>Application data such as databases</td></tr>
+  <tr><td><b>Watch out</b></td><td>Easy to lose data by accident</td><td>Host path and permissions must suit the container's user</td><td>Remove with <code>docker volume rm</code>, not <code>docker rm</code></td></tr>
+</table></div>
+
+<div class="sim" id="ps-sim">
+  <div class="simhead"><span class="badge sim">Concept simulator</span><strong>Which data survives <code>docker rm</code>?</strong></div>
+  <div class="tabs" id="ps-modes" role="group" aria-label="Storage type">
+    <button class="btn small active" data-mode="layer" aria-pressed="true">Container writable layer</button>
+    <button class="btn small" data-mode="bind" aria-pressed="false">Bind mount</button>
+    <button class="btn small" data-mode="volume" aria-pressed="false">Named volume</button>
+  </div>
+  <div class="row">
+    <button class="btn small" data-act="run">Run container</button>
+    <button class="btn small" data-act="write">Write file report.txt</button>
+    <button class="btn small" data-act="stop">docker stop</button>
+    <button class="btn small" data-act="start">docker start</button>
+    <button class="btn small danger" data-act="rm">docker rm</button>
+    <button class="btn small" data-act="reset">Reset</button>
+  </div>
+  <div class="ps-grid" id="ps-view"></div>
+  <div class="term-out" id="ps-log" aria-live="polite" style="min-height:3rem">Start with "Run container".</div>
+</div>
+
+<h3>Try it for real</h3>
+<p>These use the tiny <code>alpine:3.20</code> image so you can see persistence without our app.</p>
+<div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre data-os="unix"><code># 1) Container writable layer: lost on docker rm
+docker run -d --name scratch alpine:3.20 sh -c "echo hello &gt; /note.txt; sleep 3600"
+docker exec scratch cat /note.txt
+docker stop scratch
+docker start scratch
+docker exec scratch cat /note.txt      # still there after stop/start
+docker rm -f scratch
+docker run --rm alpine:3.20 cat /note.txt   # new container: file is gone (an error)
+
+# 2) Named volume: survives docker rm
+docker volume create reports-data
+docker run --rm -v reports-data:/data alpine:3.20 sh -c "echo saved &gt; /data/report.txt"
+docker run --rm -v reports-data:/data alpine:3.20 cat /data/report.txt
+docker volume ls
+docker volume rm reports-data
+
+# 3) Bind mount: files appear in a host folder
+mkdir -p data
+docker run --rm -v "$(pwd)/data:/data" alpine:3.20 sh -c "echo from-container &gt; /data/report.txt"
+cat data/report.txt</code></pre>
+<pre data-os="win"><code># 1) Container writable layer: lost on docker rm
+docker run -d --name scratch alpine:3.20 sh -c "echo hello &gt; /note.txt; sleep 3600"
+docker exec scratch cat /note.txt
+docker stop scratch
+docker start scratch
+docker exec scratch cat /note.txt      # still there after stop/start
+docker rm -f scratch
+docker run --rm alpine:3.20 cat /note.txt   # new container: file is gone (an error)
+
+# 2) Named volume: survives docker rm
+docker volume create reports-data
+docker run --rm -v reports-data:/data alpine:3.20 sh -c "echo saved &gt; /data/report.txt"
+docker run --rm -v reports-data:/data alpine:3.20 cat /data/report.txt
+docker volume ls
+docker volume rm reports-data
+
+# 3) Bind mount: files appear in a host folder
+mkdir data
+docker run --rm -v "${PWD}/data:/data" alpine:3.20 sh -c "echo from-container &gt; /data/report.txt"
+Get-Content data/report.txt</code></pre></div>
+<div class="callout info"><span class="t">Permissions with non-root images</span>Our image runs as user <code>appuser</code> (UID 10001). If you bind-mount a host folder that this user may not write to, the app will get "Permission denied". With named volumes, create and <code>chown</code> the target directory in the Dockerfile so a new volume inherits the right owner.</div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s8"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 9 ============ -->
+<section class="mod" id="s9">
+<div class="sechead"><span class="secnum">9</span><h2>Common errors</h2></div>
+<p class="lead">Almost every beginner problem falls into one of seven patterns. For each: <b>symptom, likely cause, diagnostic command, fix</b>. Try to guess before you reveal.</p>
+
+<div class="sim">
+  <div class="simhead"><span class="badge sim">Interactive troubleshooter</span><strong>Select a problem</strong></div>
+  <div class="tabs" id="er-tabs" role="group" aria-label="Choose an error"></div>
+  <div id="er-card"></div>
+</div>
+
+<h3>Troubleshooting flowchart</h3>
+<p>Start at the top and answer each question. Click any box to see the command to run and what it tells you.</p>
+<div class="svgwrap"><svg id="fc-svg" viewBox="0 0 1000 560" role="img" aria-label="Troubleshooting flowchart for a containerized Python app">
+  <!-- connectors -->
+  <path class="arrow" d="M500 46 V70"/>
+  <path class="arrow" d="M500 120 V150"/><text class="ts" x="508" y="140">Yes</text>
+  <path class="arrow" d="M620 95 H700"/><text class="ts" x="640" y="88">No</text>
+  <path class="arrow" d="M500 200 V230"/><text class="ts" x="508" y="220">Yes</text>
+  <path class="arrow" d="M380 175 H290"/><text class="ts" x="318" y="168">No</text>
+  <path class="arrow" d="M620 255 H700"/><text class="ts" x="640" y="248">Yes</text>
+  <path class="arrow" d="M500 280 V310"/><text class="ts" x="508" y="300">No</text>
+  <path class="arrow" d="M620 335 H700"/><text class="ts" x="640" y="328">No</text>
+  <path class="arrow" d="M500 360 V390"/><text class="ts" x="508" y="380">Yes</text>
+  <path class="arrow" d="M620 415 H700"/><text class="ts" x="640" y="408">Yes</text>
+  <path class="arrow" d="M500 440 V470"/><text class="ts" x="508" y="460">No</text>
+  <path class="arrow" d="M155 206 V222 H10 V486"/>
+  <path class="arrow" d="M10 270 H20"/><path class="arrow" d="M10 342 H20"/><path class="arrow" d="M10 414 H20"/><path class="arrow" d="M10 486 H20"/>
+  <!-- nodes -->
+  <g class="node" data-id="start" tabindex="0" role="button"><rect class="sh f-gray" x="380" y="10" width="240" height="36" rx="18"/><text class="t" x="500" y="33" text-anchor="middle">Something is wrong</text></g>
+  <g class="node" data-id="q1" tabindex="0" role="button"><rect class="sh f-blue" x="380" y="70" width="240" height="50" rx="8"/><text class="t" x="500" y="92" text-anchor="middle">Did docker build</text><text class="t" x="500" y="110" text-anchor="middle">finish successfully?</text></g>
+  <g class="node" data-id="b1" tabindex="0" role="button"><rect class="sh f-red" x="700" y="64" width="280" height="62" rx="8"/><text class="ts" x="714" y="86">Build failure: read the FIRST error</text><text class="ts" x="714" y="102">above "failed to solve". Check COPY paths,</text><text class="ts" x="714" y="118">requirements.txt, network.</text></g>
+  <g class="node" data-id="q2" tabindex="0" role="button"><rect class="sh f-blue" x="380" y="150" width="240" height="50" rx="8"/><text class="t" x="500" y="172" text-anchor="middle">Is the container listed</text><text class="t" x="500" y="190" text-anchor="middle">by docker ps?</text></g>
+  <g class="node" data-id="q3" tabindex="0" role="button"><rect class="sh f-blue" x="20" y="144" width="270" height="62" rx="8"/><text class="t" x="155" y="168" text-anchor="middle">docker ps -a</text><text class="ts" x="155" y="188" text-anchor="middle">Read STATUS, then docker logs NAME</text></g>
+  <g class="node" data-id="q5" tabindex="0" role="button"><rect class="sh f-blue" x="380" y="230" width="240" height="50" rx="8"/><text class="t" x="500" y="252" text-anchor="middle">Does curl localhost:</text><text class="t" x="500" y="270" text-anchor="middle">HOSTPORT/health work?</text></g>
+  <g class="node" data-id="ok" tabindex="0" role="button"><rect class="sh f-green" x="700" y="230" width="280" height="50" rx="8"/><text class="t" x="840" y="260" text-anchor="middle">Working. Nothing to fix.</text></g>
+  <g class="node" data-id="q6" tabindex="0" role="button"><rect class="sh f-blue" x="380" y="310" width="240" height="50" rx="8"/><text class="t" x="500" y="332" text-anchor="middle">Does PORTS in docker ps</text><text class="t" x="500" y="350" text-anchor="middle">match the app's port?</text></g>
+  <g class="node" data-id="l-port" tabindex="0" role="button"><rect class="sh f-red" x="700" y="304" width="280" height="62" rx="8"/><text class="ts" x="714" y="326">Wrong -p mapping. Ports cannot be edited:</text><text class="ts" x="714" y="342">docker rm -f NAME, then docker run again</text><text class="ts" x="714" y="358">with the correct -p HOST:CONTAINER.</text></g>
+  <g class="node" data-id="q7" tabindex="0" role="button"><rect class="sh f-blue" x="380" y="390" width="240" height="50" rx="8"/><text class="t" x="500" y="412" text-anchor="middle">Do the logs say the app</text><text class="t" x="500" y="430" text-anchor="middle">runs on 127.0.0.1?</text></g>
+  <g class="node" data-id="l-bind" tabindex="0" role="button"><rect class="sh f-red" x="700" y="384" width="280" height="62" rx="8"/><text class="ts" x="714" y="406">Bind to 0.0.0.0: use --host 0.0.0.0 in</text><text class="ts" x="714" y="422">CMD (or the run command), rebuild if</text><text class="ts" x="714" y="438">needed, and run again.</text></g>
+  <g class="node" data-id="l-end" tabindex="0" role="button"><rect class="sh f-amber" x="380" y="470" width="240" height="62" rx="8"/><text class="ts" x="500" y="494" text-anchor="middle">Test from inside: docker exec.</text><text class="ts" x="500" y="510" text-anchor="middle">Check the URL path, firewall,</text><text class="ts" x="500" y="526" text-anchor="middle">VPN or proxy.</text></g>
+  <g class="node" data-id="e-created" tabindex="0" role="button"><rect class="sh f-red" x="20" y="240" width="270" height="60" rx="8"/><text class="ts" x="30" y="260">Status "Created": docker run itself failed.</text><text class="ts" x="30" y="276">Port in use or name conflict. Read the</text><text class="ts" x="30" y="292">message, docker rm NAME, fix, rerun.</text></g>
+  <g class="node" data-id="e-pkg" tabindex="0" role="button"><rect class="sh f-red" x="20" y="312" width="270" height="60" rx="8"/><text class="ts" x="30" y="332">Exited + ModuleNotFoundError: add the</text><text class="ts" x="30" y="348">package to requirements.txt, rebuild,</text><text class="ts" x="30" y="364">run again.</text></g>
+  <g class="node" data-id="e-env" tabindex="0" role="button"><rect class="sh f-red" x="20" y="384" width="270" height="60" rx="8"/><text class="ts" x="30" y="404">Exited + KeyError (missing variable):</text><text class="ts" x="30" y="420">recreate with -e NAME=value or</text><text class="ts" x="30" y="436">--env-file.</text></g>
+  <g class="node" data-id="e-other" tabindex="0" role="button"><rect class="sh f-red" x="20" y="456" width="270" height="60" rx="8"/><text class="ts" x="30" y="476">Exited + other traceback or exit code:</text><text class="ts" x="30" y="492">fix the code or the CMD. Check the exit</text><text class="ts" x="30" y="508">code with docker inspect.</text></g>
+</svg></div>
+<div class="callout info" id="fc-info" aria-live="polite"><span class="t">Click a box</span>to see the matching command.</div>
+
+<h3>Quick diagnostic toolkit</h3>
+<div class="tablewrap"><table>
+  <tr><th>Question</th><th>Command</th></tr>
+  <tr><td>Is it running? Which ports are published?</td><td><code>docker ps</code></td></tr>
+  <tr><td>Did it exist and exit?</td><td><code>docker ps -a</code></td></tr>
+  <tr><td>What did the app print?</td><td><code>docker logs NAME</code></td></tr>
+  <tr><td>Why exactly did it stop?</td><td><code>docker inspect -f "{{.State.ExitCode}}" NAME</code></td></tr>
+  <tr><td>What ports are published?</td><td><code>docker port NAME</code></td></tr>
+  <tr><td>What is inside?</td><td><code>docker exec -it NAME sh</code></td></tr>
+</table></div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s9"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 10 ============ -->
+<section class="mod" id="s10">
+<div class="sechead"><span class="secnum">10</span><h2>Security fundamentals</h2></div>
+<p class="lead">Containers are not automatically secure. Four habits prevent the most common mistakes.</p>
+<div class="grid">
+  <div class="card"><h4>1. Do not run as root without a reason</h4><p>If a process in the container is compromised, root inside the container has far more power to read, write and change things, especially with mounted volumes or extra privileges. Our Dockerfile creates <code>appuser</code> and switches to it with <code>USER</code>. Check with <code>docker exec monitor whoami</code>.</p></div>
+  <div class="card"><h4>2. Never hardcode secrets</h4><p>A password written into a Dockerfile or source file is stored in the image forever. Commands like <code>docker history</code> and <code>docker inspect</code> can reveal it, and every person who can pull the image gets it. Supply secrets at run time through a secrets mechanism, and rotate any that leaked.</p></div>
+  <div class="card"><h4>3. Control your image tags</h4><p>A tag such as <code>latest</code> is a moving label: tomorrow it can point to a different image than today. Pin versions (<code>python:3.12-slim</code>, or even a digest) so builds are repeatable and upgrades are deliberate.</p></div>
+  <div class="card"><h4>4. Do not use untrusted images</h4><p>An image can contain anything: crypto miners, backdoors, outdated vulnerable software. Prefer Docker Official Images and verified publishers, or images from your organisation's own registry. Scan images for known vulnerabilities and review where an image came from.</p></div>
+</div>
+
+<div class="sim" id="sx-sim">
+  <div class="simhead"><span class="badge sim">Exercise</span><strong>Spot the risks</strong></div>
+  <p>This Dockerfile works, but it contains several security and quality problems. <b>Click each risky line</b>, then check your answers.</p>
+  <div id="sx-lines"></div>
+  <div class="row"><button class="btn primary" id="sx-check">Check my answers</button><button class="btn" id="sx-reset">Reset</button></div>
+  <div id="sx-res" aria-live="polite"></div>
+</div>
+
+<h3>Checklist before you share an image</h3>
+<ul>
+  <li>Base image and dependency versions are pinned.</li>
+  <li>The final <code>USER</code> is not root.</li>
+  <li>No secrets, <code>.env</code> files, keys or <code>.git</code> folders are in the image (<code>.dockerignore</code> checked).</li>
+  <li>Only needed ports are published, and bound to <code>127.0.0.1</code> when only local access is required.</li>
+  <li>The image came from, and is stored in, a registry you trust.</li>
+</ul>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s10"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 11 ============ -->
+<section class="mod" id="s11">
+<div class="sechead"><span class="secnum">11</span><h2>Hands-on lab</h2></div>
+<p class="lead">You will run the app locally, containerize it, run it, break it on purpose and fix it. Every command here runs in your <b>real terminal</b>.</p>
+<div class="scorebar"><b>Lab progress</b><div class="prog" style="flex:1;min-width:140px"><i id="lab-bar"></i></div><span id="lab-label">0 of 9 steps</span></div>
+
+<div class="lab-step" data-step="0">
+  <h4>Step 0. Prepare</h4>
+  <p>Confirm Docker works and create a folder with the four files.</p>
+  <div class="row">
+    <button class="btn small" data-dl="app.py">Download app.py</button>
+    <button class="btn small" data-dl="requirements.txt">Download requirements.txt</button>
+    <button class="btn small" data-dl="Dockerfile">Download Dockerfile</button>
+    <button class="btn small" data-dl=".dockerignore">Download .dockerignore</button>
+  </div>
+  <div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre data-os="unix"><code>docker version
+mkdir gtri-docker-lab &amp;&amp; cd gtri-docker-lab
+# Save the four downloaded files into this folder, then:
+ls -a</code></pre>
+<pre data-os="win"><code>docker version
+mkdir gtri-docker-lab; cd gtri-docker-lab
+# Save the four downloaded files into this folder, then:
+dir -Force</code></pre></div>
+  <p class="hint"><b>Expected:</b> <code>docker version</code> prints Client and Server sections. If the Server section shows an error, Docker is not running: start Docker Desktop or the Docker service. If your browser renames <code>.dockerignore</code> or <code>Dockerfile</code> on download, rename them back. They must have exactly these names.</p>
+  <p class="hint"><b>Offline classroom?</b> On a connected machine run <code>docker pull python:3.12-slim</code> then <code>docker save -o python312.tar python:3.12-slim</code>. On the offline machine run <code>docker load -i python312.tar</code>. The build also needs Python packages, so ask your facilitator about the internal package mirror.</p>
+  <label class="chk"><input type="checkbox" class="lab-chk"> Step 0 complete</label>
+</div>
+
+<div class="lab-step" data-step="1">
+  <h4>Step 1. Run the Python app locally (no Docker)</h4>
+  <div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre data-os="unix"><code>python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export SITE_NAME=GETRI-Lab
+python -m uvicorn app:app --port 8000</code></pre>
+<pre data-os="win"><code>py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+$env:SITE_NAME = "GETRI-Lab"
+python -m uvicorn app:app --port 8000</code></pre></div>
+  <p>Open <code>http://127.0.0.1:8000/health</code> in a browser. Press <b>Ctrl+C</b> in the terminal to stop the server.</p>
+  <p class="hint"><b>Expected:</b> <code>{"status":"ok"}</code>. Python 3.10 to 3.13 is recommended for these pinned packages. On Windows, if activation is blocked, run <code>Set-ExecutionPolicy -Scope Process RemoteSigned</code> in that window and try again.</p>
+  <details><summary><b>Check yourself:</b> Why does this work without Docker, and why might it not on a colleague's PC?</summary><p>It works because your machine has a compatible Python and the packages installed. A colleague with an older Python, or without the packages, would see the problems from section 1.</p></details>
+  <label class="chk"><input type="checkbox" class="lab-chk"> Step 1 complete</label>
+</div>
+
+<div class="lab-step" data-step="2">
+  <h4>Step 2. Build the image</h4>
+  <div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre><code>deactivate
+docker build -t substation-monitor:1.0 .
+docker images</code></pre></div>
+  <p class="hint"><b>Expected:</b> the build ends with a line naming the image, and <code>docker images</code> lists <code>substation-monitor</code> with tag <code>1.0</code> and a size of roughly 150 MB. (<code>deactivate</code> leaves the virtual environment; the first build downloads the base image, so it takes longer.)</p>
+  <details><summary><b>Check yourself:</b> Build it a second time. What is different, and why?</summary><p>It finishes almost instantly because every layer is served from the build cache.</p></details>
+  <label class="chk"><input type="checkbox" class="lab-chk"> Step 2 complete</label>
+</div>
+
+<div class="lab-step" data-step="3">
+  <h4>Step 3. Start the container</h4>
+  <div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre><code>docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab substation-monitor:1.0
+docker ps</code></pre></div>
+  <p class="hint"><b>Expected:</b> <code>docker run</code> prints a long container ID. <code>docker ps</code> shows <code>monitor</code> with STATUS "Up" and PORTS like <code>0.0.0.0:8080-&gt;8000/tcp</code>. If you get "port is already allocated", see section 9 and use another host port, for example <code>-p 8081:8000</code>.</p>
+  <label class="chk"><input type="checkbox" class="lab-chk"> Step 3 complete</label>
+</div>
+
+<div class="lab-step" data-step="4">
+  <h4>Step 4. Access <code>/health</code></h4>
+  <div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre data-os="unix"><code>curl http://localhost:8080/health
+curl http://localhost:8080/readings</code></pre>
+<pre data-os="win"><code>curl.exe http://localhost:8080/health
+curl.exe http://localhost:8080/readings</code></pre></div>
+  <p class="hint"><b>Expected:</b> <code>{"status":"ok"}</code>, then JSON with <code>"site":"GETRI-Lab"</code> and three readings. You can also open the same URLs in a browser. Note that you used port <b>8080</b> (host) even though the app listens on <b>8000</b> (container).</p>
+  <label class="chk"><input type="checkbox" class="lab-chk"> Step 4 complete</label>
+</div>
+
+<div class="lab-step" data-step="5">
+  <h4>Step 5. View the logs</h4>
+  <div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre><code>docker logs monitor
+docker logs -f --tail 20 monitor</code></pre></div>
+  <p>With <code>-f</code> the command keeps following new output. Refresh <code>/health</code> in the browser and watch a new line appear. Press <b>Ctrl+C</b> to stop following (this does not stop the container).</p>
+  <p class="hint"><b>Expected:</b> uvicorn start-up lines including <code>Uvicorn running on http://0.0.0.0:8000</code>, followed by one line per request such as <code>"GET /health HTTP/1.1" 200 OK</code>.</p>
+  <label class="chk"><input type="checkbox" class="lab-chk"> Step 5 complete</label>
+</div>
+
+<div class="lab-step" data-step="6">
+  <h4>Step 6. Introduce a deliberate configuration error</h4>
+  <p>Remove the working container and start a new one <b>without</b> the <code>SITE_NAME</code> setting.</p>
+  <div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre><code>docker rm -f monitor
+docker run -d --name monitor -p 8080:8000 substation-monitor:1.0
+docker ps
+docker ps -a</code></pre></div>
+  <p class="hint"><b>Expected:</b> <code>docker run</code> still prints an ID, but <code>docker ps</code> does not list the container. <code>docker ps -a</code> shows STATUS like <code>Exited (1) 3 seconds ago</code>.</p>
+  <details><summary><b>Predict first:</b> Why did <code>docker run</code> succeed yet the container is not running?</summary><p>Docker successfully created and started the container. Then the main process (our app) crashed immediately, so the container exited. A container lives only as long as its main process.</p></details>
+  <label class="chk"><input type="checkbox" class="lab-chk"> Step 6 complete</label>
+</div>
+
+<div class="lab-step" data-step="7">
+  <h4>Step 7. Diagnose and fix it</h4>
+  <div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre><code>docker logs monitor
+docker inspect -f "{{.State.ExitCode}}" monitor
+docker rm monitor
+docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab substation-monitor:1.0
+docker ps</code></pre></div>
+  <p class="hint"><b>Expected:</b> the logs end with <code>KeyError: 'SITE_NAME'</code>; the exit code is <code>1</code>. After recreating with <code>-e</code> the container shows as "Up" again and <code>/health</code> responds.</p>
+  <details><summary><b>Bonus challenge:</b> Break and fix the port mapping</summary><p>Run a container with <code>-p 8080:8001</code> (wrong container port). The container is "Up", but <code>curl</code> to <code>localhost:8080</code> fails. Use <code>docker ps</code> and <code>docker logs</code> to find the mismatch, then recreate it with <code>-p 8080:8000</code>.</p></details>
+  <details><summary><b>Bonus challenge:</b> Reproduce the localhost-binding error without rebuilding</summary><p>Run <code>docker rm -f monitor</code>, then <code>docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab substation-monitor:1.0 uvicorn app:app --host 127.0.0.1 --port 8000</code>. The container is "Up", yet <code>curl localhost:8080/health</code> fails. Find the clue in <code>docker logs</code>, then recreate it without the extra command.</p></details>
+  <label class="chk"><input type="checkbox" class="lab-chk"> Step 7 complete</label>
+</div>
+
+<div class="lab-step" data-step="8">
+  <h4>Step 8. Clean up</h4>
+  <div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div>
+<pre><code>docker stop monitor
+docker rm monitor
+docker ps -a
+docker rmi substation-monitor:1.0</code></pre></div>
+  <p class="hint"><code>docker rmi</code> deletes the image. You can skip it if you want to keep it for practice.</p>
+  <label class="chk"><input type="checkbox" class="lab-chk"> Step 8 complete</label>
+</div>
+<div class="callout ok"><span class="t">Reflection questions</span>Which step taught you the most? What does <code>docker ps -a</code> show that <code>docker ps</code> hides? Where would a password be configured for this app, and where must it never be written?</div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s11"> I have completed this section</label></div>
+</section>
+
+<!-- ============ SECTION 12 ============ -->
+<section class="mod" id="s12">
+<div class="sechead"><span class="secnum">12</span><h2>Knowledge assessment</h2></div>
+<p class="lead">Twelve multiple-choice questions. Select an answer to see an explanation. You can retake the quiz at any time.</p>
+<div class="scorebar" role="status" aria-live="polite"><b>Score:</b> <span id="quiz-score">0 / 12</span> <span id="quiz-progress" class="hint">0 answered</span> <button class="btn small" id="quiz-retake">Retake</button></div>
+<div id="quiz"></div>
+<div class="callout info" id="quiz-final" aria-live="polite" style="display:none"></div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="s12"> I have completed this section</label></div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section class="mod" id="glossary">
+<div class="sechead"><span class="secnum">A</span><h2>Glossary</h2></div>
+<div class="tablewrap"><table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td>Image</td><td>Read-only template of layers and metadata used to create containers.</td></tr>
+  <tr><td>Container</td><td>A running or stopped instance of an image, with its own writable layer.</td></tr>
+  <tr><td>Dockerfile</td><td>Text file of instructions used by <code>docker build</code>.</td></tr>
+  <tr><td>Build context</td><td>The folder sent to the daemon during a build.</td></tr>
+  <tr><td>Layer</td><td>One cached filesystem change produced by an instruction.</td></tr>
+  <tr><td>Registry</td><td>Server that stores and serves images (Docker Hub, private registries).</td></tr>
+  <tr><td>Tag</td><td>Label for an image version, written <code>name:tag</code>.</td></tr>
+  <tr><td>Daemon / client</td><td><code>dockerd</code> does the work; the <code>docker</code> command asks it to.</td></tr>
+  <tr><td>Port publishing</td><td>Forwarding a host port to a container port with <code>-p</code>.</td></tr>
+  <tr><td>EXPOSE</td><td>Dockerfile instruction that documents an intended port. It does not publish it.</td></tr>
+  <tr><td>Environment variable</td><td>A named setting passed to the process at start (<code>-e</code>).</td></tr>
+  <tr><td>Bind mount</td><td>A host folder mounted into a container.</td></tr>
+  <tr><td>Named volume</td><td>Docker-managed storage that outlives containers.</td></tr>
+  <tr><td>Exit code</td><td>Number returned when the main process ends. 0 means success; non-zero means failure.</td></tr>
+</table></div>
+<div class="done-row"><label><input type="checkbox" class="sec-done" data-sec="glossary"> I have reviewed the glossary</label></div>
+</section>
+
+</main>
+</div>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const noteHtml=s=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>');
+const store={
+  get(k,d){try{const v=localStorage.getItem('dfm.'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('dfm.'+k,JSON.stringify(v))}catch(e){}},
+  clear(){try{Object.keys(localStorage).filter(k=>k.indexOf('dfm.')===0).forEach(k=>localStorage.removeItem(k))}catch(e){}}
+};
+function copyText(t,b){
+  const done=()=>{const o=b.textContent;b.textContent='Copied';setTimeout(()=>{b.textContent=o},1200)};
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);if(ok){done()}else{b.textContent='Select and copy manually'}};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(done,fallback)}else{fallback()}
+}
+function setArrow(el,cls){el.setAttribute('class','arrow '+cls)}
+
+/* ---------- OS toggle, print, reset ---------- */
+function setOS(os){
+  document.body.dataset.os=os;
+  $$('[data-set-os]').forEach(b=>{const on=b.dataset.setOs===os;b.setAttribute('aria-pressed',String(on));b.classList.toggle('active',on)});
+  store.set('os',os);
+}
+$$('[data-set-os]').forEach(b=>b.addEventListener('click',()=>setOS(b.dataset.setOs)));
+setOS(store.get('os','unix')==='win'?'win':'unix');
+$('#btn-print').addEventListener('click',()=>window.print());
+$('#btn-reset').addEventListener('click',()=>{if(confirm('Clear your saved progress, quiz result and lab checkboxes?')){store.clear();location.reload()}});
+
+/* ---------- copy buttons ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.copy');
+  if(b){
+    let text='';
+    if(b.dataset.copyFrom){text=$('#'+b.dataset.copyFrom).textContent}
+    else{
+      const box=b.closest('.codebox');
+      const pres=$$('pre',box).filter(p=>p.offsetParent!==null);
+      const p=pres[0]||$('pre',box);
+      text=p?p.textContent:'';
+    }
+    copyText(text,b);
+  }
+  const f=e.target.closest('.copyfile');
+  if(f){copyText(FILES[f.dataset.f].map(l=>l[0]).join('\n')+'\n',f)}
+  const d=e.target.closest('[data-dl]');
+  if(d){download(d.dataset.dl)}
+});
+function download(name){
+  const f=FILES[name];if(!f)return;
+  const blob=new Blob([f.map(l=>l[0]).join('\n')+'\n'],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+}
+
+/* ---------- section progress + scroll spy ---------- */
+const SECS=['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'];
+function refreshProgress(){
+  const done=store.get('done',{});let n=0;
+  SECS.forEach(id=>{if(done[id])n++});
+  $('#prog-bar').style.width=(n/12*100)+'%';
+  $('#prog-label').textContent='Progress: '+n+' of 12 sections';
+  $$('nav#toc a').forEach(a=>{const t=$('.tick',a);if(t)t.textContent=done[a.dataset.sec]?'✓':''});
+  $$('.sec-done').forEach(c=>{c.checked=!!done[c.dataset.sec]});
+}
+document.addEventListener('change',e=>{
+  const c=e.target.closest('.sec-done');
+  if(c){const d=store.get('done',{});d[c.dataset.sec]=c.checked;store.set('done',d);refreshProgress()}
+});
+refreshProgress();
+if('IntersectionObserver' in window){
+  const links=$$('nav#toc a');
+  const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.dataset.sec===en.target.id))}})},{rootMargin:'-20% 0px -70% 0px'});
+  $$('section.mod').forEach(s=>io.observe(s));
+}
+
+/* ---------- source files (used by annotated code, copy and download) ---------- */
+/* each entry: [code, note]. note: text = start of a group, null = continues previous group, '' = blank line */
+const FILES={
+'app.py':[
+['import os','Imports Python\'s built-in `os` module. We need it to read environment variables, which are settings given to the program from outside.'],
+['import random','Imports the `random` module so the app can generate simulated meter readings.'],
+['from datetime import datetime, timezone','Imports tools for dates and times. We use them to stamp each response with the current time in UTC.'],
+['',''],
+['from fastapi import FastAPI','Imports the `FastAPI` class from the FastAPI library. FastAPI is not part of Python itself, so it must be listed in `requirements.txt` and installed. Forgetting this is the classic "works on my machine" bug.'],
+['',''],
+['# Read the site name from an environment variable.','Lines starting with `#` are comments. Python ignores them; they are notes for humans. These three lines explain the statement that follows.'],
+['# Using os.environ["..."] on purpose: if it is missing, the app stops',null],
+['# immediately with a clear error instead of running misconfigured.',null],
+['SITE_NAME = os.environ["SITE_NAME"]','Looks up the environment variable `SITE_NAME` and stores its value in a Python variable. If the variable does not exist, Python raises `KeyError: \'SITE_NAME\'` and the program stops. This "fail fast" behaviour is what you will trigger deliberately in the lab.'],
+['',''],
+['app = FastAPI(title="Substation Monitor", version="1.0.0")','Creates the web application object. Every route below is attached to `app`. The title and version also appear in the automatic documentation page FastAPI generates at `/docs`.'],
+['',''],
+['# Simulated equipment. Each tuple is (id, type, metric, low, high).','A comment describing the data structure below it. Reading comments first makes unfamiliar code easier to follow.'],
+['EQUIPMENT = [','A Python list holding the simulated equipment. Each item is a tuple: a fixed group of five values in the order given in the comment above (id, type, metric, low, high). `low` and `high` are the range within which a random reading will fall.'],
+['    ("TR-01", "transformer", "oil_temperature_c", 55.0, 75.0),',null],
+['    ("CB-07", "circuit_breaker", "load_amps", 300.0, 450.0),',null],
+['    ("CAP-02", "capacitor_bank", "voltage_kv", 10.8, 11.4),',null],
+[']',null],
+['',''],
+['',''],
+['@app.get("/health")','A decorator. It tells FastAPI: when a web client sends an HTTP GET request to the path `/health`, run the function directly underneath. This is called a route.'],
+['def health():','Defines a Python function named `health`. Nothing is passed in; it just reports that the service is alive.'],
+['    return {"status": "ok"}','Returns a Python dictionary. FastAPI automatically converts it to JSON, so the client receives `{"status":"ok"}`. Monitoring tools call endpoints like this to check that a service is up.'],
+['',''],
+['',''],
+['@app.get("/readings")','Another route: GET requests to `/readings` run the function below.'],
+['def readings():','Defines the function that builds the readings response.'],
+['    items = []','Creates an empty list. We will add one reading per piece of equipment.'],
+['    for eq_id, eq_type, metric, low, high in EQUIPMENT:','A loop that visits each tuple in `EQUIPMENT`. Python "unpacks" the five values into five named variables, so the code that follows can use `eq_id`, `low`, `high` and so on.'],
+['        items.append(','Adds one new item to the end of the `items` list. The value being added is the dictionary that follows, up to the closing parenthesis.'],
+['            {',null],
+['                "equipment_id": eq_id,',null],
+['                "type": eq_type,',null],
+['                "metric": metric,',null],
+['                "value": round(random.uniform(low, high), 1),',null],
+['            }',null],
+['        )',null],
+['    return {','Returns the final response as a dictionary: which site this is (from the environment variable), the time of the request, and the list of readings. `datetime.now(timezone.utc).isoformat()` produces a standard UTC timestamp such as `2026-10-13T05:30:12+00:00`. In the readings, `random.uniform(low, high)` picks a random number in the range and `round(..., 1)` keeps one decimal place.'],
+['        "site": SITE_NAME,',null],
+['        "timestamp": datetime.now(timezone.utc).isoformat(),',null],
+['        "readings": items,',null],
+['    }',null]
+],
+'requirements.txt':[
+['fastapi==0.115.6','The web framework. `==0.115.6` pins one exact version, so every machine and every image build installs the same one.'],
+['uvicorn==0.34.0','The web server that listens on a network port and passes requests to FastAPI. FastAPI needs a server like this to actually run.'],
+['pydantic==2.10.4','The library FastAPI uses to validate and convert data. It would be installed automatically as a dependency, but pinning it explicitly keeps this compatible combination fixed.']
+],
+'Dockerfile':[
+['# 1. Start from a small, official, version-pinned Python image','Every image starts from a base image. `python:3.12-slim` is the official Python image, version 3.12, in its "slim" variant that leaves out many tools we do not need. Pinning the tag (not `latest`) makes builds repeatable.'],
+['FROM python:3.12-slim',null],
+['',''],
+['# 2. Python and pip settings (no .pyc files, unbuffered logs, no pip cache)','`ENV` sets environment variables inside the image. `PYTHONDONTWRITEBYTECODE=1` avoids writing `.pyc` cache files. `PYTHONUNBUFFERED=1` makes Python print logs immediately so `docker logs` shows them without delay. `PIP_NO_CACHE_DIR=1` stops pip keeping downloaded packages, which keeps the image smaller. The backslash `\\` continues the instruction on the next line.'],
+['ENV PYTHONDONTWRITEBYTECODE=1 \\',null],
+['    PYTHONUNBUFFERED=1 \\',null],
+['    PIP_NO_CACHE_DIR=1 \\',null],
+['    PIP_DISABLE_PIP_VERSION_CHECK=1',null],
+['',''],
+['# 3. Work inside /app','`WORKDIR` sets the folder where following instructions run, and creates it if needed. Relative paths such as `.` in later `COPY` lines mean `/app`.'],
+['WORKDIR /app',null],
+['',''],
+['# 4. Create an unprivileged user to run the app','`RUN` executes a command while building the image and saves the result as a layer. Here it creates a normal user, `appuser`, with a fixed ID, so the app does not need to run as root.'],
+['RUN useradd --uid 10001 --no-create-home appuser',null],
+['',''],
+['# 5. Install dependencies first (cached unless requirements.txt changes)','`COPY` copies a file from the build context (your project folder) into the image. We copy only `requirements.txt` first, then install. As long as that file is unchanged, Docker reuses the cached install layer, which makes rebuilds fast.'],
+['COPY requirements.txt .',null],
+['RUN pip install -r requirements.txt',null],
+['',''],
+['# 6. Copy the application code last (changes most often)','Now copy the code. Because code changes often, putting it after the install step means edits do not force a reinstall of all packages. `--chown` makes the file owned by `appuser`.'],
+['COPY --chown=appuser:appuser app.py .',null],
+['',''],
+['# 7. Drop root privileges','From this line on, and when the container runs, processes use `appuser` instead of root. If the app were ever compromised, the attacker would have fewer rights.'],
+['USER appuser',null],
+['',''],
+['# 8. Document the port the app listens on (does NOT publish it)','`EXPOSE` records that the application is intended to listen on port 8000. It is documentation and metadata. It does not make the port reachable from your computer; that needs `-p` when you run the container.'],
+['EXPOSE 8000',null],
+['',''],
+['# 9. Start the app, listening on all interfaces inside the container','`CMD` is the default command the container runs when it starts. `uvicorn app:app` means "in the file app.py, run the object named app". `--host 0.0.0.0` makes it listen on all network interfaces inside the container; with the default `127.0.0.1` the published port would not work. `--port 8000` matches `EXPOSE`. The square-bracket form avoids an extra shell and lets the app receive stop signals correctly.'],
+['CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]',null]
+],
+'.dockerignore':[
+['# Python junk','Lines starting with `#` are comments. The patterns below name files and folders that should <b>not</b> be sent to Docker during a build.'],
+['__pycache__/',null],
+['*.pyc',null],
+['# Local virtual environments','Your local `.venv` folder can be hundreds of MB and is useless inside the image, which installs its own packages. Leaving it out keeps the build fast.'],
+['.venv/',null],
+['venv/',null],
+['# Version control and secrets','`.git` holds your entire history; `.env` often holds passwords or keys. Neither belongs in an image. Excluding them is a basic security habit.'],
+['.git/',null],
+['.env',null],
+['# Logs and local data','Log files and local data folders are rarely wanted in an image. Persistent data should go in a volume instead (section 8).'],
+['*.log',null],
+['data/',null]
+]
+};
+
+/* ---------- annotated code ---------- */
+function renderAnnot(box){
+  const name=box.dataset.file,lines=FILES[name];
+  let gid=-1;
+  const gids=lines.map((l,i)=>{if(l[1]===''){return -1}if(l[1]!==null){gid=i}return gid});
+  const top='<div class="annot-top"><span><span class="badge file">Source file</span> <b style="font-family:var(--mono)">'+esc(name)+'</b></span><span><button class="btn small copyfile" data-f="'+esc(name)+'">Copy</button> <button class="btn small" data-dl="'+esc(name)+'">Download</button></span></div>';
+  const rows=lines.map((l,i)=>{
+    const code=l[0],m=code.match(/^(\s*)(#.*)$/);
+    const html=m?esc(m[1])+'<span class="cm">'+esc(m[2])+'</span>':esc(code);
+    const blank=gids[i]<0;
+    return '<button class="ln'+(blank?' blank':'')+'" data-g="'+gids[i]+'"'+(blank?' tabindex="-1" aria-hidden="true"':'')+'><span class="n">'+(i+1)+'</span><span class="c">'+(html||' ')+'</span></button>';
+  }).join('');
+  box.innerHTML='<div class="annot-code">'+top+rows+'</div><div class="annot-note" aria-live="polite"><h4>Click a line</h4><p>Select any line of code to read what it does in plain language.</p></div>';
+  box.addEventListener('click',e=>{
+    const b=e.target.closest('.ln');
+    if(!b||b.classList.contains('blank'))return;
+    const g=+b.dataset.g;
+    $$('.ln',box).forEach(x=>x.classList.toggle('sel',+x.dataset.g===g));
+    let last=g+1;
+    gids.forEach((v,i)=>{if(v===g)last=i+1});
+    const note=lines[g][1];
+    const body=name==='.dockerignore'&&note.indexOf('<b>')>-1?note:noteHtml(note);
+    $('.annot-note',box).innerHTML='<h4>'+(g+1===last?'Line '+(g+1):'Lines '+(g+1)+' to '+last)+'</h4><p>'+body+'</p>';
+  });
+}
+$$('.annot').forEach(renderAnnot);
+
+/* ---------- section 1: works-on-my-machine ---------- */
+const MACH=[
+ {id:'laptop',name:'Developer laptop',os:'Windows 11',py:'3.12',fa:'0.115.6',uv:'0.34.0',good:true,verdict:'Works',
+  out:'INFO:     Started server process [4218]\nINFO:     Waiting for application startup.\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)'},
+ {id:'s1',name:'Test server 1',os:'Ubuntu 20.04',py:'3.8',fa:'installed (older)',uv:'installed (older)',good:false,verdict:'Fails: Python too old',
+  out:'Traceback (most recent call last):\n  ...\n  File "app.py", line 3, in <module>\n    def label(unit: str | None = None) -> str:\nTypeError: unsupported operand type(s) for |: \'type\' and \'NoneType\'\n\nCause: the "X | None" type syntax needs Python 3.10 or newer.'},
+ {id:'s2',name:'Test server 2',os:'RHEL 8',py:'3.12',fa:'not installed',uv:'not installed',good:false,verdict:'Fails: dependencies missing',
+  out:'/usr/bin/python: No module named uvicorn\n\nCause: nobody ran "pip install -r requirements.txt" on this server.'},
+ {id:'ctr',name:'Docker container',os:'Debian (inside the image)',py:'3.12',fa:'0.115.6',uv:'0.34.0',good:true,verdict:'Works on any host that runs the image',
+  out:'INFO:     Started server process [1]\nINFO:     Waiting for application startup.\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)\n\nThe runtime and libraries travel with the image, so the host does not matter.'}
+];
+(function(){
+  const tried={};
+  const tabs=$('#wm-tabs');
+  tabs.innerHTML=MACH.map(m=>'<button class="btn small" data-m="'+m.id+'" aria-pressed="false">Run on: '+esc(m.name)+'</button>').join('');
+  function table(){
+    $('#wm-table').innerHTML='<table><tr><th>Environment</th><th>OS</th><th>Python</th><th>FastAPI</th><th>uvicorn</th><th>Result</th></tr>'+
+      MACH.map(m=>'<tr><td><b>'+esc(m.name)+'</b></td><td>'+esc(m.os)+'</td><td>'+esc(m.py)+'</td><td>'+esc(m.fa)+'</td><td>'+esc(m.uv)+'</td><td>'+(tried[m.id]?'<span class="pill '+(m.good?'ok':'bad')+'">'+(m.good?'✓ ':'✗ ')+esc(m.verdict)+'</span>':'<span class="pill gray">not tried</span>')+'</td></tr>').join('')+'</table>';
+  }
+  table();
+  tabs.addEventListener('click',e=>{
+    const b=e.target.closest('[data-m]');if(!b)return;
+    const m=MACH.find(x=>x.id===b.dataset.m);
+    tried[m.id]=true;
+    $$('#wm-tabs button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    $$('#wm-tabs button').forEach(x=>x.classList.toggle('active',x===b));
+    const out=$('#wm-out');
+    out.textContent='$ python -m uvicorn app:app --port 8000\n'+m.out;
+    out.className='term-out '+(m.good?'good':'err');
+    table();
+  });
+})();
+
+/* ---------- section 2: container vs VM ---------- */
+const GL={
+ app:['Application','Your own code, here <code>app.py</code>. It is the part that does the useful work: answering <code>/health</code> and <code>/readings</code>.'],
+ libs:['Libraries and dependencies','Everything your code needs in order to run: the Python interpreter, FastAPI, uvicorn and the operating-system files they rely on. With Docker these are packaged together with the application.'],
+ cont:['Container image and container','The <b>image</b> is the packaged, read-only template of the application plus its dependencies. A <b>container</b> (the green boxes) is a running instance of an image, isolated from other containers. (Switch to the container view if you are looking at virtual machines.)'],
+ rt:['Container runtime','The software that creates and runs containers on the host, using kernel features (namespaces and cgroups) to isolate them. Docker Engine uses containerd and runc. In the virtual machine view the equivalent layer is the hypervisor.'],
+ os:['Host operating system','The operating system of the machine running Docker. All containers share its <b>kernel</b>. In the virtual machine view, every VM carries a complete guest OS of its own, which is why VMs are heavier.']
+};
+(function(){
+  $$('[data-view]').forEach(b=>b.addEventListener('click',()=>{
+    const v=b.dataset.view;
+    $('#cv-cont').style.display=v==='cont'?'':'none';
+    $('#cv-vm').style.display=v==='vm'?'':'none';
+    $$('[data-view]').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))});
+  }));
+  $('#gl-tabs').addEventListener('click',e=>{
+    const b=e.target.closest('[data-g]');if(!b)return;
+    const g=b.dataset.g;
+    $$('#gl-tabs button').forEach(x=>x.classList.toggle('active',x===b));
+    $$('#cv-svg [data-g]').forEach(r=>r.classList.toggle('hl',r.dataset.g===g));
+    $('#gl-note').innerHTML='<span class="t">'+GL[g][0]+'</span>'+GL[g][1];
+  });
+})();
+
+/* ---------- section 3: image vs container ---------- */
+(function(){
+  const NAMES=['brave_tesla','calm_ohm','eager_faraday','keen_watt','noble_volta','swift_henry'];
+  let list=[],counter=0;
+  function render(){
+    const run=list.filter(c=>c.running).length;
+    $('#ic-count').innerHTML='<b>Images on this host:</b> 1 (never changes) &nbsp; <b>Containers:</b> '+list.length+' ('+run+' running)';
+    $('#ic-run').disabled=list.length>=6;
+    $('#ic-containers').innerHTML=list.map(c=>
+      '<div class="ic-c'+(c.running?'':' stopped')+'"><h4>'+esc(c.name)+' <span class="pill '+(c.running?'ok':'gray')+'">'+(c.running?'Running':'Stopped')+'</span></h4>'+
+      '<div class="hint"><code>docker run -d --name '+esc(c.name)+' -p '+c.port+':8000 substation-monitor:1.0</code></div>'+
+      '<div class="wl"><b>This container\'s writable layer:</b><br>'+(c.files.length?c.files.map(f=>esc(f)).join('<br>'):'(empty)')+'</div>'+
+      '<div class="row"><button class="btn small" data-act="write" data-id="'+c.id+'"'+(c.running&&c.files.length<4?'':' disabled')+'>Write a file</button>'+
+      '<button class="btn small" data-act="toggle" data-id="'+c.id+'">'+(c.running?'docker stop':'docker start')+'</button>'+
+      '<button class="btn small danger" data-act="rm" data-id="'+c.id+'">docker rm</button></div></div>').join('');
+  }
+  $('#ic-run').addEventListener('click',()=>{
+    counter++;
+    list.push({id:counter,name:NAMES[(counter-1)%NAMES.length],port:8080+counter-1,running:true,files:[]});
+    render();
+  });
+  $('#ic-reset').addEventListener('click',()=>{list=[];counter=0;render()});
+  $('#ic-containers').addEventListener('click',e=>{
+    const b=e.target.closest('[data-act]');if(!b)return;
+    const id=+b.dataset.id,c=list.find(x=>x.id===id);if(!c)return;
+    if(b.dataset.act==='write'){c.files.push('/tmp/log-'+(c.files.length+1)+'.txt')}
+    else if(b.dataset.act==='toggle'){c.running=!c.running}
+    else if(b.dataset.act==='rm'){list=list.filter(x=>x.id!==id)}
+    render();
+  });
+  render();
+})();
+
+/* ---------- section 4: architecture ---------- */
+(function(){
+  const AR={
+   pull:{cmd:'docker pull python:3.12-slim',steps:[
+    {ids:['client','a-cd'],t:'You type <code>docker pull python:3.12-slim</code>. The client turns this into an API request and sends it to the daemon.'},
+    {ids:['daemon','a-dreg','registry'],t:'The daemon resolves the tag and checks which layers it already has. It asks the registry (Docker Hub by default) for the rest.'},
+    {ids:['registry','a-regi','images'],t:'The registry sends the missing layers. The daemon downloads them and stores them in the local image store.'},
+    {ids:['images'],t:'The image now sits in the local image store. <b>Nothing is running:</b> pulling an image does not create a container.'}]},
+   build:{cmd:'docker build -t substation-monitor:1.0 .',steps:[
+    {ids:['client','a-cd'],t:'You type <code>docker build -t substation-monitor:1.0 .</code>. The client packs the <b>build context</b> (your project folder, minus anything in <code>.dockerignore</code>) and sends it to the daemon.'},
+    {ids:['daemon','images'],t:'The daemon reads the <code>Dockerfile</code>. Starting with <code>FROM</code>, it looks for the base image locally.'},
+    {ids:['daemon','a-dreg','registry','a-regi','images'],t:'If the base image is not stored locally, the daemon pulls it from the registry first.'},
+    {ids:['daemon','images','a-di'],t:'The daemon runs each instruction in turn. Steps that change files become layers; unchanged steps reuse cached layers.'},
+    {ids:['images'],t:'The finished image is tagged <code>substation-monitor:1.0</code> and stored locally. <b>Still no container</b> has been started.'}]},
+   run:{cmd:'docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab substation-monitor:1.0',steps:[
+    {ids:['client','a-cd'],t:'You type <code>docker run ...</code>. The client sends the request, including the name, port mapping and environment variable, to the daemon.'},
+    {ids:['daemon','images'],t:'The daemon looks for <code>substation-monitor:1.0</code> in the local image store. If it were missing, it would pull it from the registry automatically.'},
+    {ids:['daemon','images','a-ic','containers'],t:'The daemon creates a <b>container</b> from the image: a new writable layer on top of the image layers, its own network, the environment variable and the port mapping.'},
+    {ids:['daemon','a-dr','runtime','a-rc','containers'],t:'The daemon asks the container runtime to start the image\'s <code>CMD</code> (uvicorn) as an isolated process. Docker publishes host port 8080 and forwards it to container port 8000.'},
+    {ids:['containers'],t:'The container is running. With <code>-d</code> the command returns the container ID and your terminal is free. Use <code>docker logs</code> to see the output.'}]}
+  };
+  const INFO={
+   client:'<b>Docker client.</b> The <code>docker</code> command you type. It does not build or run anything itself; it sends requests to the daemon through an API.',
+   daemon:'<b>Docker daemon (dockerd).</b> A background service that builds images, creates and manages containers, networks and volumes, and talks to registries.',
+   runtime:'<b>Container runtime.</b> The lower-level component (containerd and runc) that actually starts the container process using kernel isolation features.',
+   images:'<b>Local images.</b> Read-only templates stored on this host. They were built here or pulled from a registry.',
+   containers:'<b>Containers.</b> Running or stopped instances created from images. Each has its own writable layer.',
+   registry:'<b>Image registry.</b> A server that stores and distributes images, such as Docker Hub or a private registry inside your organisation. You pull from it and push to it.'
+  };
+  let sc='pull',step=0;
+  function show(){
+    const s=AR[sc],st=s.steps[step];
+    $$('#ar-svg [data-id]').forEach(n=>{
+      const on=st.ids.indexOf(n.dataset.id)>-1;
+      n.classList.toggle('hl',on);n.classList.toggle('dim',!on);
+    });
+    $('#ar-step').innerHTML='<span class="t">'+esc(s.cmd)+'</span><span class="badge terminal">Run in your real terminal</span> <b>Step '+(step+1)+' of '+s.steps.length+':</b> '+st.t;
+    $('#ar-count').textContent='Step '+(step+1)+' / '+s.steps.length;
+    $('#ar-prev').disabled=step===0;
+    $('#ar-next').disabled=step===s.steps.length-1;
+  }
+  $('#ar-tabs').addEventListener('click',e=>{
+    const b=e.target.closest('[data-sc]');if(!b)return;
+    sc=b.dataset.sc;step=0;
+    $$('#ar-tabs button').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))});
+    show();
+  });
+  $('#ar-prev').addEventListener('click',()=>{if(step>0){step--;show()}});
+  $('#ar-next').addEventListener('click',()=>{if(step<AR[sc].steps.length-1){step++;show()}});
+  function info(n){const id=n.dataset.id;if(INFO[id]){$('#ar-info').innerHTML=INFO[id]}}
+  $$('#ar-svg .node').forEach(n=>{
+    n.addEventListener('click',()=>info(n));
+    n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();info(n)}});
+  });
+  show();
+})();
+
+/* ---------- section 6: build context + layer cache ---------- */
+(function(){
+  const BC=[
+   ['app.py','2 KB',0.002,false,''],['requirements.txt','1 KB',0.001,false,''],['Dockerfile','1 KB',0.001,false,''],['.dockerignore','1 KB',0.001,false,''],
+   ['.env','1 KB',0.001,true,'contains secrets'],['.venv/','180 MB',180,true,'local virtual environment'],['.git/','45 MB',45,true,'full version history'],
+   ['__pycache__/','1 MB',1,true,'compiled cache'],['data/','220 MB',220,true,'local sample data'],['app.log','8 MB',8,true,'log file']
+  ];
+  function render(){
+    const ig=$('#bc-ignore').checked;let tot=0;
+    $('#bc-table').innerHTML='<tr><th>File or folder</th><th>Size</th><th>Sent to the daemon?</th></tr>'+BC.map(r=>{
+      const skipped=ig&&r[3];if(!skipped)tot+=r[2];
+      return '<tr><td><code>'+esc(r[0])+'</code> '+(r[4]?'<span class="hint">('+esc(r[4])+')</span>':'')+'</td><td>'+esc(r[1])+'</td><td>'+(skipped?'<span class="pill ok">No (ignored)</span>':'<span class="pill '+(r[3]?'bad':'gray')+'">Yes</span>')+'</td></tr>';
+    }).join('');
+    const m=$('#bc-msg');
+    m.className='callout '+(ig?'ok':'bad');
+    m.innerHTML=ig?'<span class="t">About '+tot.toFixed(2)+' MB sent</span>Only the files the build needs are sent. Builds start quickly and no secrets leave your folder.':'<span class="t">About '+Math.round(tot)+' MB sent</span>Everything is sent, including <code>.env</code> and <code>.git</code>. The build is slower, and if any <code>COPY . .</code> instruction were used, those private files would end up inside the image.';
+  }
+  $('#bc-ignore').addEventListener('change',render);render();
+
+  const GOOD=[['FROM python:3.12-slim',0,0],['ENV ... (metadata)',1,1],['WORKDIR /app',2,0],['RUN useradd ... appuser',3,0],['COPY requirements.txt .',4,0],['RUN pip install -r requirements.txt',5,0],['COPY app.py .',6,0],['USER / EXPOSE / CMD (metadata)',7,1]];
+  const NAIVE=[['FROM python:3.12-slim',0,0],['ENV ... (metadata)',1,1],['WORKDIR /app',2,0],['RUN useradd ... appuser',3,0],['COPY . .',4,0],['RUN pip install -r requirements.txt',5,0],['USER / EXPOSE / CMD (metadata)',6,1]];
+  function layers(){
+    const ch=$('#lc-change').value,naive=$('#lc-naive').checked,L=naive?NAIVE:GOOD;
+    let f=99;
+    if(ch==='base')f=0;
+    else if(ch==='req')f=4;
+    else if(ch==='app')f=naive?4:6;
+    const pip=naive?5:5;
+    $('#lc-layers').innerHTML=L.map((l,i)=>{
+      const re=i>=f;
+      return '<li class="'+(re?'rebuilt':'cached')+(l[2]?' meta':'')+'"><span>'+(i+1)+'. '+esc(l[0])+'</span><span><b>'+(re?'REBUILT':'CACHED')+'</b></span></li>';
+    }).join('');
+    const m=$('#lc-msg');
+    if(f===99){m.className='callout ok';m.innerHTML='<span class="t">Everything cached</span>Nothing changed, so Docker reuses every layer and the build finishes almost instantly.'}
+    else if(f<=pip){m.className='callout bad';m.innerHTML='<span class="t">Slow rebuild</span>The package-install layer is rebuilt, so pip downloads and installs everything again. '+(naive&&ch==='app'?'<b>This is the cost of the naive order:</b> a one-line code edit invalidates <code>COPY . .</code> and every layer after it, including the install.':'This is expected when dependencies or the base image change.')}
+    else{m.className='callout ok';m.innerHTML='<span class="t">Fast rebuild</span>Only the last copy step and metadata are redone. The slow package-install layer stays cached. That is why the Dockerfile copies the code last.'}
+  }
+  $('#lc-change').addEventListener('change',layers);$('#lc-naive').addEventListener('change',layers);layers();
+})();
+
+/* ---------- section 7: command explorer ---------- */
+const CX=[
+ {c:'docker build',what:'Builds an image from a Dockerfile and a build context.',ex:'docker build -t substation-monitor:1.0 .',
+  parts:[['docker build','Ask the daemon to build an image.'],['-t substation-monitor:1.0','Give the image a name and a tag (name:version).'],['.','The build context: the current folder. Run the command from the folder that holds the Dockerfile.']],
+  out:'[+] Building 21.3s (10/10) FINISHED\n => [1/6] FROM docker.io/library/python:3.12-slim\n => [4/6] COPY requirements.txt .\n => [5/6] RUN pip install -r requirements.txt\n => [6/6] COPY --chown=appuser:appuser app.py .\n => naming to docker.io/library/substation-monitor:1.0',
+  tip:'Forgetting the final dot is a very common mistake.'},
+ {c:'docker images',what:'Lists the images stored on this machine.',ex:'docker images',
+  parts:[['docker images','List local images with repository, tag, ID, age and size.']],
+  out:'REPOSITORY           TAG         IMAGE ID       CREATED         SIZE\nsubstation-monitor   1.0         3f2a9c1b7d40   2 minutes ago   155MB\npython               3.12-slim   a1b2c3d4e5f6   3 weeks ago     125MB\n\n(IDs and sizes will differ on your machine)',
+  tip:'One image can carry several tags. Removing a tag does not necessarily remove the image data.'},
+ {c:'docker run',what:'Creates a container from an image and starts it.',ex:'docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab substation-monitor:1.0',
+  parts:[['docker run','Create and start a container.'],['-d','Detached: run in the background and give the terminal back.'],['--name monitor','Choose the container name (otherwise Docker invents one).'],['-p 8080:8000','Publish a port: host port 8080 forwards to container port 8000 (HOST_PORT:CONTAINER_PORT).'],['-e SITE_NAME=GETRI-Lab','Set an environment variable inside the container.'],['substation-monitor:1.0','The image to create the container from.']],
+  out:'9f2c1a7e4b3d8c0a5e6f7b1d2c3a4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f',
+  tip:'This prints the container ID, not the application\'s output; use docker logs for that. Options such as -p and -e must come before the image name.'},
+ {c:'docker ps',what:'Lists running containers.',ex:'docker ps',
+  parts:[['docker ps','Show containers that are currently running, with their published ports.']],
+  out:'CONTAINER ID   IMAGE                    COMMAND                  CREATED          STATUS          PORTS                    NAMES\n9f2c1a7e4b3d   substation-monitor:1.0   "uvicorn app:app --h…"   12 seconds ago   Up 11 seconds   0.0.0.0:8080->8000/tcp   monitor',
+  tip:'Read the PORTS column: 0.0.0.0:8080->8000/tcp means host port 8080 forwards to container port 8000.'},
+ {c:'docker ps -a',what:'Lists all containers, including stopped and crashed ones.',ex:'docker ps -a',
+  parts:[['docker ps','List containers.'],['-a','All: include containers that are not running.']],
+  out:'CONTAINER ID   IMAGE                    COMMAND                  CREATED         STATUS                     PORTS                    NAMES\n9f2c1a7e4b3d   substation-monitor:1.0   "uvicorn app:app --h…"   2 minutes ago   Up 2 minutes               0.0.0.0:8080->8000/tcp   monitor\n5a6b7c8d9e0f   substation-monitor:1.0   "uvicorn app:app --h…"   5 minutes ago   Exited (1) 5 minutes ago                            broken',
+  tip:'When a container "disappears", it has usually exited. docker ps hides it; docker ps -a shows it with its exit code.'},
+ {c:'docker logs',what:'Shows what the container\'s main process printed.',ex:'docker logs -f --tail 20 monitor',
+  parts:[['docker logs','Show output captured from the container.'],['-f','Follow: keep printing new lines (Ctrl+C stops following, not the container).'],['--tail 20','Only the last 20 lines.'],['monitor','Container name or ID.']],
+  out:'INFO:     Started server process [1]\nINFO:     Waiting for application startup.\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)\nINFO:     172.17.0.1:54022 - "GET /health HTTP/1.1" 200 OK',
+  tip:'This is your first diagnostic tool, especially for containers that exited.'},
+ {c:'docker exec',what:'Runs a command inside a running container.',ex:'docker exec -it monitor sh',
+  parts:[['docker exec','Run an extra command in an existing, running container.'],['-it','Interactive terminal: lets you type into the shell.'],['monitor','Which container.'],['sh','The command to run: a shell. You can also run one-off commands such as "whoami".']],
+  out:'$ whoami\nappuser\n$ ls\napp.py\n$ exit',
+  tip:'Changes made this way are lost when the container is removed. Use exec for looking around, not for fixing the image.'},
+ {c:'docker stop',what:'Stops a running container gracefully.',ex:'docker stop monitor',
+  parts:[['docker stop','Send a polite stop signal (SIGTERM). If the process has not exited after about 10 seconds, Docker kills it.'],['monitor','Which container.']],
+  out:'monitor',
+  tip:'A stopped container still exists with its writable layer. It shows up in docker ps -a.'},
+ {c:'docker start',what:'Starts a stopped container again.',ex:'docker start monitor',
+  parts:[['docker start','Start an existing, stopped container.'],['monitor','Which container.']],
+  out:'monitor',
+  tip:'The container comes back with the same settings (ports, environment) it was created with. To change them you must remove it and run a new one.'},
+ {c:'docker rm',what:'Deletes a stopped container.',ex:'docker rm monitor',
+  parts:[['docker rm','Remove a container (not the image).'],['monitor','Which container.']],
+  out:'monitor',
+  tip:'A running container is refused unless you add -f. Anything in the container\'s own writable layer is lost; volumes remain.'}
+];
+(function(){
+  const tabs=$('#cx-tabs');
+  tabs.innerHTML=CX.map((x,i)=>'<button class="btn small'+(i===0?' active':'')+'" data-i="'+i+'" aria-pressed="'+(i===0)+'">'+esc(x.c)+'</button>').join('');
+  function show(i){
+    const x=CX[i];
+    $('#cx-card').innerHTML='<h4>'+esc(x.c)+': '+esc(x.what)+'</h4>'+
+      '<div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div><pre><code>'+esc(x.ex)+'</code></pre></div>'+
+      '<div class="tablewrap"><table><tr><th>Part</th><th>Meaning</th></tr>'+x.parts.map(p=>'<tr><td><code>'+esc(p[0])+'</code></td><td>'+esc(p[1])+'</td></tr>').join('')+'</table></div>'+
+      '<div class="codebox out"><div class="cmdhead"><span class="badge out">Example output (illustrative)</span></div><pre><code>'+esc(x.out)+'</code></pre></div>'+
+      '<div class="callout info"><span class="t">Good to know</span>'+esc(x.tip)+'</div>';
+  }
+  tabs.addEventListener('click',e=>{
+    const b=e.target.closest('[data-i]');if(!b)return;
+    $$('#cx-tabs button').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))});
+    show(+b.dataset.i);
+  });
+  show(0);
+})();
+
+/* ---------- command builder ---------- */
+(function(){
+  const q=v=>/^[A-Za-z0-9._\/:=-]+$/.test(v)?v:'"'+v.replace(/"/g,'')+'"';
+  const port=v=>/^\d+$/.test(String(v))&&+v>=1&&+v<=65535;
+  function upd(){
+    const name=$('#rb-name').value.trim()||'monitor',hp=$('#rb-host').value,cp=$('#rb-cont').value,site=$('#rb-site').value;
+    const d=$('#rb-d').checked,rm=$('#rb-rm').checked,env=$('#rb-env').checked;
+    const p=['docker run'];
+    if(d)p.push('-d');if(rm)p.push('--rm');
+    p.push('--name '+name,'-p '+hp+':'+cp);
+    if(env)p.push('-e SITE_NAME='+q(site));
+    p.push('substation-monitor:1.0');
+    $('#rb-out').textContent=p.join(' ');
+    const n=[];
+    n.push('<code>--name '+esc(name)+'</code>: you will use this name in <code>docker logs</code>, <code>stop</code> and <code>rm</code>.');
+    if(!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(name))n.push('<b>Warning:</b> container names may contain letters, digits, underscore, dot and hyphen, and must start with a letter or digit.');
+    if(!port(hp)||!port(cp))n.push('<b>Warning:</b> ports must be whole numbers from 1 to 65535.');
+    else{
+      n.push('<code>-p '+esc(hp)+':'+esc(cp)+'</code>: browse to <code>http://localhost:'+esc(hp)+'/health</code>. The app inside must listen on port '+esc(cp)+'.');
+      if(cp!=='8000')n.push('<b>Note:</b> our image\'s app listens on 8000, so a container port other than 8000 will not reach it (see the port simulator below).');
+    }
+    n.push(d?'<code>-d</code>: your terminal is free; use <code>docker logs</code> to see output.':'No <code>-d</code>: the container runs in the foreground and shows its logs here. Ctrl+C stops it.');
+    if(rm)n.push('<code>--rm</code>: the container is deleted as soon as it stops. Handy for experiments, but a crashed container will vanish before you can read it with <code>docker ps -a</code>.');
+    n.push(env?'<code>-e SITE_NAME=...</code>: required by our app.':'<b>Warning:</b> without <code>-e SITE_NAME</code> our app exits immediately with <code>KeyError</code>.');
+    $('#rb-notes').innerHTML=n.map(x=>'<li>'+x+'</li>').join('');
+  }
+  $$('#rb-name,#rb-host,#rb-cont,#rb-site,#rb-d,#rb-rm,#rb-env').forEach(el=>{el.addEventListener('input',upd);el.addEventListener('change',upd)});
+  upd();
+})();
+
+/* ---------- port mapping simulator ---------- */
+(function(){
+  function upd(){
+    const hs=$('#pm-host').value,cs=$('#pm-cont').value,as=$('#pm-app').value,b=$('#pm-bind').value;
+    const ok=v=>/^\d+$/.test(v)&&+v>=1&&+v<=65535;
+    const valid=ok(hs)&&ok(cs)&&ok(as);
+    $('#pm-t-host').textContent=hs;$('#pm-t-cont').textContent=cs;
+    $('#pm-t-app').textContent=b+':'+as;
+    $('#pm-t-url').textContent='http://localhost:'+hs;
+    $('#pm-t-map').textContent='-p '+hs+':'+cs;
+    $('#pm-cmd').textContent='docker run -d --name monitor -p '+hs+':'+cs+' -e SITE_NAME=GETRI-Lab substation-monitor:1.0';
+    const res=$('#pm-res');
+    if(!valid){
+      setArrow($('#pm-a1'),'no');setArrow($('#pm-a2'),'no');setArrow($('#pm-a3'),'no');
+      res.className='callout warn';res.innerHTML='<span class="t">Invalid port</span>Enter whole port numbers from 1 to 65535.';return;
+    }
+    setArrow($('#pm-a1'),'ok');setArrow($('#pm-a2'),'ok');
+    if(cs!==as){
+      setArrow($('#pm-a3'),'no');
+      res.className='callout bad';res.innerHTML='<span class="t">Fails: wrong container port</span>Docker forwards host port '+esc(hs)+' to container port '+esc(cs)+', but the app listens on '+esc(as)+'. Nothing is listening on '+esc(cs)+'. <b>Fix:</b> use <code>-p '+esc(hs)+':'+esc(as)+'</code>.';
+    }else if(b==='127.0.0.1'){
+      setArrow($('#pm-a3'),'no');
+      res.className='callout bad';res.innerHTML='<span class="t">Fails: app listens on localhost inside the container</span>Forwarded traffic arrives on the container\'s network interface, not on its private loopback address. An app bound to <code>127.0.0.1</code> never sees it. <b>Fix:</b> start it with <code>--host 0.0.0.0</code>.';
+    }else{
+      setArrow($('#pm-a3'),'ok');
+      res.className='callout ok';res.innerHTML='<span class="t">Works</span><code>http://localhost:'+esc(hs)+'/health</code> reaches the app through host port '+esc(hs)+' → container port '+esc(cs)+'.';
+    }
+  }
+  $$('#pm-host,#pm-cont,#pm-app,#pm-bind').forEach(el=>{el.addEventListener('input',upd);el.addEventListener('change',upd)});
+  upd();
+})();
+
+/* ---------- lifecycle simulator ---------- */
+(function(){
+  const LBL={none:'No container',created:'Created',running:'Running (Up)',stopped:'Stopped (Exited)'};
+  const ACT=[
+   {id:'run',label:'docker run',from:['none'],to:'running',m:'Created AND started in one step. The container has an empty writable layer.'},
+   {id:'create',label:'docker create',from:['none'],to:'created',m:'The container exists but has NOT been started. It appears in docker ps -a as "Created".'},
+   {id:'start',label:'docker start',from:['created','stopped'],to:'running',m:'The main process starts again. A stopped container keeps its writable layer and its original settings.'},
+   {id:'write',label:'Write a file inside',from:['running'],to:null,m:'The app writes report.txt into the container\'s own writable layer.'},
+   {id:'stop',label:'docker stop',from:['running'],to:'stopped',m:'Sent SIGTERM so the app can shut down; Docker kills it after about 10 seconds if it does not. Status becomes Exited. The writable layer is kept.'},
+   {id:'rm',label:'docker rm',from:['created','stopped'],to:'none',m:'The container is deleted.'},
+   {id:'rmf',label:'docker rm -f',from:['running'],to:'none',m:'Force-removed a running container (it is killed first).'}
+  ];
+  let st='none',file=false,log=[];
+  function render(){
+    $$('.state').forEach(g=>g.classList.toggle('cur',g.dataset.state===st));
+    $('#lcs-state').textContent=LBL[st];
+    $('#lcs-state').className='pill '+(st==='running'?'ok':st==='none'?'gray':'warn');
+    $('#lcs-data').textContent=st==='none'?'none':(file?'report.txt present':'empty');
+    $('#lcs-actions').innerHTML=ACT.map(a=>'<button class="btn small" data-a="'+a.id+'"'+(a.from.indexOf(st)>-1?'':' disabled')+'>'+esc(a.label)+'</button>').join('');
+    $('#lcs-log').textContent=log.length?log.join('\n\n'):'Press a button.';
+  }
+  $('#lcs-actions').addEventListener('click',e=>{
+    const b=e.target.closest('[data-a]');if(!b||b.disabled)return;
+    const a=ACT.find(x=>x.id===b.dataset.a);
+    let m=a.m;
+    if(a.id==='write')file=true;
+    if(a.to==='none'){m+=file?' Its writable layer, including report.txt, is now GONE.':' Nothing was stored in it.';file=false}
+    if(a.to)st=a.to;
+    log.push('$ '+a.label+'\n'+m);if(log.length>5)log.shift();
+    render();
+  });
+  render();
+})();
+
+/* ---------- command matching exercise ---------- */
+(function(){
+  const MX=[
+   ['See which containers are running right now','docker ps'],
+   ['See running AND stopped containers','docker ps -a'],
+   ['Read what the application printed','docker logs monitor'],
+   ['Open a shell inside the running container','docker exec -it monitor sh'],
+   ['Shut the container down gracefully','docker stop monitor'],
+   ['Delete a stopped container','docker rm monitor'],
+   ['Start a stopped container again','docker start monitor'],
+   ['List the images on this machine','docker images']
+  ];
+  const opts=Array.from(new Set(MX.map(x=>x[1]))).sort();
+  $('#mx-list').innerHTML=MX.map((x,i)=>'<div class="row"><label for="mx-'+i+'" style="min-width:18rem;font-weight:500">'+(i+1)+'. '+esc(x[0])+'</label><select id="mx-'+i+'" data-i="'+i+'"><option value="">Choose a command</option>'+opts.map(o=>'<option>'+esc(o)+'</option>').join('')+'</select><span class="mark" aria-live="polite"></span></div>').join('');
+  $('#mx-check').addEventListener('click',()=>{
+    let n=0;
+    $$('#mx-list select').forEach(s=>{
+      const i=+s.dataset.i,mark=s.parentNode.querySelector('.mark'),right=MX[i][1];
+      if(s.value===right){n++;mark.innerHTML=' <span class="pill ok">✓ Correct</span>'}
+      else mark.innerHTML=' <span class="pill bad">✗ Not quite</span>'+(s.value?'':' ')+' <span class="hint">Answer: <code>'+esc(right)+'</code></span>';
+    });
+    $('#mx-res').innerHTML='<b>'+n+' / '+MX.length+' correct</b>';
+  });
+})();
+
+/* ---------- section 8: environment variable demo ---------- */
+(function(){
+  const q=v=>/^[A-Za-z0-9._\/:=-]+$/.test(v)?v:'"'+v.replace(/"/g,'')+'"';
+  function upd(){
+    const on=$('#ev-on').checked,site=$('#ev-site').value;
+    $('#ev-site').disabled=!on;
+    $('#ev-cmd').textContent='docker run -d --name monitor -p 8080:8000 '+(on?'-e SITE_NAME='+q(site)+' ':'')+'substation-monitor:1.0';
+    const out=$('#ev-out'),stt=$('#ev-status');
+    if(!on){
+      stt.className='pill bad';stt.textContent='Container status: Exited (1)';
+      out.className='term-out err';
+      out.textContent='$ docker logs monitor\nTraceback (most recent call last):\n  ...\n  File "/app/app.py", line 10, in <module>\n    SITE_NAME = os.environ["SITE_NAME"]\n  ...\nKeyError: \'SITE_NAME\'';
+    }else{
+      stt.className='pill ok';stt.textContent='Container status: Up';
+      out.className='term-out good';
+      out.textContent='$ curl http://localhost:8080/readings\n{\n  "site": '+JSON.stringify(site)+',\n  "timestamp": "(current UTC time)",\n  "readings": [ ...three equipment readings... ]\n}'+(site===''?'\n\n(An empty value is still "set", so the app starts, but the site name is blank.)':'');
+    }
+  }
+  $('#ev-on').addEventListener('change',upd);$('#ev-site').addEventListener('input',upd);upd();
+})();
+
+/* ---------- persistence simulator ---------- */
+(function(){
+  let mode='layer',st;
+  function reset(){st={c:null,layer:false,host:false,vol:false,lost:false,log:['Start with "Run container".']}}
+  reset();
+  const say=t=>{st.log.push(t);if(st.log.length>6)st.log.shift()};
+  const where={layer:'its writable layer',bind:'the host folder ./data',volume:'the named volume reports-data'};
+  function view(){
+    const c=st.c;
+    const fileHere=mode==='layer'?st.layer:mode==='bind'?st.host:st.vol;
+    const boxes=[];
+    boxes.push('<div class="ps-box'+(st.lost?' lost':c?' has':' off')+'"><h4>Container</h4>'+
+      (c?'<p><span class="pill '+(c.running?'ok':'warn')+'">'+(c.running?'Running':'Stopped')+'</span></p><p>Writable layer: <b>'+(mode==='layer'?(st.layer?'report.txt':'empty'):'not used for this data')+'</b></p>':st.lost?'<p><b>Removed.</b> report.txt was in its writable layer and is lost.</p>':'<p>No container.</p>')+'</div>');
+    boxes.push('<div class="ps-box'+(mode==='bind'?(st.host?' has':''):' off')+'"><h4>Host folder <code>./data</code></h4><p>'+(mode==='bind'?'Bind-mounted at <code>/data</code>.<br>Contents: <b>'+(st.host?'report.txt':'empty')+'</b>':'Not used in this mode.')+'</p></div>');
+    boxes.push('<div class="ps-box'+(mode==='volume'?(st.vol?' has':''):' off')+'"><h4>Named volume <code>reports-data</code></h4><p>'+(mode==='volume'?'Mounted at <code>/data</code>, managed by Docker.<br>Contents: <b>'+(st.vol?'report.txt':'empty')+'</b>':'Not used in this mode.')+'</p></div>');
+    $('#ps-view').innerHTML=boxes.join('');
+    $('#ps-log').textContent=st.log.join('\n');
+    $$('#ps-modes button').forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});
+  }
+  $('#ps-modes').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;reset();say('Mode changed. Everything was reset.');view()});
+  $('#ps-sim').addEventListener('click',e=>{
+    const b=e.target.closest('[data-act]');if(!b)return;
+    const a=b.dataset.act;
+    if(a==='reset'){reset();view();return}
+    if(a==='run'){
+      if(st.c){say('A container already exists. Remove it first with docker rm.')}
+      else{
+        st.c={running:true};st.layer=false;st.lost=false;
+        const kept=mode==='bind'?st.host:mode==='volume'?st.vol:false;
+        say('New container started with an empty writable layer.'+(mode!=='layer'?(kept?' It mounts '+where[mode]+' and can see the existing report.txt.':' It mounts '+where[mode]+', which is empty.'):''));
+      }
+    }else if(a==='write'){
+      if(!st.c||!st.c.running){say('The container must be running to write a file.')}
+      else{if(mode==='layer')st.layer=true;else if(mode==='bind')st.host=true;else st.vol=true;say('report.txt written to '+where[mode]+'.')}
+    }else if(a==='stop'){
+      if(!st.c||!st.c.running)say('Nothing is running.');else{st.c.running=false;say('Container stopped. Nothing is lost by stopping.')}
+    }else if(a==='start'){
+      if(!st.c)say('There is no container to start. Use "Run container" to create a new one.');else if(st.c.running)say('Already running.');else{st.c.running=true;say('Container started again; report.txt is '+(fileHere?'still there':'not present')+'.')}
+    }else if(a==='rm'){
+      if(!st.c)say('There is no container to remove.');
+      else if(st.c.running)say('docker rm refuses to remove a running container. Stop it first (or use docker rm -f).');
+      else{
+        st.c=null;
+        if(mode==='layer'&&st.layer){st.layer=false;st.lost=true;say('Container removed. report.txt lived in its writable layer, so it is GONE.')}
+        else if(mode==='layer')say('Container removed. It had stored nothing.');
+        else say('Container removed. The data is NOT lost: it still lives in '+where[mode]+'.');
+      }
+    }
+    view();
+  });
+  view();
+})();
+
+/* ---------- section 9: errors ---------- */
+const IMG='substation-monitor:1.0';
+const RUNL='docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab '+IMG;
+const ER=[
+ {tab:'Port in use',title:'Port already in use',
+  symptom:'$ '+RUNL+'\ndocker: Error response from daemon: driver failed programming external connectivity\non endpoint monitor (...): Bind for 0.0.0.0:8080 failed: port is already allocated.\n\n(wording differs between Docker versions)',
+  cause:'<p>Another program or another container on the <b>host</b> is already using host port 8080. Only one program can listen on a given host port.</p><p><b>Subtle detail:</b> <code>docker run</code> had already created the container named <code>monitor</code> before it failed, so it now sits in the "Created" state and the name is taken. A second attempt would fail with "container name is already in use".</p>',
+  diag:[{cmd:'docker ps',note:'Is another container already publishing 8080?'},{os:'unix',cmd:'ss -ltnp | grep 8080',note:'Which program listens on this host port? (Alternative: lsof -i :8080)'},{os:'win',cmd:'netstat -ano | findstr :8080',note:'Shows the process ID (last column) that holds the port.'},{cmd:'docker ps -a',note:'The failed run left a container in "Created" state.'}],
+  fix:{text:'<p>Either stop whatever uses 8080, or choose a different <b>host</b> port. Remove the leftover container first. Only the host side of <code>-p</code> changes; browse to <code>localhost:8081</code> afterwards.</p>',cmds:['docker rm monitor','docker run -d --name monitor -p 8081:8000 -e SITE_NAME=GETRI-Lab '+IMG]},
+  repro:{text:'<p>Start two containers that both ask for host port 8080:</p>',cmds:['docker run -d --name a -p 8080:8000 -e SITE_NAME=X '+IMG,'docker run -d --name b -p 8080:8000 -e SITE_NAME=X '+IMG,'docker ps -a','# clean up','docker rm -f a b']}},
+ {tab:'Wrong port mapping',title:'Incorrect port mapping',
+  symptom:'$ docker ps\n... PORTS                    NAMES\n... 0.0.0.0:8080->8001/tcp   monitor\n\n$ curl http://localhost:8080/health\ncurl: (52) Empty reply from server\n(or "Connection reset by peer", depending on your system)',
+  cause:'<p><code>-p 8080:8001</code> forwards to <b>container port 8001</b>, but the app listens on <b>8000</b>. Docker publishes the port happily even though nothing listens behind it. The container looks healthy in <code>docker ps</code>.</p>',
+  diag:[{cmd:'docker ps',note:'Read the PORTS column: HOST->CONTAINER.'},{cmd:'docker port monitor',note:'Prints the mappings of this container.'},{cmd:'docker logs monitor',note:'Look for "Uvicorn running on ...:8000" to learn the real application port.'}],
+  fix:{text:'<p>Ports cannot be edited on an existing container. Remove it and run a new one with the correct container port.</p>',cmds:['docker rm -f monitor','docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab '+IMG]},
+  repro:{text:'<p>Use the wrong container port on purpose:</p>',cmds:['docker run -d --name wrongmap -p 8080:8001 -e SITE_NAME=X '+IMG,'docker ps','# curl http://localhost:8080/health fails','# clean up','docker rm -f wrongmap']}},
+ {tab:'Missing package',title:'Missing Python package',
+  symptom:'$ docker ps -a\n... Exited (1) 3 seconds ago   monitor\n\n$ docker logs monitor\nTraceback (most recent call last):\n  ...\n  File "/app/app.py", line 5, in <module>\n    from fastapi import FastAPI\nModuleNotFoundError: No module named \'fastapi\'\n\n(If uvicorn itself is missing, docker run fails with:\n exec: "uvicorn": executable file not found in $PATH)',
+  cause:'<p>The package is not listed in <code>requirements.txt</code> (or has a typo or wrong version), so <code>pip install</code> never put it in the image. It worked on your laptop only because the package happened to be installed there.</p>',
+  diag:[{cmd:'docker logs monitor',note:'The last line names the missing module.'},{cmd:'docker run --rm '+IMG+' pip list',note:'Lists the packages that are really inside the image (this replaces the normal CMD for one short-lived container).'},{cmd:'docker run --rm '+IMG+' pip show fastapi',note:'Checks one package and its version.'}],
+  fix:{text:'<p>Add the package to <code>requirements.txt</code> with a pinned version, <b>rebuild</b> the image, and run a new container. Do not "fix" it with <code>pip install</code> inside a running container: that change disappears with the container.</p>',cmds:['# edit requirements.txt, then:','docker build -t '+IMG+' .','docker rm monitor','docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab '+IMG]},
+  repro:{text:'<p>See the error safely with a package that does not exist in the image:</p>',cmds:['docker run --rm '+IMG+' python -c "import notinstalled"']}},
+ {tab:'Exits immediately',title:'Container exits immediately',
+  symptom:'$ '+RUNL+'\n9f2c1a7e4b3d8c0a5e6f7b1d2c3a4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f\n\n$ docker ps\nCONTAINER ID   IMAGE   COMMAND   CREATED   STATUS   PORTS   NAMES\n(empty: nothing is running)\n\n$ docker ps -a\n... Exited (1) 4 seconds ago   monitor',
+  cause:'<p>A container lives only as long as its <b>main process</b> (the <code>CMD</code>). If that process crashes or simply finishes, the container stops. Typical reasons: an application error, a missing setting, a wrong module name in <code>CMD</code>, or a command that does its job and ends (for example <code>python --version</code>).</p>',
+  diag:[{cmd:'docker ps -a',note:'Find the container and read its exit status.'},{cmd:'docker logs monitor',note:'The reason is almost always in the last lines.'},{cmd:'docker inspect -f "{{.State.ExitCode}}" monitor',note:'Prints the exit code. 0 = finished normally, 1 = application error, 125 to 127 = Docker could not run the command, 137 = killed (for example out of memory), 143 = stopped by SIGTERM.'}],
+  fix:{text:'<p>Read the logs, fix the actual cause (code, configuration or <code>CMD</code>), then recreate the container. Do not add tricks such as <code>tail -f /dev/null</code> just to keep a broken container alive.</p>',cmds:['docker logs monitor','docker rm monitor','# fix the cause, then run again']},
+  repro:{text:'<p>Compare a container that ends normally (exit code 0) with one that crashes:</p>',cmds:['docker run --name quick '+IMG+' python --version','docker ps -a','docker rm quick']}},
+ {tab:'Binds to localhost',title:'App binds to localhost instead of 0.0.0.0',
+  symptom:'$ docker ps\n... Up 20 seconds   0.0.0.0:8080->8000/tcp   monitor\n\n$ docker logs monitor\nINFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)\n\n$ curl http://localhost:8080/health\ncurl: (56) Recv failure: Connection reset by peer\n(wording varies)',
+  cause:'<p>Inside a container, <code>127.0.0.1</code> is the container\'s <i>own private loopback</i>. Traffic forwarded by Docker arrives on the container\'s network interface, so an app bound only to <code>127.0.0.1</code> never receives it. The port mapping and the container are fine; the app is listening in the wrong place.</p>',
+  diag:[{cmd:'docker ps',note:'Confirms the container is Up and the mapping is right.'},{cmd:'docker logs monitor',note:'Look at the address in "Uvicorn running on http://ADDRESS:PORT". 127.0.0.1 is the clue.'}],
+  fix:{text:'<p>Make the app listen on all interfaces inside the container with <code>--host 0.0.0.0</code> in the <code>CMD</code>, rebuild, and run again. Exposure to the outside is still controlled by <code>-p</code>, so this is safe.</p>',cmds:['# in the Dockerfile:','CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]','docker build -t '+IMG+' .','docker rm -f monitor','docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab '+IMG]},
+  repro:{text:'<p>Reproduce it without rebuilding by overriding the command:</p>',cmds:['docker run -d --name bindtest -p 8080:8000 -e SITE_NAME=X '+IMG+' uvicorn app:app --host 127.0.0.1 --port 8000','docker logs bindtest','# curl http://localhost:8080/health fails','# clean up','docker rm -f bindtest']}},
+ {tab:'Missing env var',title:'Missing environment variable',
+  symptom:'$ docker ps -a\n... Exited (1) 4 seconds ago   monitor\n\n$ docker logs monitor\nTraceback (most recent call last):\n  ...\n  File "/app/app.py", line 10, in <module>\n    SITE_NAME = os.environ["SITE_NAME"]\n  ...\nKeyError: \'SITE_NAME\'',
+  cause:'<p>The container was started without <code>-e SITE_NAME=...</code>. Our app deliberately refuses to start without it ("fail fast"). Environment variables are fixed when the container is <b>created</b>; you cannot add one to an existing container.</p>',
+  diag:[{cmd:'docker logs monitor',note:'The last line names the missing variable.'},{cmd:'docker inspect -f "{{.Config.Env}}" monitor',note:'Lists the variables the container was actually created with.'}],
+  fix:{text:'<p>Remove the container and start a new one that includes the variable, either with <code>-e</code> or with <code>--env-file</code>.</p>',cmds:['docker rm monitor','docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab '+IMG]},
+  repro:{text:'<p>This is step 6 of the lab:</p>',cmds:['docker run -d --name monitor -p 8080:8000 '+IMG,'docker ps -a','docker logs monitor']}},
+ {tab:'Build failure',title:'Image build failure',
+  symptom:'A) A bad package version:\n => ERROR [5/6] RUN pip install -r requirements.txt\nERROR: Could not find a version that satisfies the requirement fastapi==0.115.66\nERROR: No matching distribution found for fastapi==0.115.66\nERROR: failed to solve: process "/bin/sh -c pip install -r requirements.txt"\ndid not complete successfully: exit code: 1\n\nB) A file the build cannot see:\nERROR: failed to compute cache key: "/requirements.txt": not found',
+  cause:'<p><b>A:</b> a typo or non-existent version in <code>requirements.txt</code>, or no network access to the package index (a proxy or firewall).</p><p><b>B:</b> the file is not in the build context: you ran <code>docker build</code> in the wrong folder, the name is misspelt, or <code>.dockerignore</code> excludes it.</p>',
+  diag:[{cmd:'docker build --progress=plain --no-cache -t '+IMG+' .',note:'Prints the full output of every step. Read the FIRST error above "failed to solve", not just the last line.'},{os:'unix',cmd:'ls -a',note:'Is the Dockerfile here, together with requirements.txt and app.py?'},{os:'win',cmd:'dir -Force',note:'Is the Dockerfile here, together with requirements.txt and app.py?'},{os:'unix',cmd:'cat .dockerignore',note:'Is a needed file being ignored?'},{os:'win',cmd:'Get-Content .dockerignore',note:'Is a needed file being ignored?'}],
+  fix:{text:'<p>Correct the version or file name, run the build from the folder that contains the Dockerfile, and make sure the network can reach the package index (or an internal mirror).</p>',cmds:['docker build -t '+IMG+' .']},
+  repro:{text:'<p>Break the build on purpose, then repair it:</p>',cmds:['# 1. In requirements.txt change fastapi==0.115.6 to fastapi==0.115.66','docker build -t substation-monitor:bad .','# 2. Change it back, then rebuild','docker build -t '+IMG+' .']}}
+];
+(function(){
+  function cbox(lines){return '<div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div><pre><code>'+esc(lines.join('\n'))+'</code></pre></div>'}
+  const tabs=$('#er-tabs');
+  tabs.innerHTML=ER.map((e,i)=>'<button class="btn small'+(i===0?' active':'')+'" data-i="'+i+'" aria-pressed="'+(i===0)+'">'+(i+1)+'. '+esc(e.tab)+'</button>').join('');
+  function show(i){
+    const e=ER[i];
+    $('#er-card').innerHTML='<h3 style="margin-top:.5rem">'+(i+1)+'. '+esc(e.title)+'</h3>'+
+     '<div class="codebox out"><div class="cmdhead"><span class="badge out">Symptom (example output)</span></div><pre><code>'+esc(e.symptom)+'</code></pre></div>'+
+     '<p><b>Before you reveal:</b> what do you think is wrong, and which command would you run first?</p>'+
+     '<div class="row"><button class="btn small" data-r="cause" aria-expanded="false">Show likely cause</button><button class="btn small" data-r="diag" aria-expanded="false">Show diagnostic commands</button><button class="btn small" data-r="fix" aria-expanded="false">Show the fix</button><button class="btn small" data-r="repro" aria-expanded="false">Practice: reproduce it safely</button></div>'+
+     '<div class="reveal cause" data-p="cause" hidden><h4>Likely cause</h4>'+e.cause+'</div>'+
+     '<div class="reveal diag" data-p="diag" hidden><h4>Diagnostic commands</h4>'+e.diag.map(d=>'<div'+(d.os?' data-os="'+d.os+'"':'')+'><p><b>'+esc(d.note)+'</b></p>'+cbox([d.cmd])+'</div>').join('')+'</div>'+
+     '<div class="reveal fix" data-p="fix" hidden><h4>Fix</h4>'+e.fix.text+cbox(e.fix.cmds)+'</div>'+
+     '<div class="reveal" data-p="repro" hidden><h4>Practice (uses the image from the lab)</h4>'+e.repro.text+cbox(e.repro.cmds)+'</div>';
+  }
+  tabs.addEventListener('click',ev=>{
+    const b=ev.target.closest('[data-i]');if(!b)return;
+    $$('#er-tabs button').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))});
+    show(+b.dataset.i);
+  });
+  $('#er-card').addEventListener('click',ev=>{
+    const b=ev.target.closest('[data-r]');if(!b)return;
+    const p=$('[data-p="'+b.dataset.r+'"]',$('#er-card'));
+    p.hidden=!p.hidden;b.setAttribute('aria-expanded',String(!p.hidden));
+  });
+  show(0);
+})();
+
+/* ---------- troubleshooting flowchart ---------- */
+(function(){
+  const FC={
+   start:['Something is wrong','Work from the top and answer one question at a time. Do not guess; each box names the command that gives the answer.',[]],
+   q1:['Did docker build finish successfully?','The last lines of a good build name the image. If you are using an image someone else built, skip this question.',['docker images']],
+   b1:['Build failure','Scroll up to the FIRST error before the words "failed to solve". Typical causes: bad package version, network or proxy problems, or a COPY file that is not in the build context.',['docker build --progress=plain --no-cache -t substation-monitor:1.0 .']],
+   q2:['Is the container listed by docker ps?','docker ps shows only running containers. A container that crashed will not appear here.',['docker ps']],
+   q3:['Look at all containers','docker ps -a includes stopped containers. Read STATUS ("Created" or "Exited (n)") and then read the logs.',['docker ps -a','docker logs monitor']],
+   q5:['Test the endpoint from the host','Use the HOST port you published. On Windows PowerShell use curl.exe, or open the URL in a browser.',['curl http://localhost:8080/health']],
+   ok:['Working','The service answers. If something else is wrong, check the URL path or the application logic next.',['docker logs monitor']],
+   q6:['Compare the PORTS column with the app','0.0.0.0:8080->8000/tcp means host 8080 forwards to container 8000. The right-hand number must be the port the app listens on.',['docker ps','docker port monitor']],
+   'l-port':['Wrong -p mapping','Published ports cannot be edited on an existing container. Remove it and recreate it with the correct container port.',['docker rm -f monitor','docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab substation-monitor:1.0']],
+   q7:['Which address does the app report?','If the logs say http://127.0.0.1:8000, the app only listens on the container\'s private loopback.',['docker logs monitor']],
+   'l-bind':['Bind to 0.0.0.0','Use --host 0.0.0.0 in the CMD (or in the command you pass to docker run), rebuild if you changed the Dockerfile, and recreate the container.',['CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]']],
+   'l-end':['Look from the inside','If the mapping and bind address are correct, test from inside the container to separate application problems from network problems, and check for a firewall, VPN or proxy on the host.',['docker exec -it monitor sh','docker logs monitor']],
+   'e-created':['Status "Created"','docker run itself failed before the process started. The most common causes are a host port that is already in use, or a container name that already exists.',['docker rm monitor','docker run -d --name monitor -p 8081:8000 -e SITE_NAME=GETRI-Lab substation-monitor:1.0']],
+   'e-pkg':['ModuleNotFoundError','A package is not in the image. Add it to requirements.txt with a pinned version, rebuild, and run again.',['docker build -t substation-monitor:1.0 .']],
+   'e-env':['KeyError for a variable name','A required environment variable was not passed. Variables are fixed at creation, so recreate the container with -e or --env-file.',['docker run -d --name monitor -p 8080:8000 -e SITE_NAME=GETRI-Lab substation-monitor:1.0']],
+   'e-other':['Another error or exit code','Read the last lines of the logs and check the exit code: 1 is an application error; 125 to 127 means Docker could not start the command (check CMD); 137 means the process was killed, for example by memory limits.',['docker logs monitor','docker inspect -f "{{.State.ExitCode}}" monitor']]
+  };
+  function show(n){
+    const k=n.dataset.id,d=FC[k];if(!d)return;
+    $$('#fc-svg .node').forEach(x=>x.classList.toggle('hl',x===n));
+    $('#fc-info').innerHTML='<span class="t">'+esc(d[0])+'</span>'+esc(d[1])+(d[2].length?'<div class="codebox"><div class="cmdhead"><span class="badge terminal">Run in your real terminal</span><button class="btn small copy">Copy</button></div><pre><code>'+esc(d[2].join('\n'))+'</code></pre></div>':'');
+  }
+  $$('#fc-svg .node').forEach(n=>{
+    n.addEventListener('click',()=>show(n));
+    n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();show(n)}});
+  });
+})();
+
+/* ---------- section 10: spot the risks ---------- */
+(function(){
+  const SX=[
+   ['FROM python:latest',true,'Moving tag. "latest" changes over time, so builds are not repeatable and upgrades happen silently. Pin a version such as python:3.12-slim.'],
+   ['ENV API_KEY=demo-not-a-real-key',true,'Secret stored in the image. Anyone who can pull the image can read it (for example with docker history or docker inspect). Pass secrets at run time instead.'],
+   ['WORKDIR /app',false,'Fine: it only sets the working directory.'],
+   ['COPY . .',true,'Copies the whole build context, which may include .env, .git or other private files. Copy only what is needed and use .dockerignore.'],
+   ['RUN pip install fastapi uvicorn',true,'Unpinned versions: a rebuild next month may install different versions. Use a pinned requirements.txt.'],
+   ['EXPOSE 8000',false,'Fine: it documents the port (it does not publish it).'],
+   ['CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]',true,'There is no USER instruction anywhere, so this process runs as root. Create an unprivileged user and switch to it before CMD.']
+  ];
+  let picked={},checked=false;
+  function render(){
+    $('#sx-lines').innerHTML=SX.map((l,i)=>'<button class="secline'+(picked[i]?' picked':'')+'" data-i="'+i+'" aria-pressed="'+(!!picked[i])+'"'+(checked?' disabled':'')+'>'+(i+1)+'  '+esc(l[0])+'</button>').join('');
+  }
+  $('#sx-lines').addEventListener('click',e=>{
+    const b=e.target.closest('[data-i]');if(!b||checked)return;
+    const i=+b.dataset.i;picked[i]=!picked[i];render();
+  });
+  $('#sx-check').addEventListener('click',()=>{
+    checked=true;render();
+    let hit=0,fa=0,miss=0,total=0;
+    const items=$$('#sx-lines .secline');
+    SX.forEach((l,i)=>{
+      if(l[1])total++;
+      if(picked[i]&&l[1]){hit++;items[i].classList.add('hit')}
+      else if(picked[i]&&!l[1]){fa++;items[i].classList.add('miss')}
+      else if(!picked[i]&&l[1]){miss++;items[i].classList.add('miss')}
+    });
+    $('#sx-res').innerHTML='<div class="callout '+(hit===total&&!fa?'ok':'info')+'"><span class="t">You found '+hit+' of '+total+' risks'+(fa?', with '+fa+' false alarm'+(fa>1?'s':''):'')+(miss?' and missed '+miss:'')+'.</span>Green = correctly flagged. Red = a false alarm or a missed risk.</div>'+
+      '<ul>'+SX.map((l,i)=>'<li><code>'+esc(l[0])+'</code>: <b>'+(l[1]?'Risky.':'Fine.')+'</b> '+esc(l[2])+'</li>').join('')+'</ul><p>The safe version of this file is the Dockerfile in section 6.</p>';
+  });
+  $('#sx-reset').addEventListener('click',()=>{picked={};checked=false;$('#sx-res').innerHTML='';render()});
+  render();
+})();
+
+/* ---------- section 11: lab checklist ---------- */
+(function(){
+  const steps=$$('.lab-step'),saved=store.get('lab',{});
+  function upd(){
+    let n=0;
+    steps.forEach(s=>{const c=$('.lab-chk',s);s.classList.toggle('done',c.checked);if(c.checked)n++});
+    $('#lab-bar').style.width=(n/steps.length*100)+'%';
+    $('#lab-label').textContent=n+' of '+steps.length+' steps';
+  }
+  steps.forEach(s=>{
+    const c=$('.lab-chk',s);c.checked=!!saved[s.dataset.step];
+    c.addEventListener('change',()=>{const d=store.get('lab',{});d[s.dataset.step]=c.checked;store.set('lab',d);upd()});
+  });
+  upd();
+})();
+
+/* ---------- section 12: quiz ---------- */
+(function(){
+  const QZ=[
+   {q:'What is a Docker image?',o:['A running instance of an application','A read-only template made of layers, used to create containers','A virtual machine disk file','A text file that lists Python packages'],a:1,
+    w:'An image is an immutable template (layers plus metadata). A container is a running instance created from it.'},
+   {q:'Which statement about containers and virtual machines is correct?',o:['Every container boots its own full guest operating system','Containers need a hypervisor to run','Containers share the host operating system\'s kernel','A container cannot run a Python application'],a:2,
+    w:'Containers are isolated processes on the host and share its kernel. Virtual machines each include their own guest OS and kernel.'},
+   {q:'Which command lists running AND stopped containers?',o:['docker images','docker ps','docker ps -a','docker logs'],a:2,
+    w:'docker ps shows only running containers. Adding -a includes stopped and exited ones, which is essential when debugging crashes.'},
+   {q:'What does -p 8080:8000 mean?',o:['Host port 8080 is forwarded to container port 8000','Container port 8080 is forwarded to host port 8000','Two ports are opened on the host','Ports 8080 to 8000 are reserved as a range'],a:0,
+    w:'The format is HOST_PORT:CONTAINER_PORT. You browse to localhost:8080 and the traffic reaches the app listening on 8000 inside the container.'},
+   {q:'What does EXPOSE 8000 in a Dockerfile do on its own?',o:['Publishes port 8000 on the host','Makes the application listen on port 8000','Opens the host firewall for port 8000','Documents the intended port but does not publish it'],a:3,
+    w:'EXPOSE is documentation and metadata. Publishing happens at run time with -p (or -P). The application itself decides which port it listens on.'},
+   {q:'Why does the Dockerfile copy requirements.txt and install packages BEFORE copying app.py?',o:['pip refuses to run after app.py is copied','So the slow install layer stays cached when only the code changes','Docker cannot copy app.py first','It reduces the image to half its size'],a:1,
+    w:'Layers are cached in order. Code changes often; dependencies rarely. Putting the install first means a code edit does not repeat the install.'},
+   {q:'A container writes files only to its own filesystem. You run docker stop, then docker start, then later docker rm and run a new container. What happens to the files?',o:['They survive everything','They are lost as soon as the container stops','They survive stop and start but are lost after docker rm','They survive docker rm because they are stored in the image'],a:2,
+    w:'The writable layer lives as long as the container exists. Use a volume or a bind mount for data that must outlive the container.'},
+   {q:'docker ps -a shows your container as "Exited (1)". What should you check first?',o:['Reinstall Docker','The container logs with docker logs','Add more memory to the host','Delete the image'],a:1,
+    w:'The application\'s own output almost always explains the exit. Start with docker logs NAME.'},
+   {q:'The logs say "Uvicorn running on http://127.0.0.1:8000", the port mapping is correct, but the browser cannot connect. What is the fix?',o:['Change the host port','Add EXPOSE 8000','Run the container as root','Make the app listen on 0.0.0.0 (for example --host 0.0.0.0)'],a:3,
+    w:'127.0.0.1 inside a container is its private loopback. Forwarded traffic arrives on the container\'s network interface, so the app must listen on 0.0.0.0.'},
+   {q:'What is the best way to give the app a database password?',o:['Write it with ENV in the Dockerfile','Commit a .env file and COPY it into the image','Supply it at run time through a secrets mechanism and never bake it into the image','Hardcode it in app.py'],a:2,
+    w:'Anything written into an image can be read by anyone who can pull it. Provide secrets at run time and rotate any that were exposed.'},
+   {q:'Why avoid FROM python:latest in a production Dockerfile?',o:['The tag can move to a different image, so builds are not repeatable','It is always slower','It is not an official image','It cannot run FastAPI'],a:0,
+    w:'latest is just a tag that changes over time. Pin versions so builds are repeatable and upgrades are deliberate.'},
+   {q:'Which component does the docker command talk to?',o:['The image registry directly','The Docker daemon','The application inside the container','The host kernel directly'],a:1,
+    w:'The client sends API requests to the daemon (dockerd), which builds images, runs containers and talks to registries.'}
+  ];
+  let answered={},score=0;
+  function render(){
+    answered={};score=0;
+    $('#quiz').innerHTML=QZ.map((x,i)=>'<div class="q" data-i="'+i+'"><h4>Question '+(i+1)+' of '+QZ.length+'. '+esc(x.q)+'</h4>'+
+      x.o.map((o,j)=>'<button class="opt" data-j="'+j+'">'+String.fromCharCode(65+j)+'. '+esc(o)+'</button>').join('')+'<div class="expl" hidden></div></div>').join('');
+    $('#quiz-final').style.display='none';
+    upd();
+  }
+  function upd(){
+    const n=Object.keys(answered).length;
+    $('#quiz-score').textContent=score+' / '+QZ.length;
+    $('#quiz-progress').textContent=n+' answered';
+  }
+  $('#quiz').addEventListener('click',e=>{
+    const b=e.target.closest('.opt');if(!b)return;
+    const qb=b.closest('.q'),i=+qb.dataset.i;
+    if(answered[i]!==undefined)return;
+    const j=+b.dataset.j,x=QZ[i],ok=j===x.a;
+    answered[i]=j;if(ok)score++;
+    $$('.opt',qb).forEach((o,k)=>{
+      o.disabled=true;
+      if(k===x.a){o.classList.add('correct');o.innerHTML+=' ✓ Correct answer'}
+      else if(k===j){o.classList.add('wrong');o.innerHTML+=' ✗ Your answer'}
+    });
+    const ex=$('.expl',qb);ex.hidden=false;
+    ex.innerHTML='<b>'+(ok?'Correct. ':'Not quite. ')+'</b>'+esc(x.w);
+    upd();
+    if(Object.keys(answered).length===QZ.length){
+      const pct=Math.round(score/QZ.length*100);
+      const best=Math.max(store.get('best',0),score);store.set('best',best);
+      const f=$('#quiz-final');f.style.display='';
+      f.innerHTML='<span class="t">Final score: '+score+' / '+QZ.length+' ('+pct+'%)</span>'+(score>=10?'Excellent. You are ready to containerize your own Python services.':score>=8?'Good. Review the explanations for the questions you missed, then try the lab again.':'Revisit sections 3 to 9, repeat the lab, then retake the quiz.')+' Best score on this browser: '+best+' / '+QZ.length+'.';
+    }
+  });
+  $('#quiz-retake').addEventListener('click',()=>{render();$('#s12').scrollIntoView()});
+  render();
+})();
+
+})();
+</script>
+</body>
+</html>
